@@ -1,0 +1,48 @@
+sw_volume: 100
+audio_device_state:1:mpd_jack
+audio_device_state:1:alsa_dummy
+audio_device_state:0:MPD_Stream
+state: pause
+current: 4
+time: 275.225000
+random: 0
+repeat: 1
+single: 0
+consume: 0
+crossfade: 0
+mixrampdb: 0.000000
+mixrampdelay: -1.000000
+playlist_begin
+0:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 01.flac
+1:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 02.flac
+2:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 03.flac
+3:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 04.flac
+4:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 05.flac
+5:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 06.flac
+6:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 07.flac
+7:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 08.flac
+8:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 09.flac
+9:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 10.flac
+10:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 11.flac
+11:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 12.flac
+12:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 13.flac
+13:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 14.flac
+14:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 15.flac
+15:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 16.flac
+16:Linkwitz - The Dipole Loudspeaker Test/Linkwitz - The Dipole Loudspeaker Test - 17.flac
+17:Sampler - 2001 (BAD che.es)/01. The Fairfield Four - These Bones.flac
+18:Sampler - 2001 (BAD che.es)/02. Maria Bethânia - Invocação.flac
+19:Sampler - 2001 (BAD che.es)/03. Briam Bromberg - My Bass.flac
+20:Sampler - 2001 (BAD che.es)/04. Dave Holland - Pork Pie Hat.flac
+21:Sampler - 2001 (BAD che.es)/05. Dadawa - Sister Drum.flac
+22:Sampler - 2001 (BAD che.es)/06. George Mraz - Goodbye Porkpie Hat.flac
+23:Sampler - 2001 (BAD che.es)/07. The Blind Boys Of Alabama - Jesus Gonna Be Here.flac
+24:Sampler - 2001 (BAD che.es)/08. The Yuri Honing Trio - Walking On The Moon.flac
+25:Sampler - 2001 (BAD che.es)/09. Marla Glen - The Cost Of Fredom.flac
+26:Sampler - 2001 (BAD che.es)/10. Renaud Garcia-Fons - Ghazali.flac
+27:Sampler - 2001 (BAD che.es)/11. Carl Doy - Pavane.flac
+28:Sampler - 2001 (BAD che.es)/12. Abed Azrié - Vera Figura.flac
+29:Sampler - 2001 (BAD che.es)/13. Blues Company - Run Your Finger Through My Hair.flac
+30:Sampler - 2001 (BAD che.es)/14. O-Zone Percussion Group - Jazz Variants.flac
+31:Sampler - 2001 (BAD che.es)/15. Charly Antolini - Cha Cha Bonita.flac
+playlist_end

@@ -1,0 +1,73 @@
+# modulo "cli" para puerto tct/ip para consultas y cambios al vuelo
+# y modulo "eq" para el EQ del preamplificador de FIRtro
+logic:
+
+"cli" { port: 3000; },
+
+"eq"  {
+      #debug_dump_filter: "/home/firtro/.brutefir/rendered-%d";
+      {
+       coeff: "c_eq0", "c_eq1";
+       bands: 18.0, 20.0, 22.4, 25.0, 28.0, 32.0, 36.0, 40.0, 44.8, 50.0, 56.0, 63.0, 71.0, 80.0, 90.0, 100.0, 112.0, 126.0, 142.0, 160.0, 180.0, 200.0, 224.0, 250.0, 280.0, 320.0, 360.0, 400.0, 448.0, 500.0, 560.0, 630.0, 710.0, 800.0, 900.0, 1000.0, 1120.0, 1260.0, 1420.0, 1600.0, 1800.0, 2000.0, 2240.0, 2500.0, 2800.0, 3200.0, 3600.0, 4000.0, 4480.0, 5000.0, 5600.0, 6300.0, 7100.0, 8000.0, 9000.0, 10000.0, 11200.0, 12600.0, 14200.0, 16000.0, 18000.0, 20000.0, 22040.0;
+      };
+};
+
+## DEFAULT GENERAL SETTINGS ##
+
+float_bits: 32;             # internal floating point precision
+sampling_rate: 44100;       # sampling rate in Hz of audio interfaces
+filter_length: 65536;       # length of filters
+config_file: "~/.brutefir_config"; # standard location of main config file
+overflow_warnings: true;    # echo warnings to stderr if overflow occurs
+show_progress: true;        # echo filtering progress to stderr
+max_dither_table_size: 0;   # maximum size in bytes of precalculated dither
+allow_poll_mode: false;     # allow use of input poll mode
+modules_path: ".";          # extra path where to find BruteFIR modules
+monitor_rate: false;        # monitor sample rate
+powersave: false;           # pause filtering when input is zero
+lock_memory: true;          # try to lock memory if realtime prio is set
+sdf_length: -1;             # subsample filter half length in samples
+convolver_config: "~/.brutefir_convolver"; # location of convolver config file
+
+## COEFF DEFAULTS ##
+
+coeff {
+	format: "TEXT";     # file format
+	attenuation: 0.0;   # attenuation in dB
+	blocks: -1;         # how long in blocks
+	skip: 0;            # how many bytes to skip
+	shared_mem: false;  # allocate in shared memory
+};
+
+## INPUT DEFAULTS ##
+
+input {
+	device: "file" {};  # module and parameters to get audio
+	sample: "S16_LE";   # sample format
+	channels: 2/0,1;    # number of open channels / which to use
+	delay: 0,0;         # delay in samples for each channel
+	maxdelay: -1;       # max delay for variable delays
+	subdelay: 0,0;      # subsample delay in 1/100th sample for each channel
+	mute: false,false;  # mute active on startup for each channel
+};
+
+## OUTPUT DEFAULTS ##
+
+output {
+	device: "file" {};  # module and parameters to put audio
+	sample: "S16_LE";   # sample format
+	channels: 2/0,1;    # number of open channels / which to use
+	delay: 0,0;         # delay in samples for each channel
+	maxdelay: -1;       # max delay for variable delays
+	subdelay: 0,0;      # subsample delay in 1/100th sample for each channel
+	mute: false,false;  # mute active on startup for each channel
+	dither: false;      # apply dither
+};
+
+## FILTER DEFAULTS ##
+
+filter {
+	process: -1;        # process index to run in (-1 means auto)
+	delay: 0;           # predelay, in blocks
+	crossfade: false;   # crossfade when coefficient is changed
+};

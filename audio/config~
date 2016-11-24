@@ -1,0 +1,155 @@
+[misc]
+; Retardo entre órdenes en segundos
+command_delay = .5
+; Opciones de la orden "beep" para indicar carga del FIRtro
+beep_options = 
+; Usar LCD externo (requiere servidor lcdproc en ejecucion)
+enable_lcd = False
+; Tarjetas ALSA
+system_card = DX
+external_cards = miniStreamer Device
+jack_internal_monitors = ebumeter:in.L ebumeter:in.R
+jack_external_monitors = miniStreamer:playback_1 miniStreamer:playback_2
+
+[path]
+; Jack - Obligatorio
+jack_path = /usr/bin/jackd
+
+; hw:DX,0 es la tarjeta de audio PCIe Asus Xonar DX
+; OjO: la señal SPDIF_OUT se corresponde con los dos primeros puertos que presenta JACK
+; corriendo en hw:DX,0 A PESAR DE QUE aplay dice que la seccion DIGITAL es hw:DX,1 (!)
+jack_options = -R  -dalsa -dhw:DX,0 -p1024 --softmode --rate
+
+; Brutefir - Obligatorio
+brutefir_path = /usr/bin/brutefir
+brutefir_options = brutefir_config
+;brutefir_ports = brutefir:input-0 brutefir:input-1
+brutefir_ports = ecasound:in_1 ecasound:in_2
+
+; Ecasound - opcional
+ecasound_path = /usr/bin/ecasound
+; modo server tcpip y se le pasa un archivo de configuración con
+; -->-- entradas abiertas -->-- plugins de EQ -->-- salidas a Brutefir 
+ecasound_options = -q --server -s:/home/firtro/audio/PEQ_defeat_44100.ecs
+
+; Control server - Obligatorio
+control_path = /home/firtro/bin/server.py
+; salida en pantalla: 0 (Nada) - 1 (Minino) - 2 (Completo)
+control_output = 2
+; borrado de pantalla entre ordenes: True - False
+control_clear = True
+
+; Calculo EQ de sistema - Obligatorio
+syseq_path = /home/firtro/bin/syseq.py
+
+; Mpd - Opcional
+load_mpd = True
+mpd_path = /usr/bin/mpd
+mpd_options =
+
+; Client175 - Opcional
+load_client175 = False
+client175_path = /home/firtro/.client175/server.py
+client175_options = >/dev/null 2>&1
+
+; LCD_Stuff - Opcional (para mostrar info de mpd en el lcd externo)
+; Da problemas con GLIB, se sustituye por MPDLCD
+; load_lcd_stuff = False
+; lcd_stuff_path = /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff
+; lcd_stuff_options = -c /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff.conf -f 0
+
+; MPDLCD - Opcional (para mostrar info de mpd en el lcd externo)
+; https://pypi.python.org/pypi/mpdlcd
+load_mpdlcd = False
+mpdlcd_path = /usr/local/bin/mpdlcd
+mpdlcd_options =
+
+
+; Mplayer - Opcional
+load_mplayer_cdda = False
+load_mplayer_tdt = False
+mplayer_path = /usr/bin/mplayer
+cdda_options = -idle -really-quiet -slave -input file=/home/firtro/cdda_fifo -profile cdda
+cdda_fifo = /home/firtro/cdda_fifo
+tdt_options = -idle -really-quiet -slave -input file=/home/firtro/tdt_fifo -profile tdt
+tdt_fifo = /home/firtro/tdt_fifo
+
+; Shairport - Opcional
+load_shairport = True
+shairport_path = /home/firtro/bin2/shairport
+;shairport_path = /usr/local/bin/shairplay
+shairport_options = -a Firtro_Salon
+
+; Squeezeslave - Opcional
+load_squeezeslave = False
+squeezeslave_path = /home/firtro/.squeezeslave/squeezeslave
+squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
+
+; Netjack - Opcional
+load_netjack = True
+; --- netjack1:  USADO PARA EL MBP 
+netjack_path = jack_netsource
+netjack_options = -H 192.168.1.134
+; --- netjack2:
+;netjack_path = jack_load
+;netjack_options = netmanager
+
+; Lirc - Opcional
+load_irexec = False
+irexec_path = /usr/bin/irexec
+irexec_options = -d
+
+; Mopidy - Opcional (Mopidy is a music server which can play music from Spotify and from your local hard drive.)
+load_mopidy = True
+mopidy_path = /usr/bin/mopidy
+mopidy_options = 
+
+[net]
+;dirección IP del FIRtro
+ip_address = 192.168.1.94
+
+;dirección y puerto de la interfaz de brutefir
+bfcli_address = 127.0.0.1
+bfcli_port = 3000
+
+;dirección y puerto del script de control.
+;0.0.0.0 escucha en todos los interfaces de red
+;127.0.0.1 escucha solo conexiones locales
+control_address = 0.0.0.0
+control_port = 9999
+
+[speakers]
+loudspeaker = c5+cd+rel
+
+[equalizer]
+;Nombres del archivo de frecuencias, curvas de loudnes, tonos
+; frequencies = R20-freq.dat
+frequencies = R20_ext-freq.dat
+; loudness_mag_curves = R20-loudness_mag.dat
+loudness_mag_curves = R20_ext-loudness_mag.dat
+; loudness_pha_curves = R20-loudness_pha.dat
+loudness_pha_curves = R20_ext-loudness_pha.dat
+; treble_mag_curves = R20-treble_mag.dat
+treble_mag_curves = R20_ext-treble_mag.dat
+; treble_pha_curves = R20-treble_pha.dat
+treble_pha_curves = R20_ext-treble_pha.dat
+; bass_mag_curves = R20-bass_mag.dat
+bass_mag_curves = R20_ext-bass_mag.dat
+; bass_pha_curves = R20-bass_pha.dat
+bass_pha_curves = R20_ext-bass_pha.dat
+; syseq_mag_curve = R20-syseq_mag.dat
+syseq_mag_curve = R20_ext-syseq_mag.dat
+; syseq_pha_curve = R20-syseq_pha.dat
+syseq_pha_curve = R20_ext-syseq_pha.dat
+
+; Salto entre curvas de ecualización (dB)
+; Ojo: No está implementado en el programa de control.
+; Se da como indicación que debe asumirse.
+step = 1
+loudness_SPLref = 83
+loudness_SPLmax = 90
+loudness_SPLmin = 70
+tone_variation = 6
+loudness_variation = 10
+balance_variation = 6
+no_phase_xo = lp

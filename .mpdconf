@@ -1,0 +1,130 @@
+# --- DIRECTORIOS ---
+music_directory         "/home/firtro/music"
+playlist_directory      "/home/firtro/playlists"
+db_file                 "/home/firtro/.mpd/database"
+log_file                "/home/firtro/.mpd/log"
+pid_file                "/home/firtro/.mpd/pid"
+state_file              "/home/firtro/.mpd/mpd_state"
+state_file_interval     "1"
+sticker_file            "/home/firtro/.mpd/sticker.sqlite"
+
+# --- LISTENING  ---
+port                    "6600"
+# escucha tcp/ip:
+#bind_to_address         "any"
+bind_to_address         "0.0.0.0"
+# escucha socket unix:
+bind_to_address         "/home/firtro/.mpd/socket"
+
+# --- USUARIO que mostrará MPD al ejecutarse desde un usuario root
+#user                    "firtro"
+#group                   "audio"
+
+#--- DATA BASE UPDATE ---
+auto_update             "yes"
+#auto_update_depth       "3"
+follow_outside_symlinks "no"
+follow_inside_symlinks  "no"
+
+# --- ENTRADAS ---
+# Reproducción de URLs:
+input {
+    plugin "curl"
+}
+# Reproducción de URLs:
+input {
+    plugin "cdio_paranoia"
+}
+
+# --- DECODERS ---
+# (suelen venir enabled "yes" en el programa mpd compilado.
+# decoder {
+    # plugin "flac"
+    # enabled "no"
+    # }
+# decoder {
+    # plugin "mad"
+    # enabled "no"
+    # }
+
+    
+# --- SALIDAS ---    
+audio_output {
+    type            "jack"
+    name            "mpd_jack"
+    client_name     "mpd_jack"
+#    format          "*:*:6"
+#    destination_ports    "brutefir:input-0,brutefir:input-1"
+    destination_ports    "ecasound:in_1,ecasound:in_2"
+#    Control de volumen:
+#    mixer_type      "software"
+#    mixer_type      "null"
+    mixer_type      "none"
+    enabled         "yes"
+    always_on       "yes"
+}
+
+# (i) configuración en pruebas para leer en ALSA un falso ajuste de volumen en MPD
+# que será ajustado desde un cliente y así poder gobernar el volumen del FIRtro.
+audio_output {
+    type        "alsa"
+    name        "alsa_dummy"
+    mixer_type      "hardware"
+    mixer_device    "hw:Dummy"
+    mixer_control   "Master"
+}
+
+# Salida de streaming para por ejemplo un navegador que quiera 
+# conectarse al servidor MPD
+audio_output {
+    type            "httpd"
+    name            "MPD_Stream"
+      # encoder      "vorbis"                # optional, vorbis or lame
+      # encoder      "lame"                  # optional, vorbis or lame
+      encoder       "flac"
+      compression   "5"
+      port          "8000"
+      # bind_to_address "0.0.0.0"               # optional, IPv4 or IPv6
+      # quality         "5.0"                   # do not define if bitrate is defined
+      # bitrate         "128"                   # do not define if quality is defined
+      format           "44100:16:2"
+      # max_clients     "0"                     # optional 0=no limit
+    always_on "yes"
+    enabled "no"
+}
+
+# --- RESAMPLING para adecuarse a la salida ---
+samplerate_converter        "soxr high"
+#samplerate_converter        "soxr very high"
+# samplerate_converter       "Medium Sinc Interpolator"
+# samplerate_converter       "Best Sinc Interpolator"
+
+# --- REPLAY GAIN ---
+replaygain                  "album"
+#replaygain_preamp           "0"
+#volume_normalization        "no"
+
+# --- MISCEL ---
+filesystem_charset "UTF-8"
+#log_level                 "default"
+# audio_buffer_size        "4096"
+# buffer_before_play        "20%"
+metadata_to_use "artist, albumartist, album, title, track, name, genre, date, composer, performer, comment, disc"
+#gapless_mp3_playback               "yes"
+#restore_paused                     "no"
+#save_absolute_paths_in_playlists   "no"
+
+# --- AJUSTES LOW LEVEL ---
+#connection_timeout          "60"    (default)
+#max_connections             "5"        (default)
+#max_playlist_length         "16384"    (default)
+#max_command_list_size       "2048"    (default)
+#max_output_buffer_size      "8192"    (default)
+#                           
+
+# --- ZEROCONF ---
+zeroconf_enabled             "yes"
+zeroconf_name                "FIRtro mpd :-)"
+
+
+

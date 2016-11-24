@@ -1,0 +1,41 @@
+;gain       float(dB)	Ganancia a anadir a la entrada
+;xo         [lp|mp] Tipo de crossover por defecto al conectar
+;fs         [44100|48000|...] Fs deseada (deben existir filtros en la carpeta del altavoz)
+;clock      [card|word|spdif] Referencia para tarjetas con clock externo (ej:1010LT)
+;resampled  [no|44100|48000|...] Para tarjetas resampleadas añadidas a jack
+
+[analog44]
+in_ports:   system:capture_1 system:capture_2
+fs:         44100
+clock:      card
+gain:       0
+xo:         lp
+lirc_event:	
+resampled:  no
+
+[analog48]
+in_ports:   system:capture_1 system:capture_2
+fs:         48000
+clock:      card
+gain:       0
+xo:         lp
+lirc_event:	
+resampled:  no
+
+[mpd]
+in_ports:   mpd_jack:left mpd_jack:right
+fs:
+clock:      card
+gain:       0
+xo:         lp
+resampled:  no
+
+[net]
+in_ports:   netjack:capture_1 netjack:capture_2
+fs:
+clock:      card
+gain:       0
+xo:         mp
+lirc_event:
+resampled:  no
+

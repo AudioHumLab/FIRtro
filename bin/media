@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Config media devices to mount, and where to mount them
+# ********************************************************************************
+#devices=(cdrom card_MS card_CF card_SD card_xD usb)
+devices=(usb1)
+mount_base=/mnt
+# ********************************************************************************
+
+#mpc clear	# Erase actual playlist
+SAVEIFS=$IFS	# Saves actual delimiters
+IFS=$(echo -en "\n\b")	# Sets new delimiters (so spaces doesn't breaks filenames)
+
+# Tries to umount and then mount every device
+# (first umounts in order to clean previous mountings if any).
+# Then lists all files recursively and passes to mpd as a
+# file:// protocol URI (see curl docs).
+tLen=${#devices[@]}
+for (( i=0; i<${tLen}; i++ ));
+do
+	mount_point=$mount_base/${devices[i]}
+	if [ $# -eq 0 ]
+	then
+        echo "Scanning $mount_point..."
+		umount /dev/${devices[i]} >/dev/null 2>&1
+	    mount /dev/${devices[i]} >/dev/null 2>&1
+	    #find -P $mount_point -name "*.wav" -o -name "*.flac" -o -name "*.mp3" -type f -print0| while read -d $'\0' file
+	    find -P $mount_point -type f -print0| while read -d $'\0' file
+	    do mpc add "file://$file" >/dev/null 2>&1;
+	    done
+    elif [ $1 = "eject" ]
+	then
+		echo "Unmounting $mount_point..."
+	    umount /dev/${devices[i]} >/dev/null 2>&1
+	else
+	    echo "Usage: media [eject]"
+	fi
+done
+# restore $IFS (previous delimiter)
+IFS=$SAVEIFS

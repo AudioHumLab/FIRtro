@@ -1,0 +1,173 @@
+; FIRtro 2.0
+; - Gestión de tarjetas de sonido: del sistema y externas al sistema (resampled)
+; - Posibilidad de declarar puertos de jack para monitor de la fuente
+; - Preset por defecto al arranque (opcional)
+; - Uso de Ecasound opcional para el módulo de EQ paramétrico.
+
+[misc]
+; Retardo entre órdenes en segundos
+command_delay = .5
+; Opciones de la orden "beep" para indicar carga del FIRtro
+beep_options = 
+; Usar LCD externo (requiere servidor lcdproc en ejecucion)
+enable_lcd = False
+; Monitores de señal opcionales a los que también se conectará la fuente del FIRtro:
+jack_internal_monitors = 
+jack_external_monitors = 
+
+[presets]
+; Preset por defecto al arranque (opcional)
+default_preset = 
+
+[cards]
+; Tarjeta del Sistema y Tarjetas Externas a JACK:
+; (identidicador ALSA completo hw:Tarjeta,Device)
+system_card = hw:ALSA,0
+external_cards = 
+
+[path]
+; Jack - Obligatorio
+jack_path = /usr/bin/jackd
+; Opciones de Jack.
+; Jack sobre ALSA: omitir la tarjeta y la fs (gestionadas en initfirtro.py)
+; jack_options = -R -dalsa -p1024
+Jack sobre DUMMY: solo para la distribución inicial del software del FIRtro:
+jack_options = -R -ddummy -P8 -C2
+
+; Brutefir - Obligatorio
+brutefir_path = /usr/bin/brutefir
+brutefir_options = brutefir_config
+;brutefir_ports = brutefir:input-0 brutefir:input-1
+brutefir_ports = ecasound:in_1 ecasound:in_2
+
+; Ecasound - Opcional
+load_ecasound = True
+ecasound_path = /usr/bin/ecasound
+; Indicar el numero NN de filtros paramétricos:
+; (se necesita plantilla PEQxNN_defeat_Fs.ecs en ~/audio)
+ecasound_filters = 12
+; modo server tcpip y se le pasa un archivo de configuración con
+; -->-- entradas abiertas -->-- plugins de EQ -->-- salidas a Brutefir 
+ecasound_ports = ecasound:in_1 ecasound:in_2
+
+; Control server - Obligatorio
+control_path = /home/firtro/bin/server.py
+; salida en pantalla: 0 (Nada) - 1 (Minino) - 2 (Completo)
+control_output = 2
+; borrado de pantalla entre ordenes: True - False (recom. False para depurar arranque)
+control_clear = False
+
+; Calculo EQ de sistema - Obligatorio
+syseq_path = /home/firtro/bin/syseq.py
+
+; Mpd - Opcional
+load_mpd = True
+mpd_path = /usr/bin/mpd
+mpd_options =
+
+; Client175 - Opcional
+load_client175 = False
+client175_path = /home/firtro/.client175/server.py
+client175_options = >/dev/null 2>&1
+
+; LCD_Stuff - Opcional (para mostrar info de mpd en el lcd externo)
+; Da problemas con GLIB, se sustituye por MPDLCD
+; load_lcd_stuff = False
+; lcd_stuff_path = /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff
+; lcd_stuff_options = -c /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff.conf -f 0
+
+; MPDLCD - Opcional (para mostrar info de mpd en el lcd externo)
+; https://pypi.python.org/pypi/mpdlcd
+load_mpdlcd = False
+mpdlcd_path = /usr/local/bin/mpdlcd
+mpdlcd_options =
+
+
+; Mplayer - Opcional
+mplayer_path = /usr/bin/mplayer
+load_mplayer_cdda = False
+load_mplayer_tdt  = False
+cdda_options = --really-quiet --idle --slave --input=file=/home/firtro/cdda_fifo --profile=cdda
+tdt_options  = --really-quiet --idle --slave --input=file=/home/firtro/tdt_fifo  --profile=tdt
+cdda_fifo = /home/firtro/cdda_fifo
+tdt_fifo  = /home/firtro/tdt_fifo
+
+; Shairport - Opcional
+load_shairport = False
+shairport_path = /home/firtro/bin2/shairport
+;shairport_path = /usr/local/bin/shairplay
+shairport_options = -a Firtro_Salon
+
+; Squeezeslave - Opcional
+load_squeezeslave = False
+squeezeslave_path = /home/firtro/.squeezeslave/squeezeslave
+squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
+
+; Netjack - Opcional
+load_netjack = False
+; --- netjack1: 
+netjack_path = jack_netsource
+netjack_options = -H 192.168.1.134
+; --- netjack2:
+;netjack_path = jack_load
+;netjack_options = netmanager
+
+; Lirc - Opcional
+load_irexec = False
+irexec_path = /usr/bin/irexec
+irexec_options = -d
+
+; Mopidy - Opcional (Mopidy is a music server which can play music from Spotify and from your local hard drive.)
+load_mopidy = False
+mopidy_path = /usr/bin/mopidy
+mopidy_options = 
+
+[net]
+;dirección IP del FIRtro
+ip_address = 192.168.2.1
+
+;dirección y puerto de la interfaz de brutefir
+bfcli_address = 127.0.0.1
+bfcli_port = 3000
+
+;dirección y puerto del script de control.
+;0.0.0.0 escucha en todos los interfaces de red
+;127.0.0.1 escucha solo conexiones locales
+control_address = 0.0.0.0
+control_port = 9999
+
+[speakers]
+loudspeaker = ejemplo2vias
+
+[equalizer]
+;Nombres del archivo de frecuencias, curvas de loudnes, tonos
+; frequencies = R20-freq.dat
+frequencies = R20_ext-freq.dat
+; loudness_mag_curves = R20-loudness_mag.dat
+loudness_mag_curves = R20_ext-loudness_mag.dat
+; loudness_pha_curves = R20-loudness_pha.dat
+loudness_pha_curves = R20_ext-loudness_pha.dat
+; treble_mag_curves = R20-treble_mag.dat
+treble_mag_curves = R20_ext-treble_mag.dat
+; treble_pha_curves = R20-treble_pha.dat
+treble_pha_curves = R20_ext-treble_pha.dat
+; bass_mag_curves = R20-bass_mag.dat
+bass_mag_curves = R20_ext-bass_mag.dat
+; bass_pha_curves = R20-bass_pha.dat
+bass_pha_curves = R20_ext-bass_pha.dat
+; syseq_mag_curve = R20-syseq_mag.dat
+syseq_mag_curve = R20_ext-syseq_mag.dat
+; syseq_pha_curve = R20-syseq_pha.dat
+syseq_pha_curve = R20_ext-syseq_pha.dat
+
+; Salto entre curvas de ecualización (dB)
+; Ojo: No está implementado en el programa de control.
+; Se da como indicación que debe asumirse.
+step = 1
+loudness_SPLref = 83
+loudness_SPLmax = 90
+loudness_SPLmin = 70
+tone_variation = 6
+loudness_variation = 10
+balance_variation = 6
+no_phase_xo = lp

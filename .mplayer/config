@@ -1,0 +1,23 @@
+# Write your default config options here!
+
+# Resample the sound to 44100Hz
+# NOTA: mplayer automáticamente resamplea si es necesario
+#af=lavcresample=44100:16:1:11
+#af=resample=44100:0:2
+
+# NOTA IMPORTANTE: en FIRtro 2.0 dejamos que initfirtro.py determine 
+# los puertos de salida que pueden ser brutefir o ecasound
+# Output audio to jack (a valid destination port is needed, default is system)
+#ao=jack:name=mplayer:port=brutefir
+#ao=jack:name=mplayer:port=ecasound
+# Output audio to alsa
+#ao=alsa:device=hw=0.0
+
+[tdt]
+# NOTA: mplayer automáticamente resamplea si es necesario
+#af=resample=44100:0:2 
+
+[cdda]
+# NOTA: mplayer automáticamente resamplea si es necesario
+
+
