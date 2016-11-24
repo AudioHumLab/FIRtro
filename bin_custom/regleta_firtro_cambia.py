@@ -14,23 +14,19 @@ import stopfirtro
 from time import sleep
 
 def main():
-    cambiaON  = False
-    cambiaOFF = False
     for clavija in regleta.clavijasDic.keys():
         if "AMP" in regleta.clavijasDic[clavija].upper():
             if regleta.ver_clavijas(clavija, printa=False) == ["on"]:
                 # ^ nota: printa=False para que no printe el estado inicial del enchufe
                 regleta.set_clavija(clavija, "off")
-                if not cambiaOFF:
-                    print "Apagamos enchufes y paramos el audio de FIRtro"
-                    stopfirtro.main("audio")
-                cambiaOFF = True
+                print "Apagamos enchufes y paramos el audio de FIRtro"
+                stopfirtro.main("audio")
+                return
             else:
                 regleta.set_clavija(clavija, "on")
-                if not cambiaON:
-                    print "Encendemos enchufes y arrancamos el audio de FIRtro"
-                    initfirtro.main("audio")
-                cambiaON = True
+                print "Encendemos enchufes y arrancamos el audio de FIRtro"
+                initfirtro.main("audio")
+                return
         # retardo necesario para que funcione bien la regleta USB:
         sleep(.2)
 

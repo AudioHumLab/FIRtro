@@ -204,8 +204,8 @@ def alsa_restore_cards():
     """
     for card in [system_card] + external_cards.split():
         card = bareCard(card)
-        if ":" in card: card = card.split(":")[1]
         tmp = "alsactl --file /home/firtro/audio/asound." + card + " restore " + card
+        print "cccc", card
         tmp = sp.call(tmp, shell=True)
 
 def alsa_mute_system_card(muteOnOff):
