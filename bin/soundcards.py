@@ -230,7 +230,8 @@ def alsa_dB2percent(dB):
     """
     tmp = float(dB.replace("dB", ""))
     tmp = int(100.0 + (tmp * 10.0/3.0))
-    if tmp < 0: tmp = 0
+    if tmp < 0:
+        tmp = 0
     return str(tmp) + "%"
 
 def analog_set(card=bareCard(system_card), mode="off"):
@@ -255,11 +256,13 @@ def analog_scontrols_main(card=bareCard(system_card)):
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i dac", shell=True).split("\n")[:-1]
         DACs = [x.split("control ")[-1] for x in tmp if not "filter" in x.lower()]
-    except: DACs = []
+    except:
+        DACs = []
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i master", shell=True).split("\n")[:-1]
         Masters = [x.split("control ")[-1] for x in tmp]
-    except: Masters = []
+    except:
+        Masters = []
     return DACs + Masters
 
 def iec958_set(card=bareCard(system_card), mode="on"):
