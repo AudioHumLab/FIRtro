@@ -27,6 +27,8 @@ u"""
 #   para intentar resincronizar el DAC externo conectado :-/
 # v1.3b
 # - se depura iec958_set para tarjetas que no tengan este control
+# v1.3c
+# - se depura analog_scontrols y iec_scontrols
    
 from time import sleep
 import jack
@@ -53,7 +55,9 @@ def amixer(card, cmd):
     if sp.call(cmd, shell=True):
         print "(soundcards) <!> Error: " + cmd
         return False
-    return True
+    else:
+        print "(soundcards) " + cmd
+        return True
     
 # Función especializada en la tarjeta M-Audio 1010LT
 def change_clock_1010LT(clock,fs):
@@ -230,12 +234,14 @@ def alsa_dB2percent(dB):
     return str(tmp) + "%"
 
 def analog_set(card=bareCard(system_card), mode="off"):
+    """ Función auxiliar para establecer los controles principales analógicos (Master o DAC)
+    """
     if mode == "off":
-        for scontrol in analog_scontrols(card):
+        for scontrol in analog_scontrols_main(card):
             cmd = "-M sset " + scontrol + " 0%"
             amixer(card, cmd)
     if mode == "on":
-        for scontrol in analog_scontrols(card):
+        for scontrol in analog_scontrols_main(card):
             gain = "0.00dB"
             # (i) LEEMOS ~/audio/cards.ini si tuviera una sección para la tarjeta
             if card in cardsINI.sections():
@@ -243,33 +249,36 @@ def analog_set(card=bareCard(system_card), mode="off"):
             cmd = "-M sset " + scontrol + " " + alsa_dB2percent(gain)
             amixer(card, cmd)
 
-def analog_scontrols(card=bareCard(system_card)):
+def analog_scontrols_main(card=bareCard(system_card)):
+    """ v1.0 solo buscamos los DAC o los Master
+    """
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i dac", shell=True).split("\n")[:-1]
-        DACs = [x.split()[-1] for x in tmp]
+        DACs = [x.split("control ")[-1] for x in tmp if not "filter" in x.lower()]
     except: DACs = []
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i master", shell=True).split("\n")[:-1]
-        Masters = [x.split()[-1] for x in tmp]
+        Masters = [x.split("control ")[-1] for x in tmp]
     except: Masters = []
     return DACs + Masters
 
 def iec958_set(card=bareCard(system_card), mode="on"):
-    """ Función auxiliar para manejar los posibles switches SPDIF de una tarjeta
+    """ Función auxiliar para establecer los posibles switches SPDIF de una tarjeta
     """
-    # si el grep devuelve algo:
-    if not sp.call("amixer -c" + bareCard(card) + " scontrols | grep -i iec", shell=True):
-        iec958 = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i iec", shell=True)
-        for scontrol in iec958.split("\n"):
-            if "'IEC958'" in scontrol:
-                scontrol = scontrol.split()[-1]
-                # Solo lo ejecutamos si el scontrol tiene Capabilities: pswitch (los penum no funcionan)
-                if "pswitch" in sp.check_output("amixer -c" + bareCard(card) + " sget " + scontrol, shell=True):
-                    amixer(card, cmd="sset " + scontrol + " '" + mode + "'")
-    # si no devulve nada es pq la tarjeta no tiene controles iec958
-    else:
-        pass
+    for scontrol in iec958_scontrols(card):
+        # Solo lo ejecutamos si el scontrol tiene Capabilities: pswitch (los penum no funcionan)
+        # y excluimos los loopback
+        if "pswitch" in sp.check_output("amixer -c" + bareCard(card) + " sget " + scontrol, shell=True):
+            amixer(card, cmd="sset " + scontrol + " '" + mode + "'")
 
+def iec958_scontrols(card=bareCard(system_card)):
+    try:
+        tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i iec958", shell=True).split("\n")[:-1]
+        tmp = [x.split("control ")[-1] for x in tmp]
+        return [x for x in tmp if (not "loop" in x.lower()) and (not "filter" in x.lower())]
+    except: 
+        return []
+        
 if __name__ == "__main__":
     if sys_argv[1:]:
         for cosa in sys_argv[1:]:
