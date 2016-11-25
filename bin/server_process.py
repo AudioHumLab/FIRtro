@@ -253,7 +253,9 @@ def do (order):
 
         elif command == "input":
             if len(line) > 1:
-                name = arg1.lower()
+                # name = arg1.lower()   # evitamos la restricción de hasta 3 argumentos
+                name = " ".join(line[1:]).lower()
+                print "NNNNNNNNNNNNNNNN", name
                 if name == "restore":
                     # Si estoy restaurando la entrada, ya la tengo en input_name
                     change_input = True
@@ -358,7 +360,7 @@ def do (order):
 
         elif command == "preset":       ## <PRESETS> ##
             if len(line) > 1:
-                #preset = arg1  evitamos la restricción de hasta 3 argumentos
+                #preset = arg1          # evitamos la restricción de hasta 3 argumentos
                 preset = " ".join(line[1:])
                 change_preset   = True
                 change_drc      = True  ## pq los preset tienen un DRC asociado
