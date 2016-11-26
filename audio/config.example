@@ -1,4 +1,4 @@
-; FIRtro 2.0
+; FIRtro 2.0 
 ; - Gestión de tarjetas de sonido: del sistema y externas al sistema (resampled)
 ; - Posibilidad de declarar puertos de jack para monitor de la fuente
 ; - Preset por defecto al arranque (opcional)
