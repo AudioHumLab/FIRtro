@@ -41,7 +41,7 @@ def load_jt(options):
     while intentos:
         try:
             if "JackTrip" in check_output("jack_lsp", shell=True):
-                print "(jacktrip) Ha arrancado Jacktrip."
+                print "(jacktrip.py) Ha arrancado Jacktrip."
                 break
         except:
             pass
@@ -71,7 +71,7 @@ def load_jt(options):
             pass
         except:
             Popen("killall jacktrip", shell=True)
-            print "(jacktrip) algo va mal :-("
+            print "(jacktrip.py) algo va mal :-("
 
     # modo server
     if "-s" in options:
@@ -83,7 +83,7 @@ def load_jt(options):
             jack.connect(source_ports[1], "JackTrip:send_2")
         except:
             Popen("killall jacktrip", shell=True)
-            print "(jacktrip) algo va mal :-("
+            print "(jacktrip.py) algo va mal :-("
             
     jack.detach()
     sc.alsa_mute_system_card("off")
