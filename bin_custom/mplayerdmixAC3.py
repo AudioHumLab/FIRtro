@@ -8,7 +8,7 @@ u"""
     uso:
         mplayerdmixAC3.py [on|off]
 """
-# v0.1beta
+# v0.1BETA
 
 from subprocess import Popen
 from sys import argv as sys_argv
