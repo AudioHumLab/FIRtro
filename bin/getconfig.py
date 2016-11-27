@@ -58,6 +58,7 @@ mpdlcd_options = config.get('path', 'mpdlcd_options')
 
 load_mplayer_cdda = config.getboolean('path', 'load_mplayer_cdda')
 load_mplayer_tdt = config.getboolean('path', 'load_mplayer_tdt')
+pause_mplayer_tdt = config.getboolean('path', 'pause_mplayer_tdt')
 mplayer_path = config.get('path', 'mplayer_path')
 
 cdda_options = config.get('path', 'cdda_options')
