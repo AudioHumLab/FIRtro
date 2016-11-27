@@ -82,11 +82,13 @@ load_mpdlcd = False
 mpdlcd_path = /usr/local/bin/mpdlcd
 mpdlcd_options =
 
-
 ; Mplayer - Opcional
 mplayer_path = /usr/bin/mplayer
 load_mplayer_cdda = False
 load_mplayer_tdt  = False
+; Para parar mplayer quedando en idle si la input es otra (ahorro de %CPU)
+pause_mplayer_tdt = False
+; --quiet para ver como cambia de canal, --really-quiet para no ver nada
 cdda_options = --really-quiet --idle --slave --input=file=/home/firtro/cdda_fifo --profile=cdda
 tdt_options  = --really-quiet --idle --slave --input=file=/home/firtro/tdt_fifo  --profile=tdt
 cdda_fifo = /home/firtro/cdda_fifo
@@ -105,12 +107,15 @@ squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 
 ; Netjack - Opcional
 load_netjack = False
-; --- netjack1: 
-netjack_path = jack_netsource
-netjack_options = -H 192.168.1.134
-; --- netjack2:
+; --- jacktrip.py -s | -c serverHostName
+netjack_path = /home/firtro/bin/jacktrip.py
+netjack_options = -s
+; --- netjack2 (es la opción preferida):
 ;netjack_path = jack_load
 ;netjack_options = netmanager
+; --- netjack1 (alternativa)
+;netjack_path = jack_netsource
+;netjack_options = -H mbp.local
 
 ; Lirc - Opcional
 load_irexec = False
