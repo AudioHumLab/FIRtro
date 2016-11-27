@@ -3,6 +3,7 @@
 ; - Posibilidad de declarar puertos de jack para monitor de la fuente
 ; - Preset por defecto al arranque (opcional)
 ; - Uso de Ecasound opcional para el módulo de EQ paramétrico.
+; - sintaxis mplayer2
 
 [misc]
 ; Retardo entre órdenes en segundos
