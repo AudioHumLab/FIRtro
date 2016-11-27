@@ -2,15 +2,19 @@
 # -*- coding: utf-8 -*-
 u"""
     Módulo para gestionar jacktrip en FIRtro.
+    https://github.com/jcacerec/jacktrip
     JackTrip ofrece una conexión IP entre dos máquinas que corren JACK,
     sin necesidad de que una de ellas sea esclava con el backend 
     jackd -d net como requieren netjack1 y netjack2. 
     
     uso:
-        jacktrip.py [-s | -c serverHost]
+        jacktrip.py [-s | -c serverHost]    #  servidor | cliente
+    nota:
+        Los puertos JackTrip solo pueden conectarse cuando están activos,
+        es decir cuando hayan sincronizado con el otro extremo por la red.
 """
-# v0.1 usar con cautela  :-/
-  
+# v0.1 BETA
+
 from sys import argv as sys_argv, exit as sys_exit
 from time import sleep
 import jack
@@ -65,13 +69,14 @@ def load_jt(options):
     # modo client
     if "-c" in options:
         try:
-            # lo conectamos al FIRtro, bueno mejor cambiar la input
+            # La conexión a FIRtro se gestiona cambiando la input en FIRtro. 
             #jack.connect("JackTrip:receive_1", firtro_ports[0])
             #jack.connect("JackTrip:receive_2", firtro_ports[1])
             pass
         except:
             Popen("killall jacktrip", shell=True)
-            print "(jacktrip.py) algo va mal :-("
+            print "(jacktrip.py) (i) para conectar puertos se necesita que estén" 
+            print "                  activos (con una conexion cliente jacktrip en red)"
 
     # modo server
     if "-s" in options:
@@ -82,8 +87,11 @@ def load_jt(options):
             jack.connect(source_ports[0], "JackTrip:send_1")
             jack.connect(source_ports[1], "JackTrip:send_2")
         except:
-            Popen("killall jacktrip", shell=True)
-            print "(jacktrip.py) algo va mal :-("
+            # el motivo del fallo es que los puertos de JackTrip no están activos:
+            # "Cannot connect ports owned by inactive clients: "JackTrip" is not active"
+            # porque no ha sincronizado todavía con un cliente.
+            print "(jacktrip.py) (i) para conectar puertos se necesita que estén" 
+            print "                  activos (con una conexion cliente jacktrip en red)"
             
     jack.detach()
     sc.alsa_mute_system_card("off")

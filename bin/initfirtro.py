@@ -248,7 +248,7 @@ def main(run_level):
 
             # Netjack
             if load_netjack:
-                print "(initfirtro) Arrancando NETJACK ..."
+                print "(initfirtro) Arrancando NETJACK (" + netjack_path + ")"
                 netjack = Popen([netjack_path] + netjack_options.split(), stdout=None, stderr=None)
                 time.sleep(command_delay)
 
