@@ -1,45 +1,60 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 u"""
-    http://www.mplayerhq.hu/DOCS/HTML/en/advaudio-channels.html
-    http://www.mplayerhq.hu/DOCS/tech/slave.txt
-    http://people.iola.dk/arj/2010/02/27/channel-downmixing-in-mplayer/
-    
+    Configura mplayer slave para hacer downmix de AC3 5.1
+
     uso:
-        mplayerdmixAC3.py [on|off]
+            mplayerdmixAC3.py [on|off]
+    nota:
+            coeffs de downmix en ~/custom/firtro.ini
+            mplayer slave fifo:  ~/tdt_fifo
 """
-# v0.1BETA
+# v0.1beta
 
 from subprocess import Popen
 from sys import argv as sys_argv
-
-# canales del downmix:
-panCH = "L", "R"
-
-# panning:
-#        L    R
-FLpan = 0.4, 0.0
-FRpan = 0.0, 0.4
-RLpan = 0.2, 0.0
-RRpan = 0.0, 0.2
-CEpan = 0.1, 0.1
-SWpan = 0.4, 0.4
+from ConfigParser import ConfigParser
+dmixINI = ConfigParser()
+dmixINIpath = "/home/firtro/custom/firtro.ini"
+fifoPath = "/home/firtro/tdt_fifo"
 
 def panAC3():
+    #http://www.mplayerhq.hu/DOCS/HTML/en/advaudio-channels.html
+    #http://www.mplayerhq.hu/DOCS/tech/slave.txt
+    
+    # leemos la sección ac3downmix de ~/custom/firtro.ini
+    # en la que estás definidos los % de  downmix
+    dmixINI.read(dmixINIpath)
+    try:
+        FLpan = dmixINI.get("ac3downmix", "FL").split()
+        FRpan = dmixINI.get("ac3downmix", "FR").split()
+        SLpan = dmixINI.get("ac3downmix", "SL").split()
+        SRpan = dmixINI.get("ac3downmix", "SR").split()
+        CEpan = dmixINI.get("ac3downmix", "CE").split()
+        SWpan = dmixINI.get("ac3downmix", "SW").split()
+    except:
+        return False
+
     f =   [":".join([str(x) for x in FLpan])]
     f +=  [":".join([str(x) for x in FRpan])]
-    f +=  [":".join([str(x) for x in RLpan])]
-    f +=  [":".join([str(x) for x in RRpan])]
+    f +=  [":".join([str(x) for x in SLpan])]
+    f +=  [":".join([str(x) for x in SRpan])]
     f +=  [":".join([str(x) for x in CEpan])]
     f +=  [":".join([str(x) for x in SWpan])]
-    return "pan=" + str(len(panCH)) + ":" + ":".join(f)
+
+    return "pan=2:" + ":".join(f)
 
 if __name__ == "__main__":
     if sys_argv[1:]:
         # borramos cualquier filtro previo
-        Popen('echo "af_clr" > /home/firtro/tdt_fifo', shell=True)
+        Popen('echo "af_clr" > ' + fifoPath, shell=True)
         if sys_argv[1] == "on":
             # añadimos el filtro pan que hace el downmix
-            Popen('echo "af_add ' + panAC3() + '" > /home/firtro/tdt_fifo', shell=True)
+            filtro = panAC3()
+            if filtro:
+                #print panAC3() # debug
+                Popen('echo "af_add ' + filtro  + '" > ' + fifoPath, shell=True)
+            else:
+                print "No se localiza información de downmix en " + dmixINIpath
     else:
         print __doc__    
