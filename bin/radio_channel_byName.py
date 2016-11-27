@@ -1,36 +1,56 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-u""" 
+""" 
     FIRtro 2.0. Script para cambiar de canal DVB-Radio (tdt)
     Uso:
-        radiochannel.py nombreCanal
+        radiochannel.py [ nombreCanal | -last | -prev ]
     Nota:
-        nombreCanal según:
-            ~/custom/firtro.ini
+        nombreCanal segun:
+            ~/audio/radio
             ~/.mplayer/channels.conf
-"""    
-   
+""" 
+# v1.0b
+# - se adopta el archivo original de canales ~/audio/radio
+
 import os
 from subprocess import call as sp_call
 from sys import argv as sys_argv, path as sys_path
-import subprocess as sp
 sys_path.append("/home/firtro/bin")
 from getconfig import tdt_fifo
-
+from basepaths import status_filename
 from ConfigParser import ConfigParser
-myChannels  = ConfigParser()
-configFile = "/home/firtro/custom/firtro.ini"
+userConfig = ConfigParser()
+userConfigF  = "/home/firtro/audio/radio"
 status = ConfigParser()
 statusFile = "/home/firtro/audio/status"
 mplayerChannelsFile = ("/home/firtro/.mplayer/channels.conf")
 
-def misCanales():
+# Para las funciones last_channel() y prev_channel()
+from ConfigParser import ConfigParser
+st = ConfigParser()
+def read_status():
+    st.read("/home/firtro/audio/" + status_filename)
+    global radioch, radioch_prev
+    radioch      = st.get("inputs", "radioch")
+    radioch_prev = st.get("inputs", "radioch_prev")
+
+def last_channel():
+    read_status()
+    if not select_channel(radioch):
+        print "error recuperando last channel"
+
+def prev_channel():
+    read_status()
+    if not select_channel(radioch_prev):
+        print "error recuperando previous channel"
+
+def userChannels():
     """ Lee los canales de firtro.ini
     """
     canales = []
-    myChannels.read(configFile)
-    for option in myChannels.options("tdtradio"):
-        canalName = myChannels.get("tdtradio", option)
+    userConfig.read(userConfigF)
+    for option in userConfig.options("channels"):
+        canalName = userConfig.get("channels", option)
         canales.append( canalName.replace('"', '').replace("'", "").strip() )
     return canales
 
@@ -47,23 +67,26 @@ def mplayerChannels():
         print "problemas accediendo a " + mplayerChannelsFile
     return chs
 
-def selec_canal(c):
+def select_channel(ch):
     """ cambia de canal si el canal está en firtro.ini o en channels.conf
     """
-    if c in misCanales() or c in mplayerChannels():
-        c = c.replace(" ", "\\ ") # hay que escapar los espacios para mplayer
-        tmp = "echo loadfile dvb://'" + c + "' > " + tdt_fifo
+    if ch in userChannels() or ch in mplayerChannels():
+        # hay que escapar los espacios para mplayer:
+        ch2 = ch.replace(" ", "\\ ")
+        tmp = "echo loadfile dvb://'" + ch2 + "' > " + tdt_fifo
         sp_call(tmp + "&", shell=True)
+        # actualizamos status con  el canal solicitado a mplayer
+        updateStatus(ch)
         return True
     else:
         return False
 
-def actualizaStatus(c):
+def updateStatus(ch):
     status.read(statusFile)
     prev = status.get("inputs", "radioch")
-    if prev <> c:
+    if prev <> ch:
         status.set("inputs", "radioch_prev", prev) 
-    status.set("inputs", "radioch", c) 
+    status.set("inputs", "radioch", ch) 
     f = open(statusFile, "w")
     status.write(f)
     f.close()
@@ -71,11 +94,12 @@ def actualizaStatus(c):
 if __name__ == "__main__":
     if sys_argv[1:]:
         canal = sys_argv[1]
-        if selec_canal(canal):
-            actualizaStatus(canal)
-        else:
+        if canal == "-last":
+            last_channel()
+        elif canal == "-prev":
+            prev_channel()
+        elif not select_channel(canal):
             print "NO existe el canal:", canal
-
     else:
         print __doc__
         
