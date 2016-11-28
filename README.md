@@ -40,3 +40,14 @@ FIRtro is a "black box" software package, intended to filter and to equalise act
 - Mount CIFS and NFS Network Attached Storage.
 - Installation is based on GitHub repository.
 
+## GNU GPL software used here:
+- [Jack](http://www.jackaudio.org)
+- [Brutefir](https://www.ludd.ltu.se/~torger/brutefir.html)
+- [Ecasound](http://nosignal.fi/ecasound/)
+- [fil-plugins](http://kokkinizita.linuxaudio.org/linuxaudio/)
+- [zita-ajbridge](http://kokkinizita.linuxaudio.org/linuxaudio/)
+- [mpd](https://www.musicpd.org)
+- [mplayer](http://www.mplayerhq.hu/)
+- [netjack](http://jackaudio.org/faq/netjack.html)
+- [jacktrip](https://github.com/jcacerec/jacktrip)
+
