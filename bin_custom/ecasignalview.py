@@ -4,6 +4,8 @@
     uso:
         ecasignalview.py [jackClient] (default: ecasound)
 """
+# v1.0beta
+
 import jack
 from subprocess import call
 from sys import argv as sys_argv, exit as sys_exit
