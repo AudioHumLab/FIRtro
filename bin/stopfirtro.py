@@ -60,6 +60,9 @@ def main(run_level):
             # shairport
             if load_shairport:
                 Popen (["killall", shairport_path], stdout=fnull, stderr=fnull)
+            # jacktrip
+            if load_jacktrip: 
+                Popen (["killall", jacktrip_path], stdout=fnull, stderr=fnull)
             # netjack
             if load_netjack: 
                 Popen (["killall", netjack_path], stdout=fnull, stderr=fnull)

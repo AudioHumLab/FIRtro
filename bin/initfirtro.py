@@ -41,8 +41,9 @@
 # - Se usa el path completo ~/lspk/altavoz/FS/brutefir_config
 #   como argumento de arranque de brutefir.
 #
-# v2.2
+# v2.2a
 # - Se adapta la sección de arranque de mplayer a los puertos brutefir/ecasound
+# - se incorpora jacktrip
 #----------------------------------------------------------------------
 
 import sys
@@ -246,9 +247,19 @@ def main(run_level):
                 print "(initfirtro) Arrancando MPLAYER ..."
                 mplayer = Popen([mplayer_path] + tmp.split(), stdout=None, stderr=None)
 
+            # Jacktrip
+            if load_jacktrip:
+                if "-s" in jacktrip_options:
+                    jtmode = "SERVER"
+                else:
+                    jtmode = "CLIENT"
+                print "(initfirtro) Arrancando JACKTRIP " + jtmode + " ..."
+                jacktrip = Popen([jacktrip_path] + jacktrip_options.split(), stdout=None, stderr=None)
+                time.sleep(command_delay)
+
             # Netjack
             if load_netjack:
-                print "(initfirtro) Arrancando NETJACK (" + netjack_path + ")"
+                print "(initfirtro) Arrancando NETJACK ..."
                 netjack = Popen([netjack_path] + netjack_options.split(), stdout=None, stderr=None)
                 time.sleep(command_delay)
 

@@ -106,14 +106,17 @@ load_squeezeslave = False
 squeezeslave_path = /home/firtro/.squeezeslave/squeezeslave
 squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 
+; JackTrip - Opcional
+load_jacktrip = False
+jacktrip_path = /home/firtro/bin/jacktrip.py
+; options: -s (server mode) / -c serverHostName (client mode)
+jacktrip_options = -s
+
 ; Netjack - Opcional
 load_netjack = False
-; --- jacktrip.py -s | -c serverHostName
-netjack_path = /home/firtro/bin/jacktrip.py
-netjack_options = -s
 ; --- netjack2 (es la opción preferida):
-;netjack_path = jack_load
-;netjack_options = netmanager
+netjack_path = jack_load
+netjack_options = netmanager
 ; --- netjack1 (alternativa)
 ;netjack_path = jack_netsource
 ;netjack_options = -H mbp.local

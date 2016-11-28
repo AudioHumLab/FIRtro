@@ -75,6 +75,10 @@ load_squeezeslave = config.getboolean('path', 'load_squeezeslave')
 squeezeslave_path = config.get('path', 'squeezeslave_path')
 squeezeslave_options = config.get('path', 'squeezeslave_options')
 
+load_jacktrip = config.getboolean('path', 'load_jacktrip')
+jacktrip_path = config.get('path', 'jacktrip_path')
+jacktrip_options = config.get('path', 'jacktrip_options')
+
 load_netjack = config.getboolean('path', 'load_netjack')
 netjack_path = config.get('path', 'netjack_path')
 netjack_options = config.get('path', 'netjack_options')
