@@ -5,15 +5,20 @@ u"""
     https://github.com/jcacerec/jacktrip
     JackTrip ofrece una conexión IP entre dos máquinas que corren JACK,
     sin necesidad de que una de ellas sea esclava con el backend 
-    jackd -d net como requieren netjack1 y netjack2. 
+    jackd -d net como requieren netjack1 y netjack2.
+
+    MUY IMPORTANTE: consultar la Guia del Usurio y comprobar que 
+                    JackTrip no se queda conectado a system:playback_X
+                    en el extremo cliente.
     
     uso:
-        jacktrip.py [-s | -c serverHost]    #  servidor | cliente
+        jacktrip.py [-s | -c serverHost]  #  modo servidor | modo cliente
     nota:
         Los puertos JackTrip solo pueden conectarse cuando están activos,
         es decir cuando hayan sincronizado con el otro extremo por la red.
 """
-# v0.1 BETA
+# v0.1 BETA -q 8 -r 2 para más robustez en al red
+# v0.1a     -z para enviar zeros cuando ocurra underrun
 
 from sys import argv as sys_argv, exit as sys_exit
 from time import sleep
@@ -39,7 +44,7 @@ def load_jt(options):
     # arranca jacktrip
     Popen("killall jacktrip", shell=True)
     sleep(.5)
-    Popen("jacktrip -q 8 -r 2 " + options + " >/dev/null 2>&1", shell=True)
+    Popen("jacktrip -z -q 8 -r 2 " + options + " >/dev/null 2>&1", shell=True)
     # esperamos a jacktrip:
     intentos = 20 # * 0.25 = 5 segundos
     while intentos:

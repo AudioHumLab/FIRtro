@@ -108,6 +108,7 @@ squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 
 ; JackTrip - Opcional
 load_jacktrip = False
+; IMPORTANTE usar bin/jacktrip.py en lugar de /usr/bin/jacktrip (ver Guia del Usuario)
 jacktrip_path = /home/firtro/bin/jacktrip.py
 ; options: -s (server mode) / -c serverHostName (client mode)
 jacktrip_options = -s
