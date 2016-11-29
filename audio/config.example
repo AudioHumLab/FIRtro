@@ -109,7 +109,7 @@ squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 ; JackTrip - Opcional
 load_jacktrip = False
 ; IMPORTANTE instalar la última versión JackTrip de GitHub (ver Guia del Usuario)
-jacktrip_path = /usr/bin/jacktrip.py
+jacktrip_path = /usr/bin/jacktrip
 ; options: -s (server mode) / -c serverHostName (client mode)
 jacktrip_options = --nojackportsconnect -s
 
