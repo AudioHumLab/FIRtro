@@ -159,6 +159,7 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
             try: #los monitores son opcionales
                 if ext_monitor_ports:
                     jack_connect(in_ports[i], ext_monitor_ports[i])
+                if int_monitor_ports:
                     jack_connect(in_ports[i], int_monitor_ports[i])
             except:
                 logging.exception("error en conexion de monitores")

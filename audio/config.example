@@ -111,7 +111,7 @@ load_jacktrip = False
 ; IMPORTANTE instalar la última versión JackTrip de GitHub (ver Guia del Usuario)
 jacktrip_path = /usr/bin/jacktrip
 ; options: -s (server mode) / -c serverHostName (client mode)
-jacktrip_options = --nojackportsconnect -s
+jacktrip_options = -s -z -q8 -r2 --nojackportsconnect
 
 ; Netjack - Opcional
 load_netjack = False
