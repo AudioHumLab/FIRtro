@@ -43,7 +43,7 @@ FIRtro is a "black box" software package, intended to filter and to equalise act
 ## GNU GPL software used here:
 - [DSD](https://github.com/rripio/DSD)
 - [Jack Audio Connection Kit](http://www.jackaudio.org) | [Jack Wiki](https://github.com/jackaudio/jackaudio.github.com/wiki)
-- [Brutefir](https://www.ludd.ltu.se/~torger/brutefir.html)
+- [Brutefir](http://www.ludd.ltu.se/~torger/brutefir.html)
 - [Ecasound](http://nosignal.fi/ecasound/)
 - [fil-plugins](http://kokkinizita.linuxaudio.org/linuxaudio/)
 - [zita-ajbridge](http://kokkinizita.linuxaudio.org/linuxaudio/)
