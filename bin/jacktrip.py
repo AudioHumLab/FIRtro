@@ -7,18 +7,23 @@ u"""
     sin necesidad de que una de ellas sea esclava con el backend 
     jackd -d net como requieren netjack1 y netjack2.
 
-    MUY IMPORTANTE: consultar la Guia del Usurio y comprobar que 
-                    JackTrip no se queda conectado a system:playback_X
-                    en el extremo cliente.
+    IMPORTANTE: Este script evita que algunas versiones Debian/Ubuntu de 
+                JackTrip se queden autoconectadas a system:playback_X
+                en el momento de inicio de JackTrip.
+                Consultar FIRtro -  Guia del Usuario, se recomienda 
+                instalar la versión más reciente de JackTrip desde GitHub.
     
     uso:
-        jacktrip.py [-s | -c serverHost]  #  modo servidor | modo cliente
+      jacktrip.py [-s | -c server]  #  modo servidor | modo cliente
+      jacktrip.py -r                #  reconecta la entrada actual  a JackTrip:send
+
     nota:
         Los puertos JackTrip solo pueden conectarse cuando están activos,
         es decir cuando hayan sincronizado con el otro extremo por la red.
 """
 # v0.1 BETA -q 8 -r 2 para más robustez en al red
 # v0.1a     -z para enviar zeros cuando ocurra underrun
+# v0.1b opción -r para reconectar con la entrada activa de FIRtro
 
 from sys import argv as sys_argv, exit as sys_exit
 from time import sleep
@@ -70,36 +75,43 @@ def load_jt(options):
     except:
         # es posible que sea un FIRtro pequeño sin system:capture
         pass
-        
+    jack.detach()        
+
     # modo client
     if "-c" in options:
-        try:
-            # La conexión a FIRtro se gestiona cambiando la input en FIRtro. 
-            #jack.connect("JackTrip:receive_1", firtro_ports[0])
-            #jack.connect("JackTrip:receive_2", firtro_ports[1])
-            pass
-        except:
-            Popen("killall jacktrip", shell=True)
-            print "(jacktrip.py) (i) para conectar puertos se necesita que estén" 
-            print "                  activos (con una conexion cliente jacktrip en red)"
+        # La conexión a FIRtro se gestiona cambiando la input en FIRtro. 
+        pass
 
     # modo server
     if "-s" in options:
+        connect_source2jacktrip()
+            
+    sc.alsa_mute_system_card("off")
+
+def connect_source2jacktrip():
+        jack.attach("tmp")
+        # Desconectamos lo que hubiera en JackTrip
+        c1_ports = jack.get_connections("JackTrip:send_1")
+        c2_ports = jack.get_connections("JackTrip:send_2")
+        for p1 in c1_ports:
+            jack.disconnect(p1, "JackTrip:send_1")
+        for p2 in c2_ports:
+            jack.disconnect(p2, "JackTrip:send_2")
         try:
             # conectamos las fuente del FIRtro a jacktrip
-            source_ports =  [jack.get_connections(firtro_ports[0])[0]]
-            source_ports += [jack.get_connections(firtro_ports[1])[0]]
-            jack.connect(source_ports[0], "JackTrip:send_1")
-            jack.connect(source_ports[1], "JackTrip:send_2")
+            s1_ports = jack.get_connections(firtro_ports[0])
+            s2_ports = jack.get_connections(firtro_ports[1])
+            for s1 in s1_ports:
+                jack.connect(s1, "JackTrip:send_1")
+            for s2 in s2_ports:
+                jack.connect(s2, "JackTrip:send_2")
         except:
             # el motivo del fallo es que los puertos de JackTrip no están activos:
             # "Cannot connect ports owned by inactive clients: "JackTrip" is not active"
             # porque no ha sincronizado todavía con un cliente.
             print "(jacktrip.py) (i) para conectar puertos se necesita que estén" 
             print "                  activos (con una conexion cliente jacktrip en red)"
-            
-    jack.detach()
-    sc.alsa_mute_system_card("off")
+        jack.detach()
 
 if __name__ == "__main__":
     if sys_argv[1:]:
@@ -108,6 +120,8 @@ if __name__ == "__main__":
             opts += cosa + " "
         if opts.strip().split()[0] in ("-s", "-c"):
             load_jt(opts)
+        elif opts.strip().split()[0] in ("-r"):
+            connect_source2jacktrip()
     else:
         print __doc__
     
