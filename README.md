@@ -6,7 +6,7 @@ FIRtro is a "black box" software package, intended to filter and to equalise act
 
 ## FIRtro features
 
-(https://github.com/AudioHumLab/FIRtro/wiki/02-Block-Diagram-and-Features)
+ [See here](https://github.com/AudioHumLab/FIRtro/wiki/02-Block-Diagram-and-Features)
 
 ## GNU GPL software used here:
 - [DSD](https://github.com/rripio/DSD)
