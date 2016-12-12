@@ -1,3 +1,14 @@
+[tasks]
+#   HH:MM  DoWeek   DoMonth   Month    COMMAND (if more than one please use a script)
+1 = 03:00  1        *         *        /home/firtro/bin_custom/otracosa.sh
+2 = 07:30  1-5      *         *        /home/firtro/bin_custom/alarmclock.sh
+
+[reles]
+1 = nousado
+2 = amplis
+3 = nousado
+4 = nousado
+
 # Regleta USB
 [regleta]
 #toma   = etiqueta
@@ -8,12 +19,12 @@
 
 
 # BACKUP script configuration
-[origins]
+[backup_origins]
 firtro = /home/firtro
-[destinations]
+[backup_destinations]
 mirror = /media/sda1/firtroMirror
 dated  = /media/sda1/firtroDated
-[patterns]
+[backup_patterns]
 exclude = *.pyc .aptitude/ .config/ .cache/ .ipython/ .local/ .mpd/ .ncmpcpp/ .client175 music/ tmp/ www/music/ Downloads/ Descargas/ Documents /Documentos /Images /Imágenes /Escritorio /Desktop /Música /Music /Public /Público /Video /Vídeos /Templates /Plantillas /.compiz /.dbus /.gnupg .lirc /.mozilla /.nano* /.pki /.putty /.gconf
 
 

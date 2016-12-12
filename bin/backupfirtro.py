@@ -38,14 +38,14 @@ configINI.read("/home/firtro/custom/firtro.ini")
 
 def rsyncFirtro(mode):
     cmd = "rsync -vaz"
-    srcPath  = configINI.get("origins", "firtro")
+    srcPath  = configINI.get("backup_origins", "firtro")
 
     if mode == "dated":
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
-        destPath = configINI.get("destinations", "dated")
+        destPath = configINI.get("backup_destinations", "dated")
 
     elif mode == "mirror":
-        destPath = configINI.get("destinations", "mirror")
+        destPath = configINI.get("backup_destinations", "mirror")
     else:
         return None
 
@@ -57,7 +57,7 @@ def rsyncFirtro(mode):
         cmd += " --delete"
 
     # añadimos todos los excludes en el comando
-    for pattern in configINI.get("patterns", "exclude").split():
+    for pattern in configINI.get("backup_patterns", "exclude").split():
         cmd += " --exclude " +  pattern
     cmd += " " + srcPath + " " + destPath
 
