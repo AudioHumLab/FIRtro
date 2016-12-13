@@ -44,14 +44,14 @@ if __name__ == "__main__":
         for cosa in sys_argv[1:]:
             if ":" in cosa:
                 hora = cosa
-            elif ("-" in cosa and not "-h" in cosa) or "," in cosa or cosa.isdigit():
-                DoW = cosa
-            elif cosa == "off":
-                offMode = True
             elif cosa == "-edit":
                 editMode = True
             elif cosa == "-clear":
                 clearMode = True
+            elif ("-" in cosa and not "-h" in cosa) or "," in cosa or cosa.isdigit():
+                DoW = cosa
+            elif cosa == "off":
+                offMode = True
             elif "-h" in cosa:
                 print __doc__
                 sys_exit()
