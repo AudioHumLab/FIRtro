@@ -45,7 +45,7 @@ def prev_channel():
         print "error recuperando previous channel"
 
 def userChannels():
-    """ Lee los canales de firtro.ini
+    """ Lee los canales de userconfig.ini
     """
     canales = []
     userConfig.read(userConfigF)
@@ -68,7 +68,7 @@ def mplayerChannels():
     return chs
 
 def select_channel(ch):
-    """ cambia de canal si el canal está en firtro.ini o en channels.conf
+    """ cambia de canal si el canal está en userconfig.ini o en channels.conf
     """
     if ch in userChannels() or ch in mplayerChannels():
         # hay que escapar los espacios para mplayer:

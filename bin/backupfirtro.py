@@ -20,7 +20,7 @@ from subprocess import call
 # EL archivo de configuración personal de FIRtro
 # contiene la configuración del backup.
 configINI = ConfigParser()
-configINI.read("/home/firtro/custom/firtro.ini")
+configINI.read("/home/firtro/custom/userconfig.ini")
 
 # Ejemplo en bash
 #SRCPATH='/etc /home/firtro /usr/local/bin'
