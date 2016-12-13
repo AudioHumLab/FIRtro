@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 u""" 
-    Script para gestionar la regleta de enchufes.
+    Script para gestionar la regleta USB de enchufes 'EnerGenie EG-PMS2'
     
     Uso: regleta.py  [cambia | on | off]  [#toma ...] | all]  [--help]
          sin argumentos muestra el estado
