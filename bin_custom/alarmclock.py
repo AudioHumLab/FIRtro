@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """
     Use:
-        alarmclock.py                   Print cron jobs for firtro
-        alarmclock.py HH:MM [DoW]       Add an alarm clock on
-        alarmclock.py HH:MM [DoW] [off] Add an alarm clock off
-        alarmclock.py -clear            Clear any 'alarmclock' entry job 
-        alarmclock.py -edit             Edit userconfig.ini file 
-        alarmclock.py --help            This help
+        alarmclock.py                  Print cron jobs for firtro
+        alarmclock.py HH:MM [DoW]      Add an alarm clock on
+        alarmclock.py HH:MM [DoW] off  Add an alarm clock off
+        alarmclock.py -clear           Clear any 'alarmclock' entry job 
+        alarmclock.py -edit            Edit userconfig.ini file 
+        alarmclock.py --help           This help
 """
 from sys import argv as sys_argv, exit as sys_exit
 from subprocess import call, check_output
