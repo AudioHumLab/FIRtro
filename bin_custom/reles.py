@@ -8,7 +8,7 @@ u"""
          
     NOTA:  se lee un archivo INI con la sección [reles] que 
            etiqueta los reles del modulo de reles:
-           /home/firtro/custom/firtro.ini
+           /home/firtro/custom/userconfig.ini
           
 """
 # v1.0: 
@@ -18,7 +18,7 @@ HOME = "/home/firtro"
 from sys import argv as sys_argv, exit as sys_exit
 from ConfigParser import ConfigParser
 firtroINI = ConfigParser()
-firtroINI.read("/home/firtro/custom/firtro.ini")
+firtroINI.read("/home/firtro/custom/userconfig.ini")
 
 # https://github.com/amorphic/tosr0x
 import tosr0x

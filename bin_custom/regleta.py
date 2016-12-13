@@ -8,7 +8,7 @@ u"""
          
     NOTA:  se lee un archivo INI con la sección [regleta] que 
            etiqueta las clavijas de la regleta:
-           /home/firtro/custom/firtro.ini
+           /home/firtro/custom/userconfig.ini
           
 """
 # v2.0: 
@@ -20,7 +20,7 @@ from subprocess import call, check_output
 from ConfigParser import ConfigParser
 
 firtroINI = ConfigParser()
-firtroINI.read("/home/firtro/custom/firtro.ini")
+firtroINI.read("/home/firtro/custom/userconfig.ini")
 
 # Diccionario de CLAVIJAS
 clavijasDic = {}

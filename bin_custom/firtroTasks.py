@@ -9,7 +9,7 @@
 # v1.1 configobj sustituye a ConfigParser pq respeta los comentarios en el .INI
 
 crontabFile = "/home/firtro/custom/firtroCrontab"
-INIfile     = "/home/firtro/custom/firtro.ini"
+INIfile     = "/home/firtro/custom/userconfig.ini"
 
 from sys import argv as sys_argv
 from subprocess import call, check_output
@@ -52,7 +52,7 @@ def appendTaskINI(time, DoW="*", DoM="*", Month="*", task=""):
     return True
 
 def editINI():
-    """ edit firtro.ini, then update cron jobs
+    """ edit userconfig.ini, then update cron jobs
     """
     call("nano " + INIfile, shell=True)
     updateCrontab(readTasksINI())

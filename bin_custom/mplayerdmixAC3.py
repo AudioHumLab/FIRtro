@@ -6,7 +6,7 @@ u"""
     uso:
             mplayerdmixAC3.py [on|off]
     nota:
-            coeffs de downmix en ~/custom/firtro.ini
+            coeffs de downmix en ~/custom/userconfig.ini
             mplayer slave fifo:  ~/tdt_fifo
 """
 # v0.1beta
@@ -15,14 +15,14 @@ from subprocess import Popen
 from sys import argv as sys_argv
 from ConfigParser import ConfigParser
 dmixINI = ConfigParser()
-dmixINIpath = "/home/firtro/custom/firtro.ini"
+dmixINIpath = "/home/firtro/custom/userconfig.ini"
 fifoPath = "/home/firtro/tdt_fifo"
 
 def panAC3():
     #http://www.mplayerhq.hu/DOCS/HTML/en/advaudio-channels.html
     #http://www.mplayerhq.hu/DOCS/tech/slave.txt
     
-    # leemos la sección ac3downmix de ~/custom/firtro.ini
+    # leemos la sección ac3downmix de ~/custom/userconfig.ini
     # en la que estás definidos los % de  downmix
     dmixINI.read(dmixINIpath)
     try:

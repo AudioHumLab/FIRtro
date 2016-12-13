@@ -5,7 +5,7 @@
         alarmclock.py                Print cron jobs for firtro
         alarmclock.py  HH:MM [DoW]   Add an alarm clock
         alarmclock.py  clear         Clear any 'alarmclock' entry job 
-        alarmclock.py  edit          Edit firtro.ini file 
+        alarmclock.py  edit          Edit userconfig.ini file 
         alarmclock.py  --help        This help
 """
 from sys import argv as sys_argv, exit as sys_exit
