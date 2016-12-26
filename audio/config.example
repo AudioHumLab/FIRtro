@@ -99,9 +99,9 @@ tdt_fifo  = /home/firtro/tdt_fifo
 load_shairport = False
 shairport_path = /home/firtro/bin_custom/shairport
 ; If no Pulseaudio:
-shairport_options = -d -a Firtro -o alsa -- d jack
+shairport_options = -a Firtro -o alsa -- d jack
 ; If Pulseaudio:
-;shairport_options = -d -a Firtro -o pulse
+;shairport_options = -a Firtro -o pulse
 
 ; Squeezeslave - Opcional
 load_squeezeslave = False
