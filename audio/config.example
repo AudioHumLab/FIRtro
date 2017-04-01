@@ -1,5 +1,5 @@
-; FIRtro 2.0 
-; - Gestión de tarjetas de sonido: del sistema y externas al sistema (resampled)
+; FIRtro 2.0a
+; - Gestión de tarjetas de sonido: del sistema y externas al sistema (remuestreadas)
 ; - Posibilidad de declarar puertos de jack para monitor de la fuente
 ; - Preset por defecto al arranque (opcional)
 ; - Uso de Ecasound opcional para el módulo de EQ paramétrico.
@@ -25,6 +25,10 @@ default_preset =
 ; (identidicador ALSA completo hw:Tarjeta,Device)
 system_card = hw:ALSA,0
 external_cards = 
+; Resampler para tarjetas externas: alsa | zita
+resampler = alsa
+; calidad del resampling (opcional) (0..4 para alsa, 16..96 para zita)
+resamplingQ =3
 
 [path]
 ; Jack - Obligatorio
