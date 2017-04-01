@@ -44,7 +44,10 @@
 # v2.2a
 # - Se adapta la sección de arranque de mplayer a los puertos brutefir/ecasound
 # - se incorpora jacktrip
-#----------------------------------------------------------------------
+#
+# v2.2b
+# - Se permite zita o alsa_in/out para resampling de tarjetas externas (audio/config, soundcards.py)
+#--------------------------------------------------------------------------------------
 
 import sys
 # para poder importar los módulos del FIRtro locales en ~/bin:
@@ -74,19 +77,20 @@ def read_status():
     preset      = st.get("general", "preset")
 
 # INICIO:
+
+# Opcional: DEPURACION A FICHERO:
+#sys.stdout = open("/home/firtro/firtro_debug.log", "w")
+
+original_stdout = sys.stdout
+# se usa para evitar algunos printados más abajo
+fnull = open(os.devnull, 'w')
+
 read_status()   # v2.0 en sustitución de getstatus por ser estático.
 audio_folder = loudspeaker_folder + loudspeaker + "/" + fs + "/"
-original_stdout = sys.stdout
 if load_ecasound:
     firtro_ports = ecasound_ports
 else:
     firtro_ports = brutefir_ports
-
-# Opcional: DEPURACION A FICHERO:
-# sys.stdout = open("/home/firtro/debug_Firtro", "w")
-
-# se usa para evitar algunos printados más abajo
-fnull = open(os.devnull, 'w')
 
 # Cambiamos al directorio de brutefir config
 # (es innecesario si se usan path completos en brutefir_config)
@@ -163,14 +167,18 @@ def main(run_level):
                 time.sleep(.25)
 
         # Inicializaremos los posibles monitores externos de señal del FIRtro
-        # Conectamos a JACK tarjetas adicionales mediante resampling (zita-j2a)
+        # Conectamos a JACK tarjetas adicionales mediante resampling (zita-j2a/alsa_out)
         # (mediante el modulo soundcards aka sc)
-        os.system("pkill -f zita") # por si acaso
         for card in system_card.split() + external_cards.split():
             # bareCard devuelve el nombre de la tarjeta sin "hw:" y sin el device ",X"
             if [x for x in jack_external_monitors.split() if sc.bareCard(card) in x]:
-                print "(initfirtro) Arrancando zita " + card + " ..."
-                sc.arranca_zita(card, fs, "j2a")
+                print "(initfirtro) Arrancando RESAMPLER en " + card + " ..."
+                if "alsa" in resampler:
+                    sc.arranca_resampler(card, fs, "alsa_out")
+                elif "zita" in resampler:
+                    sc.arranca_resampler(card, fs, "zita-j2a")
+                else:
+                    print "(initfirtro) (!) Revisar resampler en audio/config."
 
         # Brutefir
         print "(initfirtro) Arrancando BRUTEFIR ..."
@@ -227,7 +235,7 @@ def main(run_level):
             intentos = 16 # 16 * 0.25 = 4 segundos
             while intentos:
                 try:
-                    if check_output("pgrep -f -l mpd", shell=True):
+                    if check_output("pgrep -l mpd", shell=True):
                         print "(initfirtro) Ha arrancando MPD."
                         break
                 except:
@@ -355,6 +363,7 @@ def main(run_level):
 
     else:
         print __doc__
+
 
 if __name__ == "__main__":
     if sys.argv[1:]:

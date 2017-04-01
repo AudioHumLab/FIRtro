@@ -24,6 +24,8 @@ default_preset = config.get('presets', 'default_preset')
 #[cards]
 system_card = config.get('cards', 'system_card')
 external_cards = config.get('cards', 'external_cards')
+resampler = config.get('cards', 'resampler')
+resamplingQ = config.get('cards', 'resamplingQ')
 
 #[path]
 jack_path = config.get('path', 'jack_path')

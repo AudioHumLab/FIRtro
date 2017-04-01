@@ -1,35 +1,39 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-u""" 
-    Módulo interno para gestión de las tarjetas declaradas en 
+u"""
+    Módulo interno para gestión de las tarjetas declaradas en
     ~/audio/config
-    
+
     - Gestión del mixer de las tarjetas.
     - Integración en Jack mediante resampling (zita).
     - Gestión del reloj en tarjetas profesionales.
-    
+
     NOTA:
-    Las tarjetas profesionales con referencia de reloj configurable (int/ext) 
+    Las tarjetas profesionales con referencia de reloj configurable (int/ext)
     deben ser declaradas en /home/firtro/audio/cards.ini (ver documentación)
-"""    
-# v1.1: 
+"""
+# v1.1:
 # - Se evalúa si la tarjeta es USB (aplay -l) para poner n=3 en zita
 # - Se pone latencia inicial en zita-a2j para intentar evitar desincronismos
 # v1.2:
 # - Se integra aquí la funcionalidad de selección de la referencia de reloj
 #   interna/externa para tarjetas profesionales compatibles.
 # v1.3:
-# - Se integran aquí las funciones para restaurar el mixer ALSA de las [cards] 
+# - Se integran aquí las funciones para restaurar el mixer ALSA de las [cards]
 #   de audio/config, también para hacer mute/unmute en el mixer de la principal.
 # v1.3a
-# - Se revisa la rutina alsa_mute_system_card() 
-# - Se permite un argumento (no documentado) que fuerza un flapeo SPDIF 
+# - Se revisa la rutina alsa_mute_system_card()
+# - Se permite un argumento (no documentado) que fuerza un flapeo SPDIF
 #   para intentar resincronizar el DAC externo conectado :-/
 # v1.3b
 # - se depura iec958_set para tarjetas que no tengan este control
 # v1.3c
 # - se depura analog_scontrols y iec_scontrols
-   
+# v1.3d
+# - se revisan los parámetros de arranque de zita
+# - se arranca zita con Popen
+# - zita con log rotado en /var/log/<username>
+
 from time import sleep
 import jack
 import os
@@ -58,7 +62,7 @@ def amixer(card, cmd):
     else:
         print "(soundcards) " + cmd
         return True
-    
+
 # Función especializada en la tarjeta M-Audio 1010LT
 def change_clock_1010LT(clock,fs):
     """ Orden de configuracion:
@@ -81,7 +85,7 @@ def change_clock_1010LT(clock,fs):
 def change_clock_DUMMY(clock,fs):
     print "(soundcards) change clock *** DUMMY *** clock:" + clock + " fs:" + format(fs)
     return True
-    
+
 # DICCIONARIO DE FUNCIONES PARA TARJETAS CON REFERENCIA DE RELOJ INT/EXT
 # De uso interno para apuntar a la función correspondiente
 # para las tarjetas [proCards] en ~/audio/cards.ini.
@@ -120,28 +124,33 @@ def external_card_resync(in_ports, rate):
             if [x for x in monitor_ports if bareCard(card) in x]:
                 card_es_input_y_monitor = True
 
-            apaga_zita(card)
-            if card_es_input_y_monitor:
-                arranca_zita(card, rate, mode="j2a")
-            arranca_zita(card, rate, mode="a2j")
+            apaga_resampler(card)
 
-def apaga_zita(card):
+            if "alsa" in resampler:
+                mode = "alsa_in"
+            elif "zita" in resampler:
+                mode = "zita-a2j"
+            if card_es_input_y_monitor:
+                arranca_resampler(card, rate, mode)
+            arranca_resampler(card, rate, mode)
+
+def apaga_resampler(card):
     sp.call("pkill -f " + card , shell=True)
     intentos = 8
     while True:
-        zita_process = sp.check_output("pgrep -l -f " + bareCard(card), shell=True)
-        if not "zita" in zita_process:
-            print "(server_input) Se ha apagado zita " + card
+        resampler_process = sp.check_output("pgrep -l -f " + bareCard(card), shell=True)
+        if (not "zita" in resampler_process) and (not "alsa_" in resampler_process):
+            print "(server_input) Se ha apagado el resampler en " + card
             break
         if not intentos:
-            print "(server_input) <!> no se ha apagado zita " + card
+            print "(server_input) <!> no se ha apagado el resamplern en " + card
             break
         intentos -= 1
         sleep(.25)
 
 # devuelve el nombre alsa de la tarjeta sin "hw:_____,X"
 def bareCard(card):
-    """ función auxiliar que devuelve el nombre de la tarjeta 
+    """ función auxiliar que devuelve el nombre de la tarjeta
         sin "hw:" y sin el device ",X"
         de utilidad para presentar la tarjeta en jack o para buscarla
         dentro de los posibles monitores externos de audio/config
@@ -156,60 +165,119 @@ def cardIsUSB(card):
     else:
         return False
 
-def temporary_zita_bash(card, rate, mode, p="512", n="2"):
+def cardParams(card, mode):
+    """ diccionario con parámetros de tarjeta en función del tipo de tarjeta
+        y del modo de trabajo (zita necezita ajustes...)
+    """
+    # valores por defecto:
+    p = {"latencia":"", "2ch16bit":False, "p":"512", "n":"2"}
+
+    if mode == "zita-a2j" or mode == "alsa_in":
+        pass
+    elif mode == "zita-j2a" or mode == "alsa_out":
+        pass
+
+    if cardIsUSB(card):
+        p["p"] = "1024"
+        p["n"] = "3"
+        if "miniStreamer" in card:
+            p["2ch16bit"] = True
+            p["p"] = "1024"
+
+    if "zita" in mode:
+        p["2ch16bit"] = True
+        p["p"] = "64"
+
+    return p
+
+def zitaJack(card, rate, mode, p="", n="", log=False):
     """ OjO algo pasa con zita que deja el socket 9999 pillado si lo intentamos lanzar desde python
         He optado por preparar un script de shell e invocarlo, entonces no hay problema (¿¡?)
+        mode: zita-j2a | zita-a2j
+        log:  invocar True para debug
     """
-    latencia = ""
-    if mode == "a2j":
-        latencia = " -I512" # ver man zita-a2j
-    if cardIsUSB(card):
-        n = "3"
-        p = "1024"
-    tmp =  "# OjO algo pasa con zita que deja el socket 9999 pillado si lo intentamos lanzar desde python\n"
-    tmp += "# He optado por preparar un script de shell e invocarlo, entonces no hay problema (¿¡?)\n"
-    tmp += "zita-" + mode + " -j" + bareCard(card) + " -d" + card + latencia + \
-           " -L -p" + p + " -n" + n + " -r" + rate + " > /dev/null 2>&1 &"
-    os.system("touch    /tmp/zitaTmp.sh")
-    os.system("chmod +x /tmp/zitaTmp.sh")
-    os.system("echo '" + tmp + "' > /tmp/zitaTmp.sh")
-    if sp.call  ("/tmp/zitaTmp.sh", shell=True):
-        chk = False
-    else: 
+    params = cardParams(card, mode)
+    #tmp =  "# OjO algo pasa con zita que deja el socket 9999 pillado si lo intentamos lanzar desde python\n"
+    #tmp += "# He optado por preparar un script de shell e invocarlo, entonces no hay problema (¿¡?)\n"
+    tmp = mode + " -j" + bareCard(card) + " -d" + card
+    if params["latencia"]:      tmp += " -I" + params["latencia"]
+    if params["2ch16bit"]:      tmp += " -L"
+    if resamplingQ:             tmp += " -Q" + resamplingQ
+    tmp += " -p" + params["p"]
+    tmp += " -n" + params["n"]
+    tmp += " -r" + rate
+    # log para estudiar por qué se desincroniza zita :-/
+    if not log:
+        #tmp +=  " > /dev/null 2>&1 &"
+        pass
+    else:
+        tmp +=  " -v  >> /var/log/" + os.getenv("LOGNAME") + "/" + mode + "_" + bareCard(card) + " &"
+
+    #os.system("touch    /tmp/zitaTmp.sh")
+    #os.system("chmod +x /tmp/zitaTmp.sh")
+    #os.system("echo '" + tmp + "' > /tmp/zitaTmp.sh")
+    #if sp.call  ("/tmp/zitaTmp.sh", shell=True):
+    try:
+        sp.Popen(tmp, shell=True)
         chk = True
-    os.remove("/tmp/zitaTmp.sh")  # lo borramos para que otro usuario pueda sobreescribirlo later
+    except:
+        chk = False
+
+    #os.remove("/tmp/zitaTmp.sh")  # lo borramos para que otro usuario pueda sobreescribirlo later
     return chk
-    
-def arranca_zita(card, rate, mode):
-    if temporary_zita_bash(card, rate, mode):
+
+def alsaInOut(card, rate, mode):
+    params = cardParams(card, mode)
+    tmp = mode + " -j" + bareCard(card) + " -d" + card
+    if resamplingQ:
+        tmp += " -q" + resamplingQ
+    tmp += " -p" + params["p"]
+    tmp += " -n" + params["n"]
+    tmp += " -r" + rate
+    try:
+        sp.Popen(tmp, shell=True)
+        return True
+    except:
+        return False
+
+def arranca_resampler(card, rate, mode):
+    """ mode puede ser: zita-a2j, zita-j2a, alsa_in, alsa_out
+    """
+    resamplerIsRunning = False
+    if "zita" in mode:
+        # este es el verdadero arranque de zita:
+        resamplerIsRunning = zitaJack(card, rate, mode, log=False)  #  ver la funcion zitaJack
+    elif "alsa" in mode:
+        resamplerIsRunning = alsaInOut(card, rate, mode)
+
+    if resamplerIsRunning:
         # esperamos a que los puertos zita aparezcan en jack
         jack.attach('tmp')
         intentos = 8; encontrado = False
-        while True:
+        while intentos:
             for port in jack.get_ports():
                 if bareCard(card) in port:
                     encontrado = True
             if encontrado:
-                print "(soundcards) Se ha reiniciado zita-" + mode + " " + card + " " + rate
-                break
-            if not intentos:
-                print "(soundcards) <!> No se ha podido reiniciar zita-" + mode + " " + card + " " + rate
+                print "(soundcards) Se ha reiniciado " + mode + " " + card + " " + rate
                 break
             intentos -= 1
-            print "(soundcards) Esperando a zita-" + mode + " . .. ..."
+            print "(soundcards) Esperando a " + mode + "." * (8-intentos+1)
             sleep(.25)
+        if not intentos:
+            print "(soundcards) (!) No está disponible el puerto " + bareCard(card) + " en jack"
         jack.detach()
     else:
-        print "(soundcards) <!> No se ha podido reiniciar zita-" + mode + " " + card + " " + rate
-        
+        print "(soundcards) <!> No se ha podido reiniciar " + mode + " en " + card + " " + rate
+
 def alsa_restore_cards():
     """ Restaura los amixer de todas las tarjetas de ~/audio/config leyendo
-        los archivos asound.XXXX que el usuario ha debido guardar en ~/audio
+        los archivos asound.xxx que el usuario ha debido guardar en ~/audio
     """
     for card in [system_card] + external_cards.split():
         card = bareCard(card)
         tmp = "alsactl --file /home/firtro/audio/asound." + card + " restore " + card
-        print "cccc", card
+        print "(soundcards) restaurando alsactl en ", card
         tmp = sp.call(tmp, shell=True)
 
 def alsa_mute_system_card(muteOnOff):
@@ -230,8 +298,7 @@ def alsa_dB2percent(dB):
     """
     tmp = float(dB.replace("dB", ""))
     tmp = int(100.0 + (tmp * 10.0/3.0))
-    if tmp < 0:
-        tmp = 0
+    if tmp < 0: tmp = 0
     return str(tmp) + "%"
 
 def analog_set(card=bareCard(system_card), mode="off"):
@@ -256,13 +323,11 @@ def analog_scontrols_main(card=bareCard(system_card)):
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i dac", shell=True).split("\n")[:-1]
         DACs = [x.split("control ")[-1] for x in tmp if not "filter" in x.lower()]
-    except:
-        DACs = []
+    except: DACs = []
     try:
         tmp = sp.check_output("amixer -c" + bareCard(card) + " scontrols | grep -i master", shell=True).split("\n")[:-1]
         Masters = [x.split("control ")[-1] for x in tmp]
-    except:
-        Masters = []
+    except: Masters = []
     return DACs + Masters
 
 def iec958_set(card=bareCard(system_card), mode="on"):
@@ -281,7 +346,7 @@ def iec958_scontrols(card=bareCard(system_card)):
         return [x for x in tmp if (not "loop" in x.lower()) and (not "filter" in x.lower())]
     except: 
         return []
-        
+
 if __name__ == "__main__":
     if sys_argv[1:]:
         for cosa in sys_argv[1:]:
@@ -305,4 +370,4 @@ if __name__ == "__main__":
             for card in cardsINI.get("proCards", "cards").split():
                 print "\t" + card
         print
-    
+

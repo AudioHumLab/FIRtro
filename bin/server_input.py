@@ -11,8 +11,9 @@
 #   puede ser debido un escenario de CPU% muy cargada afectando 
 #   a las operaciones jack.disconnect/connect. Para debug se usa logging.
 #
-# v2.1:
+# v2.1b:
 # - Parada de mplayer (s/audio/config) cuando no se está escuchando para ahorrar CPU%
+# - Solo paramos MPD o MOPIDY al dejar la input, al seleccionarla no hacemos nada.
 
 from os import path as os_path, remove as os_remove, system as os_system
 from sys import path as sys_path
@@ -54,12 +55,12 @@ int_monitor_ports = jack_internal_monitors.split()
 
 # Alias con temporización experimental para operaciones jack.con/disconnect
 tj = 0.1
-def jack_connect(p1,p2):
+def jack_connect(p1, p2):
     jack.connect(p1, p2)
-    sleep(tj)
-def jack_disconnect(p1,p2):
+    #sleep(tj)
+def jack_disconnect(p1, p2):
     jack.disconnect(p1, p2)
-    sleep(tj)
+    #sleep(tj)
 
 # Funcion original del FIRtro levemente modificada para
 # usar opcionalmente puertos de monitoreo
@@ -82,20 +83,23 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
                 print "(server_input) Pausando MPD."
                 os_system("mpc pause > /dev/null 2>&1 &")
             else:
-                os_system("mpc play > /dev/null 2>&1 &")
+                pass
+                # no reanudamos mpd al recuperar la entrada.
+                #os_system("mpc play > /dev/null 2>&1 &")
     except:
         logging.exception("error en if load_mpd")
-    
+
     try:
         if load_mopidy:
             if 'mopidy' not in input_name.lower():
                 print "(server_input) Pausando MOPIDY."
                 os_system("mpc -p 7700 pause > /dev/null 2>&1 &")
             else:
-                os_system("mpc -p 7700 play > /dev/null 2>&1 &")
+                pass
+                #os_system("mpc -p 7700 play > /dev/null 2>&1 &")
     except:
         logging.exception("error en if load_mopidy")
-        
+
     # Si la entrada NO es TDT pausamos MPLAYER para ahorro de CPU%
     if load_mplayer_tdt and pause_mplayer_tdt:
         if 'tdt' not in input_name.lower():
@@ -106,7 +110,6 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
             print "(serve_input) Resintonizando TDT: " + radioch
             if not radio_byName.select_channel(radioch):
                 print "(serve_input) (i) ERROR resintonizando TDT: " + radioch
-                
 
     ################################################################
     #     cuerpo principal CASI como el original de FIRtro 1.0:    #
@@ -133,10 +136,10 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
                 for source in sources_R_intMon: jack_disconnect(source, int_monitor_ports[1])
         except:
             logging.exception("error en desconexion de monitores")
-            
+
         # Y conectamos la entrada a al FIRtro y a los monitores
         for i in range(len(in_ports)):
-            
+
             # apaño provisional: los in_ports previstos en audio/inputs:
             # miniStreamer:capture_1   , no coinciden con el puerto zita-a2j:
             # miniStreamer-01:capture_1, hay que apañarlo
@@ -155,11 +158,10 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
                 jack_connect(inp, out_ports[i])
             except:
                 logging.exception("error conectando " + in_ports[i] + " <> " + out_ports[i])
-        
+
             try: #los monitores son opcionales
                 if ext_monitor_ports:
                     jack_connect(in_ports[i], ext_monitor_ports[i])
-                if int_monitor_ports:
                     jack_connect(in_ports[i], int_monitor_ports[i])
             except:
                 logging.exception("error en conexion de monitores")
@@ -167,7 +169,7 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
         jack.detach()
 
     except:
-        
+
         # Si hay alguna excepción devolvemos boolean False
         logging.exception("error en cuerpo ppal")
         jack.detach()
