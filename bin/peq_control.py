@@ -23,6 +23,9 @@
 # v1.1:
 #  Corregido cargaPEQini cuando el INI tiene menos bloques de plugins que ecasound
 #  Permite PEQdump sin ser el dueño del fichero /home/firtro/lspk/altavoz/peqdump.txt
+# v1.1a:
+#  suprimido el sleep(0.1) de cargaPEQini
+#  y cambiado sleep(0.02) antes 0.1 en PEQbypass (estos sleeps habría que depurarlos...)
 
 from os import path as os_path, remove as os_remove
 from sys import path as sys_path, argv as sys_argv
@@ -95,7 +98,7 @@ def cargaPEQini(archivoPEQini):
                 # (!) por si el pop* se agota antes que los posibles filtros admitidos en ecasound
                 if listaParamsPlugins:
                     ecanet("cop-set " + str(cop) + "," + str(pos) + "," + listaParamsPlugins.pop(0)) #(*)
-    sleep(.1)
+    #sleep(.1)
     print "(peq_control) Se ha cargado en Ecasound el archivo: " + archivoPEQini
     print "(peq_control) Recuerda revisar la Ganancia global del primer plugin."
     try:
@@ -141,7 +144,7 @@ def PEQbypass(mode):
     for chain in ("left", "right"):
         ecanet("c-select " + chain)
         ecanet("c-bypass " + mode)
-        sleep(.1) # experimental, es necesario
+        sleep(.02) # experimental, es necesario
 
     for chain in ecanet("c-status").replace("[selected] ", "").split("\n")[2:4]:
         tmp = ""
