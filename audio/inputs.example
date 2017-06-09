@@ -4,18 +4,9 @@
 ;clock      [card|word|spdif] Referencia para tarjetas con clock externo (ej:1010LT)
 ;resampled  [no|44100|48000|...] Para tarjetas resampleadas añadidas a jack
 
-[analog44]
+[analog]
 in_ports:   system:capture_1 system:capture_2
-fs:         44100
-clock:      card
-gain:       0
-xo:         lp
-lirc_event:	
-resampled:  no
-
-[analog48]
-in_ports:   system:capture_1 system:capture_2
-fs:         48000
+fs:         
 clock:      card
 gain:       0
 xo:         lp
