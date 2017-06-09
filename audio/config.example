@@ -66,7 +66,7 @@ control_clear = False
 syseq_path = /home/firtro/bin/syseq.py
 
 ; Mpd - Opcional
-load_mpd = True
+load_mpd = False
 mpd_path = /usr/bin/mpd
 mpd_options =
 
