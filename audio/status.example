@@ -25,7 +25,7 @@ loudness_ref = 0.0
 [inputs]
 radio_prev = 3
 radio = 2
-input = analog44
+input = analog
 resampled = no
 mono = off
 
