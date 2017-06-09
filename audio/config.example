@@ -42,11 +42,11 @@ jack_options = -R -ddummy -P8 -C2
 ; Brutefir - Obligatorio
 brutefir_path = /usr/bin/brutefir
 brutefir_options = brutefir_config
-;brutefir_ports = brutefir:input-0 brutefir:input-1
-brutefir_ports = ecasound:in_1 ecasound:in_2
+brutefir_ports = brutefir:input-0 brutefir:input-1
+;brutefir_ports = ecasound:in_1 ecasound:in_2
 
 ; Ecasound - Opcional
-load_ecasound = True
+load_ecasound = False
 ecasound_path = /usr/bin/ecasound
 ; Indicar el numero NN de filtros paramétricos:
 ; (se necesita plantilla PEQxNN_defeat_Fs.ecs en ~/audio)
