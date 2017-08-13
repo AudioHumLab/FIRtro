@@ -11,7 +11,7 @@ balance = 0.0
 [general]
 fs = 44100
 clock = card
-preset = tweeter att 6dB
+preset = plano_y_peq
 filter_type = lp
 muted = False
 polarity = +
