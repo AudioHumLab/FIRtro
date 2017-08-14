@@ -34,9 +34,9 @@ resamplingQ =3
 ; Jack - Obligatorio
 jack_path = /usr/bin/jackd
 ; Opciones de Jack.
-;Jack sobre ALSA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
-; jack_options = -R -dalsa -p1024
-Jack sobre DUMMY: solo para la distribución inicial del software del FIRtro:
+; Jack sobre ALSA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
+;jack_options = -R -dalsa -p1024
+; Jack sobre DUMMY: solo para la distribución inicial del software del FIRtro:
 jack_options = -R -ddummy -P8 -C2
 
 ; Brutefir - Obligatorio
