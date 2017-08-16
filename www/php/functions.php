@@ -95,7 +95,6 @@
         $json=firtro_socket ("level_add -3");
         }
     elseif($command == 'vol_slider') {
-        echo '<script>console.log("PRUEBA WWW PHP FUNCTIONS.PHP")</script>';
         $json=firtro_socket ("level $value");
         }
     elseif($command == 'bal_slider') {
