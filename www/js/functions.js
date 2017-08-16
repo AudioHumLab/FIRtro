@@ -16,7 +16,7 @@ var $loudeq_plot_data=[''];
 var $plot_data_new=[''];
 // Objeto para guardar temporalmente los cambios realizados en la configuracion mientras no son salvados o descartados
 var $config_changes={};
-// Timeout de espera (ms) para hacer un resize de los gr·ficos cuando el tamaÒo de ventana cambia
+// Timeout de espera (ms) para hacer un resize de los gr√°ficos cuando el tama√±o de ventana cambia
 var $resize_timeout=200;
 // Valor del conjunto de pulsaciones del teclado numerico
 var $keypad_value="";
@@ -81,7 +81,7 @@ $plot_options = {
   }
 }
 
-// Personalizamos las opciones para el grafico drc. Ojo, que los objetos no se pueden copiar igual·ndolos.
+// Personalizamos las opciones para el grafico drc. Ojo, que los objetos no se pueden copiar igual√°ndolos.
 $plot_options_drc = jQuery.extend(true,{}, $plot_options);
 $plot_options_drc.axes.yaxis.ticks=['-16','-14','-12','-10','-8','-6','-4','-2',[0,'0 dB'],'2','4'];
 
@@ -142,7 +142,7 @@ $(function(){
   };
 })(jQuery);
 
-// FunciÛn para enviar comandos al servidor
+// Funci√≥n para enviar comandos al servidor
 function send_command(command, value) {
     //console.log(command)
     $.ajax({
@@ -156,10 +156,10 @@ function send_command(command, value) {
     });
 }
 
-// Funcion para actualizar periodicamente la p·gina seg˙n el tiempo especificado
-// Se vuelve a hacer una peticiÛn ajax independiente que la que se usa para actualizar en los cambios de p·gina
-// La razÛn es que de esta forma el tiempo de espera (window.setTimeout) se puede poner despuÈs de recibir los datos y actualizar la p·gina, de forma sÌncrona
-// Esto evita que se produzcan llamadas simultaneas ajax si Èstas tardan mas que el tiempo de espera
+// Funcion para actualizar periodicamente la p√°gina seg√∫n el tiempo especificado
+// Se vuelve a hacer una petici√≥n ajax independiente que la que se usa para actualizar en los cambios de p√°gina
+// La raz√≥n es que de esta forma el tiempo de espera (window.setTimeout) se puede poner despu√©s de recibir los datos y actualizar la p√°gina, de forma s√≠ncrona
+// Esto evita que se produzcan llamadas simultaneas ajax si √©stas tardan mas que el tiempo de espera
 
 function auto_update() {
     $.ajax({
@@ -179,7 +179,7 @@ function auto_update() {
     });
 }
 
-// Si el comando se envÌa correctamente, la respuesta se procesa aqui.
+// Si el comando se env√≠a correctamente, la respuesta se procesa aqui.
 function onSuccess(data) {
     // Intentamos guardar los datos recibidos y capturamos la excepcion si ocurre un error
     try { eval( '$php_data_raw=' + data ); }
@@ -191,7 +191,7 @@ function onSuccess(data) {
     // Comparamos el objeto recibido con el almacenado, y actualizamos solo si difieren
     if (JSON.stringify($php_data) !== JSON.stringify($php_data_raw)) {
         $php_data = $php_data_raw;
-        // Prueba chapuzas para retrasar a voluntad la actualizacion de la pagina y comprobar que el auto update no envia otra peticiÛn hasta que termine
+        // Prueba chapuzas para retrasar a voluntad la actualizacion de la pagina y comprobar que el auto update no envia otra petici√≥n hasta que termine
         //alert("Hola");
         //$force_update=0;
         update_controls ();
@@ -239,17 +239,19 @@ function changeGlobalTheme(theme)
     //setTheme(".ui-btn", "ui-btn-hover", theme);
 };
 
-// ActualizaciÛn de los valores de la p·gina
+// Actualizaci√≥n de los valores de la p√°gina
 function update_controls () {
     $("[name='tittle']").text("FIRtro [" + $php_data["loudspeaker"] + "]");
     var $first_item=true;
-    // P·gina activa del documento
+    // P√°gina activa del documento
     switch ($.mobile.activePage.attr('id')) {
         case 'level_page':
-            if ($("#vol_slider").attr("value") != $php_data['level']) $("#vol_slider").attr("value",$php_data['level']).slider("refresh");
+            if ($("#vol_slider").attr("value") != $php_data['level']) {
+                $("#vol_slider").attr("value", $php_data['level']).slider("refresh");
+	    }
             if ($("#vol_slider").attr("max") != $php_data['maxlevel']) {
-                $("#vol_slider").attr("max",$php_data['maxlevel']);
-                $("#vol_slider").attr("min",$php_data['maxlevel']-$config['vol_slider_hr']);
+                $("#vol_slider").attr("max", $php_data['maxlevel']);
+                $("#vol_slider").attr("min", $php_data['maxlevel']-$config['vol_slider_hr']);
                 $("#vol_slider").slider("refresh");
             }
             if ($("#bal_slider").attr("max") != $php_data['balance_variation']) {
@@ -503,9 +505,9 @@ function update_controls () {
     }
 }
 
-// Actualizacion de los datos que contienen los gr·ficos
+// Actualizacion de los datos que contienen los gr√°ficos
 function update_plot(){
-    switch ($.mobile.activePage.attr('id')) { // P·gina activa del documento
+    switch ($.mobile.activePage.attr('id')) { // P√°gina activa del documento
         case 'drc_page':
             $syseq_r_plot.replot();
             $syseq_l_plot.replot();
@@ -523,21 +525,21 @@ function update_plot(){
 ////////*** MANEJO DE EVENTOS ***////////
 /////////////////////////////////////////
 
-// Seg˙n la doc de JQuery se debe usar el mÈtodo "$(document).on('pageinit',function(){" 
+// Seg√∫n la doc de JQuery se debe usar el m√©todo "$(document).on('pageinit',function(){" 
 // en vez de "$(document).on('ready', function(event){"
-// para asegurarse de que la p·gina esta siempre lista
+// para asegurarse de que la p√°gina esta siempre lista
 // http://jquerymobile.com/test/docs/api/events.html
-// Pero OjO, porque este evento se produce por cada inicializaciÛn de la p·gina, 
-// cuando pinchamos por primera vez, asÌ que hay que filtrar por p·gina
-// para evitar asignar la misma funciÛn mas de una vez al mismo control.
+// Pero OjO, porque este evento se produce por cada inicializaci√≥n de la p√°gina, 
+// cuando pinchamos por primera vez, as√≠ que hay que filtrar por p√°gina
+// para evitar asignar la misma funci√≥n mas de una vez al mismo control.
 
 // "$(document).on('ready', function(event){" se ejecuta SOLO la primera vez que se carga el documento, 
-// con la p·gina de inicio. Aqui se define la funciÛn por defecto para todos los botones, 
-// y como no se usa ning˙n ID ni nombre, funciona para todas las p·ginas y simplificamos cÛdigo.
+// con la p√°gina de inicio. Aqui se define la funci√≥n por defecto para todos los botones, 
+// y como no se usa ning√∫n ID ni nombre, funciona para todas las p√°ginas y simplificamos c√≥digo.
 
-// AtenciÛn, como usamos posteriormete el evento 'pageinit' para cÛdigo especifÌco de cada p·gina, 
-// debe tenerse en cuenta que primero se produce el envento 'pageinit' (una vez por p·gina)
-// y luego 'ready' (solo la primera vez que se abre el documento, sea la p·gina que sea). 
+// Atenci√≥n, como usamos posteriormete el evento 'pageinit' para c√≥digo especif√≠co de cada p√°gina, 
+// debe tenerse en cuenta que primero se produce el envento 'pageinit' (una vez por p√°gina)
+// y luego 'ready' (solo la primera vez que se abre el documento, sea la p√°gina que sea). 
 // Esto puede influir en donde se deben declarar ciertas variables
 
 $(document).on('ready', function(event){
@@ -551,19 +553,19 @@ $(document).on('ready', function(event){
     //$.extend($.mobile.zoom, {locked:true,enabled:false});
     
     // Capturamos todos los botones del formulario tipo submit.
-    // Se envÌa su nombre al cÛdigo PHP, donde se interpretar· la acciÛn correspondiente.
+    // Se env√≠a su nombre al c√≥digo PHP, donde se interpretar√° la acci√≥n correspondiente.
     $('input[type="submit"]').click(function(event) {
         //var theName = $.trim($("#theName").val());
         //var $button_name=event.currentTarget.name;
         var $button_name = event.currentTarget.name;
         var $button_value = event.currentTarget.value; //Es lo mismo que: var button= $(this).attr('name');
         // Excepciones:
-        // 1- Si la p·gina es la del navegador:
+        // 1- Si la p√°gina es la del navegador:
         if ($.mobile.activePage.attr('id')=="media_page") {
             // Navegador: Enviamos como valor el tipo de control (auto, mpd, cd, etc..)
             $button_value = $("#media_page input[name=media_select]:checked").attr("value");
             // Excepto si es auto, que enviamos la entrada activa
-            // Mejor no coger el valor del selector de entradas, porque si no se ha entrado previamente en la p·gina, no est· inicializado
+            // Mejor no coger el valor del selector de entradas, porque si no se ha entrado previamente en la p√°gina, no est√° inicializado
             //if ($button_value == "auto") $button_value=$("#inputs_page input[name='input_select']:checked").attr("value");
             // Asi que lo cogemos del array recibido del servidor
             if ($button_value == "auto") $button_value=$php_data['input_name'];
@@ -586,9 +588,9 @@ $(document).on('ready', function(event){
         event.preventDefault();
     });
             
-    // Esto se usa para hacer el resize de los gr·ficos. Algunos exploradores generan eventos continuos mientras se estan redimensionando
+    // Esto se usa para hacer el resize de los gr√°ficos. Algunos exploradores generan eventos continuos mientras se estan redimensionando
     // creando una carga de de trabajo innecesaria. Otros sin embargo solo generan un evento cuando acaban de redimensionarse.
-    // Para solucionar todos los casos, pongo un timer de espera ($resize_timeout) antes de hacer el resize del gr·fico
+    // Para solucionar todos los casos, pongo un timer de espera ($resize_timeout) antes de hacer el resize del gr√°fico
     var $resize_timer;
     $(window).resize(function() {
         clearTimeout($resize_timer);
@@ -604,28 +606,28 @@ $(document).on('ready', function(event){
     if ($config['auto_update'] == true) auto_update();
 });
 
-// FunciÛn genÈrica de inicializaciÛn de p·gina. Poner aqui las funciones comunes para todas.
-// Se ejecuta la primera vez que se carga cada p·gina.
-// OjO con el orden de los eventos, ver notas en funciÛn anterior.
+// Funci√≥n gen√©rica de inicializaci√≥n de p√°gina. Poner aqui las funciones comunes para todas.
+// Se ejecuta la primera vez que se carga cada p√°gina.
+// OjO con el orden de los eventos, ver notas en funci√≥n anterior.
 $(document).on('pageinit', function(){
     //changeGlobalTheme($config['global_theme']);    
 });
 
-// Inicializaciones por p·gina. Se ejecutan la primera vez que se carga la p·gina.
+// Inicializaciones por p√°gina. Se ejecutan la primera vez que se carga la p√°gina.
 $(document).on('pageinit','#level_page', function(){
 
-    // TambiÈn podemos hacer una ˙nica funcion generica pageinit:
+    // Tambi√©n podemos hacer una √∫nica funcion generica pageinit:
     // $(document).on('pageinit', function(){
-    // y filtrar dentro por el id de la p·gina, usando la variable "this"
+    // y filtrar dentro por el id de la p√°gina, usando la variable "this"
     // var $page = this;
     // alert ($page.id);
 
-    // TambiÈn existe $(this)
+    // Tambi√©n existe $(this)
     // $() is the jQuery constructor function.
     // this is a reference to the DOM element of invocation.
     // so basically, in $(this), you are just passing the this in $() as a parameter so that you could call jQuery methods and functions.
     
-    // Slider de volumen. Se envÌa el nombre y el valor al cÛdigo PHP cada vez que cambie
+    // Slider de volumen. Se env√≠a el nombre y el valor al c√≥digo PHP cada vez que cambie
     $('#vol_slider').on('slidestop',function(event) {
         //var $slider_name=event.currentTarget.name;
         //var $value=event.currentTarget.value;
@@ -633,7 +635,7 @@ $(document).on('pageinit','#level_page', function(){
         event.preventDefault();
     });
     
-    // Slider de balance. Se envÌa el nombre y el valor al cÛdigo PHP cada vez que cambie
+    // Slider de balance. Se env√≠a el nombre y el valor al c√≥digo PHP cada vez que cambie
     $('#bal_slider').on('slidestop',function(event) {
         //var $slider_name=event.currentTarget.name;
         //var $value=event.currentTarget.value;
@@ -644,7 +646,7 @@ $(document).on('pageinit','#level_page', function(){
 
 $(document).on('pageinit','#drc_page', function(){
 
-    // Slider y switch de loudness. Se envÌa el nombre y el valor al cÛdigo PHP
+    // Slider y switch de loudness. Se env√≠a el nombre y el valor al c√≥digo PHP
     $('#syseq_switch').on('slidestop',function(event) {
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
@@ -662,7 +664,7 @@ $(document).on('pageinit','#tone_page', function(){
 
 $(document).on('pageinit','#loudness_page', function(){
 
-    // Slider y switch de loudness. Se envÌa el nombre y el valor al cÛdigo PHP
+    // Slider y switch de loudness. Se env√≠a el nombre y el valor al c√≥digo PHP
     $('#loudness_slider, #loudness_switch').on('slidestop',function(event) {
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
@@ -675,7 +677,7 @@ $(document).on('pageinit','#loudness_page', function(){
 $(document).on('pageinit','#inputs_page', function(){
     if ($php_data) {
         
-        // Recorremos el array de entradas para aÒadir el cÛdigo correspondiente al selector
+        // Recorremos el array de entradas para a√±adir el c√≥digo correspondiente al selector
         // OjO se usa el nombre de la entrada como id del selector para que luego sea mas sencillo de seleccionar
         // Por tanto NO puede haber dos entradas con el mismo nombre, lo cual es de esperar.
         $php_data['inputs'].forEach(function(item) {
@@ -686,7 +688,7 @@ $(document).on('pageinit','#inputs_page', function(){
         // Tambien se podria buscar por su valor: $('input[value="xxxx"]')
         //$("input[id='input_select_" + $current_input + "'] ").attr('checked', true);
         $("#input_select_" + $php_data['input_name'].replace(/( )/g,"\\\ ")).attr('checked', true);
-        // Tenemos que invocar la acciÛn de crear al div que contiene todo el selector
+        // Tenemos que invocar la acci√≥n de crear al div que contiene todo el selector
         // Sino no se muestra con el estilo predefinido
         $("#input_radiodiv").trigger("create");
         
@@ -699,7 +701,7 @@ $(document).on('pageinit','#inputs_page', function(){
 
 });
 
-// Esto est· fusilado de arriba #inputs_page
+// Esto est√° fusilado de arriba #inputs_page
 $(document).on('pageinit','#presets_page', function(){
     if ($php_data) {
         
@@ -712,7 +714,7 @@ $(document).on('pageinit','#presets_page', function(){
         
         $("#preset_select_" + $php_data['preset'].replace(/( )/g,"\\\ ")).attr('checked', true);
 
-        // creaciÛn de un divisor de botones de entrada radio
+        // creaci√≥n de un divisor de botones de entrada radio
         $("#preset_radiodiv").trigger("create");
         
         // Capturamos los eventos de cambio para enviar las ordenes correspondientes
@@ -768,7 +770,7 @@ $(document).on('pageinit','#config_page', function(){
         $('#config_cs').append('<div data-role="collapsible" id="'+section+'"><h3>'+capitalize(section)+'</h3><div id="'+section+'_content" data-role="content"></div>').trigger("create")
         if (section == "themes") {
             $themes_array = $config_ws['themes']['themes'].split(" ");
-            //El primer elemento deberÌa ser una cadena vacia, pero si no lo es, aÒado al final la opcion "default"
+            //El primer elemento deber√≠a ser una cadena vacia, pero si no lo es, a√±ado al final la opcion "default"
             if ($themes_array[0] == "") $themes_array[0] = "default";
                 else $themes_array.push("default");
             $("#"+section+"_content").append('<select name="config_option" id="global_theme" data-icon="grid" data-native-menu="false"></select>').trigger("create");
@@ -814,7 +816,7 @@ $(document).on('pageinit','#config_page', function(){
 
 });
 
-// Capturamos el cambio de p·gina, para actualizar contenido si procede
+// Capturamos el cambio de p√°gina, para actualizar contenido si procede
 /*
 pageinit
 pagebeforeload = triggered before the load request (inside changepage) is made
@@ -826,9 +828,9 @@ pageshow = triggered when the page is shown
 */
 
 $(document).on('pagechange', function(event){
-    // Primero inicializamos la p·gina con los valores actuales si los hay, para que no se haga tan lenta la primera carga
+    // Primero inicializamos la p√°gina con los valores actuales si los hay, para que no se haga tan lenta la primera carga
     //if (typeof $php_data !== "undefined") update_controls();
     if ($php_data) update_controls();
-    // Ahora solicitamos al server el estado. Si las variables han cambiado, la propia funciÛn se encargar· de actualizar los datos, sino no har· nada
+    // Ahora solicitamos al server el estado. Si las variables han cambiado, la propia funci√≥n se encargar√° de actualizar los datos, sino no har√° nada
     send_command( "status", "0");
 });
