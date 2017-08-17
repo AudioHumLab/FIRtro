@@ -33,10 +33,10 @@ resamplingQ =3
 [path]
 ; Jack - Obligatorio
 jack_path = /usr/bin/jackd
-; Opciones de Jack.
-; Jack sobre ALSA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
+; -- Opciones de Jack. NOTA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
+; - opciones para usar Jack sobre ALSA: 
 ;jack_options = -R -dalsa -p1024
-; Jack sobre DUMMY: solo para la distribución inicial del software del FIRtro:
+; - opciones para usar Jack sobre DUMMY (tarjeta virtual de pruebas):
 jack_options = -R -ddummy -P8 -C2
 
 ; Brutefir - Obligatorio
