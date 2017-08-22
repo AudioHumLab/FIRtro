@@ -14,6 +14,7 @@
 # v2.1b:
 # - Parada de mplayer (s/audio/config) cuando no se está escuchando para ahorrar CPU%
 # - Solo paramos MPD o MOPIDY al dejar la input, al seleccionarla no hacemos nada.
+# - Revisión del uso de los canales de radio
 
 from os import path as os_path, remove as os_remove, system as os_system
 from sys import path as sys_path
@@ -25,16 +26,15 @@ sys_path.append(HOME + "/bin")
 from getconfig import *
 
 # Para recargar el canal de TDT
-import radio_channel_byName as radio_byName
+import radio_channel
 
 # Para leer el status en dinámico
 from basepaths import status_filename
 from ConfigParser import ConfigParser
 st = ConfigParser()
 def read_status():
-    global radioch, radio
+    global radio
     st.read("/home/firtro/audio/" + status_filename)
-    radioch     = st.get("inputs", "radioch")
     radio       = st.get("inputs", "radio")
 
 # Para el debug de excepciones
@@ -106,10 +106,10 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
             print "(server_input) Parando  MPLAYER."
             os_system("echo stop > /home/firtro/tdt_fifo")
         else:
-            read_status() # leemos el ultimo canal de radio escuchado
-            print "(serve_input) Resintonizando TDT: " + radioch
-            if not radio_byName.select_channel(radioch):
-                print "(serve_input) (i) ERROR resintonizando TDT: " + radioch
+            read_status() # leemos el ultimo preset de radio escuchado (v2.1b)
+            print "(serve_input) Resintonizando TDT presintonía: " + radio
+            if not radio_channel.select_preset(radio):
+                print "(serve_input) (i) ERROR resintonizando TDT presintonía: " + radio
 
     ################################################################
     #     cuerpo principal CASI como el original de FIRtro 1.0:    #
