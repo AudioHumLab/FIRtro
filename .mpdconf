@@ -70,8 +70,18 @@ audio_output {
     destination_ports    "brutefir:input-0,brutefir:input-1"
     # Forzado opcional del formarto "fs:bits:channels", admite asteriscos.
     #format          "*:*:2"
+}
+
+# Salida ALSA DUMMY para poder tener un volumen ficticio sincronizado con FIRtro
+# NOTA: se necesita tener cargado el module snd_dummy en /etc/modules
+audio_output {
+    enabled         "yes"
+    type            "alsa"
+    name            "alsa_dummy"
+    device          "hw:Dummy"
+    mixer_control   "Master"
     # Control de volumen ficticio para enlazar FIRtro con el control de volumen de MPD:
-    mixer_type "null"
+    mixer_type      "hardware"
 }
 
 # Salida de streaming para por ejemplo un navegador que quiera 
