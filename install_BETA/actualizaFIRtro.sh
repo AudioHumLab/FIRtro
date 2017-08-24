@@ -120,9 +120,9 @@ cp -r $origen/*     $destino/
 cp -r $origen/.*    $destino/
 
 
-#########################################################
+########################################################################
 # Si se ha pedido conservar las configuraciones
-#########################################################
+########################################################################
 if [ $conservar ]; then
     echo \(i\) Restaurando configuraciones de usuario
     # carpeta RAIZ:
@@ -144,6 +144,9 @@ if [ $conservar ]; then
     # carpeta WWW
     echo "www/config/config.ini"
     cp www/config/config.ini.LAST   www/config/config.ini
+########################################################################
+# Si NO se ha pedido conservar las configuraciones, se sobreescriben:
+########################################################################
 else
     # Algunos archivos de configuracion se proporcionan con extension .example:
     cp audio/status.example             audio/status
