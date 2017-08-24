@@ -8,14 +8,14 @@ import os
 import json
 from getconfig import control_port
 
-def firtro_socket (data):
+def firtro_socket (data, quiet=False):
     server="localhost"
     port=control_port
 
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        print "Connecting to",server, "port",str(port)+"..."
+        if not quiet: print "Connecting to",server, "port",str(port)+"..."
         s.connect((server,port))
     except socket.gaierror, e:
         print "Address-related error connecting to server: %s" % e
@@ -24,7 +24,7 @@ def firtro_socket (data):
         print "Connection error: %s" % e
         sys.exit(-1)
 
-    print "Connected"
+    if not quiet: print "Connected"
     try:
         # Si se pasa un parámetro, se envia al servidor y se cierra la conexión
         if data:
@@ -54,11 +54,11 @@ def firtro_socket (data):
                     print "Received data:", recibido
                     break
                 else:
-                    print "Received data:"
+                    if not quiet: print "Received data:"
                     recibido = json.loads(recibido)
                     for key, value in recibido.iteritems(): print key, value
     except: print "Unexpected error:", sys.exc_info()[0]
-    print "Closing connection..."
+    if not quiet: print "Closing connection..."
     s.close()
 
 if __name__ == "__main__":

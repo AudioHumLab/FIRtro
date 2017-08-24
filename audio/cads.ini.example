@@ -6,7 +6,7 @@
 
 # amixer scontrol level user configuration for 
 # M-Audio Delta M1010LT
-# individual 'DAC' scontrols
+# individual 'DAC' levels
 [M1010LT]
 'DAC',0 = -6.00dB
 'DAC',1 = -3.00dB
@@ -21,3 +21,4 @@
 # 'pro cards' are sound cards that allow clock reference configuration
 # Put here a list of alsa sound cards names separated by spaces
 cards = M1010LT
+

@@ -3,123 +3,135 @@
 ; - Posibilidad de declarar puertos de jack para monitor de la fuente
 ; - Preset por defecto al arranque (opcional)
 ; - Uso de Ecasound opcional para el módulo de EQ paramétrico.
-; - sintaxis mplayer2
+; 2.0b
+; - nuevas opciones, resaltado de las subsecciones en path
 
 [misc]
-; Retardo entre órdenes en segundos
+
+; -- Tope de ganancia (dB) admitada en Brutefir.
+gmax = 0
+
+; -- Tonos a cero en el arranque
+tone_defeat_on_startup = True
+
+; -- Retardo entre órdenes en segundos
 command_delay = .5
-; Opciones de la orden "beep" para indicar carga del FIRtro
+
+; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
-; Usar LCD externo (requiere servidor lcdproc en ejecucion)
+
+; -- Usar LCD externo (requiere servidor lcdproc en ejecucion)
 enable_lcd = False
-; Monitores de señal opcionales a los que también se conectará la fuente del FIRtro:
+
+; -- Monitores de señal opcionales a los que también se conectará la input de FIRtro (opcional):
+; - monitores internos (software):
 jack_internal_monitors = 
+;jack_internal_monitors = ebumeter:in.L ebumeter:in.R JackTrip:send_1 JackTrip:send_2
+; - monitores externos (tarjetas de sonido):
 jack_external_monitors = 
+;jack_external_monitors = PCH:playback_1 PCH:playback_2
+
+[speakers]
+
+loudspeaker = ejemplo2vias
 
 [presets]
-; Preset por defecto al arranque (opcional)
-default_preset = 
+
+; -- Preset por defecto al arranque (opcional)
+default_preset = plano
 
 [cards]
-; Tarjeta del Sistema y Tarjetas Externas a JACK:
+
+; -- Tarjeta del sistem, la que arranca JACK:
 ; (identidicador ALSA completo hw:Tarjeta,Device)
-system_card = hw:ALSA,0
+system_card = hw:0,0
+; -- Tarjeta adicionales 'externas' a JACK que se conectarán con resampling:
 external_cards = 
-; Resampler para tarjetas externas: alsa | zita
+;external_cards = hw:miniStreamer,0
+; -- Programa de resampling para conectar a JACK las tarjetas externas: alsa | zita
 resampler = alsa
-; calidad del resampling (opcional) (0..4 para alsa, 16..96 para zita)
+; -- Calidad del resampling (opcional) (0..4 para alsa, 16..96 para zita)
 resamplingQ =3
 
 [path]
-; Jack - Obligatorio
+
+; ---- SERVIDORES: ----
+
+; -- CONTROL SERVER -- Obligatorio
+control_path = /home/firtro/bin/server.py
+; salida en pantalla: 0 (Nada) - 1 (Minino) - 2 (Completo)
+control_output = 2
+; borrado de pantalla entre ordenes: True - False
+control_clear = False
+
+; -- CALCULO DE EQ DEL SISTEMA -- Obligatorio
+syseq_path = /home/firtro/bin/syseq.py
+
+; -- JACK -- Obligatorio
 jack_path = /usr/bin/jackd
-; -- Opciones de Jack. NOTA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
+; -- Opciones de Jack.
+;    NOTA: omitir la tarjeta y la fs (se gestionada en initfirtro.py segun la system_card indicada arriba)
 ; - opciones para usar Jack sobre ALSA: 
 ;jack_options = -R -dalsa -p1024
 ; - opciones para usar Jack sobre DUMMY (tarjeta virtual de pruebas):
 jack_options = -R -ddummy -P8 -C2
 
-; Brutefir - Obligatorio
+; -- BRUTEFIR -- Obligatorio
 brutefir_path = /usr/bin/brutefir
-brutefir_options = brutefir_config
+; Para opciones ver https://www.ludd.ltu.se/~torger/brutefir.html#config
+brutefir_options =
 brutefir_ports = brutefir:input-0 brutefir:input-1
-;brutefir_ports = ecasound:in_1 ecasound:in_2
 
-; Ecasound - Opcional
+; -- ECASOUND -- Opcional
 load_ecasound = False
 ecasound_path = /usr/bin/ecasound
 ; Indicar el numero NN de filtros paramétricos:
 ; (se necesita plantilla PEQxNN_defeat_Fs.ecs en ~/audio)
-ecasound_filters = 12
-; modo server tcpip y se le pasa un archivo de configuración con
-; -->-- entradas abiertas -->-- plugins de EQ -->-- salidas a Brutefir 
+ecasound_filters = 16
 ecasound_ports = ecasound:in_1 ecasound:in_2
+; NOTA: initfirtro.py cargará Ecasound en modo server tcpip y se le pasa un archivo de configuración con
+;       -->-- entradas abiertas -->-- plugins de EQ -->-- salidas a Brutefir 
 
-; Control server - Obligatorio
-control_path = /home/firtro/bin/server.py
-; salida en pantalla: 0 (Nada) - 1 (Minino) - 2 (Completo)
-control_output = 2
-; borrado de pantalla entre ordenes: True - False (recom. False para depurar arranque)
-control_clear = False
+; ---- FUENTES: ----
 
-; Calculo EQ de sistema - Obligatorio
-syseq_path = /home/firtro/bin/syseq.py
-
-; Mpd - Opcional
+; -- MPD -- Opcional
 load_mpd = False
 mpd_path = /usr/bin/mpd
-mpd_options =
+mpd_options = 
+; Pausar mpd si no es la input seleccionada (ahorro de %CPU):
+pause_mpd = False
+; El volumen de MPD puede gobernar el volumen de FIRtro (OjO en fase BETA):
+mpd_volume_linked2firtro = False
 
-; Client175 - Opcional
-load_client175 = False
-client175_path = /home/firtro/.client175/server.py
-client175_options = >/dev/null 2>&1
-
-; LCD_Stuff - Opcional (para mostrar info de mpd en el lcd externo)
-; Da problemas con GLIB, se sustituye por MPDLCD
-; load_lcd_stuff = False
-; lcd_stuff_path = /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff
-; lcd_stuff_options = -c /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff.conf -f 0
-
-; MPDLCD - Opcional (para mostrar info de mpd en el lcd externo)
-; https://pypi.python.org/pypi/mpdlcd
-load_mpdlcd = False
-mpdlcd_path = /usr/local/bin/mpdlcd
-mpdlcd_options =
-
-; Mplayer - Opcional
+; -- MPLAYER -- Opcional (se carga una instancia por cada servicio cdda y/o tdt)
 mplayer_path = /usr/bin/mplayer
 load_mplayer_cdda = False
 load_mplayer_tdt  = False
-; Para parar mplayer quedando en idle si la input es otra (ahorro de %CPU)
+; -- Opciones: -quiet para ver como cambia de canal, -really-quiet para no ver nada, -nolirc desactiva Lirc:
+mplayer_options = -quiet -nolirc
+; Dejar mplayer en idle si no es la input seleccionada (ahorro de %CPU):
 pause_mplayer_tdt = False
-; --quiet para ver como cambia de canal, --really-quiet para no ver nada
-cdda_options = --really-quiet --idle --slave --input=file=/home/firtro/cdda_fifo --profile=cdda
-tdt_options  = --really-quiet --idle --slave --input=file=/home/firtro/tdt_fifo  --profile=tdt
-cdda_fifo = /home/firtro/cdda_fifo
-tdt_fifo  = /home/firtro/tdt_fifo
+pause_mplayer_cdda = False
 
-; Shairport - Opcional
+; -- SHAIRPORT -- Opcional (FIRtro como altavoz AirPlay)
 load_shairport = False
-shairport_path = /home/firtro/bin_custom/shairport
-; If no Pulseaudio:
-shairport_options = -a Firtro -o alsa -- d jack
-; If Pulseaudio:
-;shairport_options = -a Firtro -o pulse
+;shairport_path = /home/firtro/bin_custom/shairport
+shairport_path = shairport-sync
+shairport_options = -a FirtroSalon -o pulse
 
-; Squeezeslave - Opcional
+; -- SQUEEZESLAVE --  Opcional
 load_squeezeslave = False
 squeezeslave_path = /home/firtro/.squeezeslave/squeezeslave
 squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 
-; JackTrip - Opcional
-load_jacktrip = False
-; IMPORTANTE instalar la última versión JackTrip de GitHub (ver Guia del Usuario)
-jacktrip_path = /usr/bin/jacktrip
-; options: -s (server mode) / -c serverHostName (client mode)
-jacktrip_options = -s -z -q8 -r2 --nojackportsconnect
+; -- MOPIDY -- Opcional (A music server which can play music from Spotify and from your local hard drive)
+load_mopidy = False
+mopidy_path = /usr/bin/mopidy
+mopidy_options = 
+; Pausar mopidy si no es la input seleccionada (ahorro de %CPU):
+pause_mopidy = False
 
-; Netjack - Opcional
+; -- NETJACK -- Opcional
 load_netjack = False
 ; --- netjack2 (es la opción preferida):
 netjack_path = jack_load
@@ -128,32 +140,52 @@ netjack_options = netmanager
 ;netjack_path = jack_netsource
 ;netjack_options = -H mbp.local
 
-; Lirc - Opcional
+; -- JACKTRIP -- Opcional
+load_jacktrip = False
+; IMPORTANTE instalar la última versión JackTrip de GitHub (ver Guia del Usuario)
+jacktrip_path = /usr/bin/jacktrip
+; options: -s (server mode) / -c serverHostName (client mode)
+jacktrip_options = -c rpi2fir -r 2 --nojackportsconnect
+
+; ---- CONTROL: ----
+
+; -- LIRC -- Opcional (control de FIRtro por IR)
 load_irexec = False
 irexec_path = /usr/bin/irexec
 irexec_options = -d
 
-; Mopidy - Opcional (Mopidy is a music server which can play music from Spotify and from your local hard drive.)
-load_mopidy = False
-mopidy_path = /usr/bin/mopidy
-mopidy_options = 
+; -- CLIENT175 -- Opcional
+load_client175 = False
+client175_path = /home/firtro/.client175/server.py
+client175_options = >/dev/null 2>&1
+
+; ---- DISPLAYS: ----
+
+; -- LCD_STUFF -- Opcional (para mostrar info de mpd en el lcd externo)
+; Da problemas con GLIB, se sustituye por MPDLCD
+; load_lcd_stuff = False
+; lcd_stuff_path = /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff
+; lcd_stuff_options = -c /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff.conf -f 0
+
+; -- MPDLCD -- Opcional (para mostrar info de mpd en el lcd externo)
+; https://pypi.python.org/pypi/mpdlcd
+load_mpdlcd = False
+mpdlcd_path = /usr/local/bin/mpdlcd
+mpdlcd_options =
 
 [net]
-;dirección IP del FIRtro
-ip_address = 192.168.2.1
+;-- dirección IP del FIRtro
+ip_address = 192.168.1.94
 
-;dirección y puerto de la interfaz de brutefir
+;-- dirección y puerto de la interfaz de brutefir
 bfcli_address = 127.0.0.1
 bfcli_port = 3000
 
-;dirección y puerto del script de control.
+;-- dirección y puerto del script de control.
 ;0.0.0.0 escucha en todos los interfaces de red
 ;127.0.0.1 escucha solo conexiones locales
 control_address = 0.0.0.0
 control_port = 9999
-
-[speakers]
-loudspeaker = ejemplo1via
 
 [equalizer]
 ;Nombres del archivo de frecuencias, curvas de loudnes, tonos

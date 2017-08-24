@@ -1,26 +1,30 @@
+[room EQ]
+system_eq = True
+room_gain = 3.0
+house_atten = 2.0
+peq = cd+sub
+peqdefeat = False
+drc_eq = 0
+
 [recording EQ]
+loudness_track = True
+loudness_ref = 7.0
 treble = 0.0
 bass = 0.0
 
 [level]
 replaygain_track = False
-level = -21.0
-headroom = 26.2
-balance = 0.0
+level = -24.0
+headroom = 26.0
+balance = 0
 
 [general]
 fs = 44100
 clock = card
-preset = plano_y_peq
+preset = plano
 filter_type = lp
 muted = False
 polarity = +
-peq = off
-drc_eq = 0
-
-[loudness EQ]
-loudness_track = True
-loudness_ref = 0.0
 
 [inputs]
 radio_prev = 3
@@ -28,4 +32,3 @@ radio = 2
 input = analog
 resampled = no
 mono = off
-
