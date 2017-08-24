@@ -73,9 +73,7 @@ Se usa:
         mixer_control   "Master"
     }
 
-Fuentes:
-Apuntes de **rripio**
-https://github.com/therealmuffin/synchronator/blob/master/INSTALL_MANUAL.md
+Fuentes: apuntes de **rripio** y https://github.com/therealmuffin/synchronator/blob/master/INSTALL_MANUAL.md
 
 - `audio/config`, `getconfig.py` 
 
