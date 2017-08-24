@@ -55,11 +55,11 @@ Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propaga
 
 - `/etc/modules`
 
-Se incluye snd_dummy
+Se incluye **snd_dummy**
 
 - `home/USER/.mpdconf`
 
-Se descarta mixer_type = null no funciona en la salida jack:
+Se descarta `mixer_type = null` no funciona en la salida jack:
 
     audio_output{type "jack" .... .... mixer_type  "null"}
 
