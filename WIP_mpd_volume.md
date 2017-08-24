@@ -53,9 +53,13 @@ Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propaga
 
 ## Cambios
 
+- `/etc/modules`
+
+Se incluye snd_dummy
+
 - `home/USER/.mpdconf`
 
-Se descarta:
+Se descarta mixer_type = null no funciona en la salida jack:
 
     audio_output{type "jack" .... .... mixer_type  "null"}
 
@@ -69,6 +73,9 @@ Se usa:
         mixer_control   "Master"
     }
 
+Fuentes:
+Apuntes de **rripio**
+https://github.com/therealmuffin/synchronator/blob/master/INSTALL_MANUAL.md
 
 - `audio/config`, `getconfig.py` 
 
