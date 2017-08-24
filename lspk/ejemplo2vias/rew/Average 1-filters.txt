@@ -1,0 +1,23 @@
+Este archivo wav procede de Room EQ Wizard --> Export IR as wav (32bit mono)
+
+Esto es lo que dice sox de este archivo
+
+$ sox --info Average\ 1-filters.wav
+
+Input File     : 'Average 1-filters.wav'
+Channels       : 1
+Sample Rate    : 44100
+Precision      : 32-bit
+Duration       : 00:00:02.97 = 131072 samples = 222.912 CDDA sectors
+File Size      : 524k
+Bit Rate       : 1.41M
+Sample Encoding: 32-bit Signed Integer PCM
+
+
+Es sabido que estos archivos con procesables con la utilidad trimwav2pcm de DSD
+que los convierte en .pcm utilizables por Brutefir.
+
+octave:1>  trimwav2pcm <nombrearchivo> (sin extensión)
+
+Por tanto, si queremos sintetizar FIRs con rePhase deberemos usar wav 32bit LPCM.
+

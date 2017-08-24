@@ -1,0 +1,138 @@
+# ------------------------------
+# ------ GENERAL SETTINGS ------
+# ------------------------------
+
+sampling_rate:     44100;
+
+filter_length:     8192,4;
+float_bits:        32;
+
+overflow_warnings: true;
+allow_poll_mode:   false;
+monitor_rate:      true;
+powersave:         -80;
+lock_memory:       true;
+show_progress:     false;
+
+# -------------------------
+# --------  I/O -----------
+# -------------------------
+
+input "in_L", "in_R" {
+	# Sin conexiones a priori en la entrada:
+	device: "jack" { };
+	sample: "AUTO";
+	channels: 2/0,1;
+};
+
+output "fr_L", "fr_R" {
+	# mapeo de las 2 salidas:
+	device: "jack" { ports:
+	"system:playback_1"/"fr_L", "system:playback_2"/"fr_R";
+	};
+	sample:   "AUTO";
+	channels: 2/0,1;
+	maxdelay: 1000;
+	dither:   true;
+	delay:    0,0; # 'samples' that are equivalent in 'ms' to 0,0
+};
+
+# --------------------------------
+# ----- EQ & LOUDNESS COEFFs -----
+# --------------------------------
+
+coeff "c_eq0" {
+	filename: "dirac pulse";
+	shared_mem: true;
+	blocks: 1; # suficiente para hacer curvas de EQ suave
+};
+coeff "c_eq1" {
+	filename: "dirac pulse";
+	shared_mem: true;
+	blocks: 1; # suficiente para hacer curvas de EQ suave
+};
+
+# --------------------------------
+# ---------- DRC COEFFs ----------
+# --------------------------------
+
+coeff "c_drc1_R" {
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1/R_drc_pba1.pcm";
+	format:      "FLOAT_LE";
+	shared_mem:  false;
+	attenuation: -1.0;
+};
+coeff "c_drc1_L" {
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1/L_drc_pba1.pcm";
+	format:      "FLOAT_LE";
+	shared_mem:  false;
+	attenuation: -1.0;
+};
+
+# --------------------------------
+# ---------- XO COEFFs -----------
+# --------------------------------
+
+coeff "c_lp-fr1" {
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/lp-fr.pcm";
+	format:      "FLOAT_LE";
+	shared_mem:  false;
+	attenuation: -0.58;
+};
+coeff "c_mp-fr1" {
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/mp-fr.pcm";
+	format:      "FLOAT_LE";
+	shared_mem:  false;
+	attenuation: -0.58;
+};
+
+# coeficiente comodín para vias full range sin filtrado
+coeff "c_dirac-pulse" {
+	filename:    "dirac pulse";
+	format:      "FLOAT_LE";
+	shared_mem:  false;
+	attenuation: 0.0;
+};
+
+# ------------------------------
+# --------  CONVOLVER   --------
+# ------------------------------
+
+# --- EQ filtering:
+
+filter "f_eq_L" {
+	from_inputs:  "in_L";
+	to_filters:   "f_drc_L";
+	coeff:        "c_eq0";
+};
+filter "f_eq_R" {
+	from_inputs:  "in_R";
+	to_filters:   "f_drc_R";
+	coeff:        "c_eq1";
+};
+
+# --- DRC filtering:
+
+filter "f_drc_L" {
+	from_filters: "f_eq_L";
+	to_filters:   "f_fr_L";
+	coeff:        -1;
+};
+filter "f_drc_R" {
+	from_filters: "f_eq_R";
+	to_filters:   "f_fr_R";
+	coeff:        -1;
+};
+
+# --- XOVER filtering:
+
+filter "f_fr_L" {
+	from_filters: "f_drc_L";
+	to_outputs:   "fr_L"/0.0/1;
+	coeff:        "c_lp-fr1";
+};
+filter "f_fr_R" {
+	from_filters: "f_drc_R";
+	to_outputs:   "fr_R"/0.0/1;
+	coeff:        "c_lp-fr1";
+};
