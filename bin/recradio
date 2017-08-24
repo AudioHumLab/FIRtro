@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#Config
+CHANNELS=/home/firtro/.tzap/channels.conf
+DIR=/mnt/hd_usb/Music/Radio
+DATE=$(date +%g%m%d)
+
+# Apaga la radio y libera la tarjeta:
+# Identificar el usuario que lanzó el FIRtro,
+# basándose en el usuario de jackd
+# 	Si ha quedado encendida la radio:
+# echo stop > /home/$(ps -C jackd -o user --no-headers)/tdt_fifo
+
+CONTROL=`ps -ufirtro -o pid,args |grep tdt|grep mplayer2|wc -l`
+if [ $CONTROL -gt 0 ] ; then
+	#echo stop > /home/firtro/tdt_fifo
+	echo stop > ~/tdt_fifo
+fi
+#	Si había algo grabando:
+killall tzap
+
+sleep 5
+
+i=0
+argv=()
+for arg in "$@"; do
+    argv[$i]="$arg"
+    i=$((i + 1))
+done
+
+PID=$(grep -wi "$1" $CHANNELS | cut -d: -f12)
+
+# Comentar la linea que corresponda según la versión de ts2es instalada
+
+# Version antigua de ts2es
+tzap -o - -c $CHANNELS -t $((60*$2)) "$1" | ts2es $PID > $DIR/_$3-$DATE.mp2
+
+# Version moderna de ts2es
+#tzap -o - -c $CHANNELS -t $((60*$2)) "$1" | ts2es -pid $PID -stdin -stdout > $DIR/_$3-$DATE.mp2

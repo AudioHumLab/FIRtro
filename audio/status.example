@@ -1,0 +1,34 @@
+[room EQ]
+system_eq = True
+room_gain = 3.0
+house_atten = 2.0
+peq = cd+sub
+peqdefeat = False
+drc_eq = 0
+
+[recording EQ]
+loudness_track = True
+loudness_ref = 7.0
+treble = 0.0
+bass = 0.0
+
+[level]
+replaygain_track = False
+level = -24.0
+headroom = 26.0
+balance = 0
+
+[general]
+fs = 44100
+clock = card
+preset = plano
+filter_type = lp
+muted = False
+polarity = +
+
+[inputs]
+radio_prev = 3
+radio = 2
+input = analog
+resampled = no
+mono = off

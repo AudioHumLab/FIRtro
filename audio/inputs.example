@@ -1,0 +1,76 @@
+; Cada sección de este archivo será una entrada de FIRtro
+; Las opciones admitidas en cada sección son:
+;
+; in_ports:   puerto1 puerto2       Nombre de los puertos de lectura que ofrece la fuente en jack, 
+;                                   separados por espacios (*)
+; gain:       float(dB)             Ganancia a añadir a la entrada
+; xo:         [lp|mp]               Tipo de crossover por defecto al conectar
+; fs:         [44100|48000|...]     Fs deseada (deben existir filtros en la carpeta del altavoz)
+; clock:      [card|word|spdif]     Referencia para tarjetas con clock externo (ej:1010LT)
+; resampled:  [no|44100|48000|...]  Para fuentes a través de tarjetas resampleadas añadidas a jack
+; lirc_event: ID del evento de LIRC para el mando a distancia IR infrarrojos
+;
+; (*) Información sobre los nombres de los puertos de las distintas fuentes:
+;
+; - MPD son los definidos en ~/.mpdconf,
+;   combinando client_name + ':' + source_ports, por ejemplo: mpd_jack:out_0 mpd_jack:out_1
+;
+; - MPLAYER para TDT o CDDA son los definidos en ~/.mplayer/config,
+;   sustituyendo 'noconnect' por 'out_0' y 'out_1', por ejemplo: mplayer_tdt:out_0 mplayer_tdt:out_1
+;
+; - PULSEAUDIO no son definibles por el usuario.
+;
+; - TARJETA DE SONIDO principal (la gobernada por JACK) son:
+;       system:capture_X 
+;
+; - TARJETAS DE SONIDO adicionales conectadas a JACK mediante resampling aparecerán como:
+;       nombreALSA:capture_X
+;
+;   Nota: en caso de duda, podemos consultarlos con la orden jack_lsp
+;
+
+[analog]
+in_ports:   system:capture_1 system:capture_2
+fs:         44100
+clock:      card
+gain:       0.0
+xo:         lp
+lirc_event:     
+resampled:  no
+
+[analog_mp]
+in_ports:   system:capture_1 system:capture_2
+fs:         44100
+clock:      card
+gain:       0.0
+xo:         mp
+lirc_event:     
+resampled:  no
+
+[pulse]
+in_ports:   pulse_sink:front-left pulse_sink:front-right
+fs:         
+clock:      card
+gain:       0.0
+xo:         lp
+lirc_event:     
+resampled:  no
+
+[mpd]
+in_ports:   mpd_jack:out_0 mpd_jack:out_1
+fs:         
+clock:      card
+gain:       0.0
+xo:         lp
+lirc_event:     "0000000000001799 0 Music Hauppauge_350"
+resampled:  no
+
+[tdt]
+in_ports:   mplayer_tdt:out_0 mplayer_tdt:out_1
+fs:         
+clock:      card
+gain:       0.0
+xo:         lp
+lirc_event:
+resampled:  no
+
