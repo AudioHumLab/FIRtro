@@ -1,0 +1,10 @@
+[playlist]
+default_track_name = Pista de CD
+previous_name = _previous
+playlist_name = _cdda.xspf
+#playlist_name = _cdda.pls
+playlist_path = /home/firtro/playlists/
+cddb_path = /home/firtro/.cddb/
+
+[mpd]
+port = 6600
