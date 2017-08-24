@@ -86,11 +86,11 @@ cp audio/radio              audio/radio.LAST
 cp audio/cards.ini          audio/cards.ini.LAST
 cp audio/config_mcd         audio/config_mcd.LAST
 cp audio/config_media       audio/config_media.LAST
-rm audio/asound*LAST        # por si hubiera anteriores no los replicamos
+rm -f audio/asound*LAST     # por si hubiera anteriores no los replicamos
 for file in audio/asound* ; do
     mv "$file" "$file.LAST"
 done
-rm audio/PEQx*LAST          # por si hubiera anteriores no los replicamos
+rm -f audio/PEQx*LAST       # por si hubiera anteriores no los replicamos
 for file in audio/PEQx* ; do
     mv "$file" "$file.LAST"
 done
