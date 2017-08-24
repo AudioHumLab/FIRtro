@@ -39,7 +39,7 @@ Nuevo módulo residente **`client_mpd.py`** que escuchará al server MPD y en ca
 
 El módulo `server_process.py` de FIRtro actualizará el 'volume' de MPD cuando el usuario reajuste el 'level' de FIRtro. Basta con cargar `client_mpd` en server_process.py para poder actualizar a MPD.
 
-NOTA: aunque la opción mpd_volume_linked2firtro = False en audio/config los cambios de nivel en FIRtro se verán reflejados en el indicador de volumen del cliente MPD.
+**NOTA:** aunque la opción `mpd_volume_linked2firtro = False` en `audio/config` los cambios de nivel en FIRtro se verán reflejados en el indicador de volumen del cliente MPD.
 
 ### Protección antibucle
 
