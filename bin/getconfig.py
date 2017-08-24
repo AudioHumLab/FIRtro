@@ -53,7 +53,7 @@ ecasound_ports   = config.get('path', 'ecasound_ports')
 load_mpd = config.getboolean('path', 'load_mpd')
 mpd_path = config.get('path', 'mpd_path')
 mpd_options = config.get('path', 'mpd_options')
-mpd_volume_linked2firtro = config.get('path', 'mpd_volume_linked2firtro')
+mpd_volume_linked2firtro = config.getboolean('path', 'mpd_volume_linked2firtro')
 pause_mpd = config.getboolean('path', 'pause_mpd')
 
 load_mplayer_tdt  = config.getboolean('path', 'load_mplayer_tdt')
