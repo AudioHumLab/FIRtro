@@ -2,12 +2,16 @@
 ## https://www.musicpd.org/doc/user ##
 ######################################
 
-# --- DIRECTORIOS ---
+# --- DIRECTORIO DE LA MUSICA ---
 music_directory         "/home/firtro/music"
-# Opcion de listas en local o compartidas en una carpeta de red:
+
+# --- DIRECTORIO DE PLAYLISTS ---
 playlist_directory      "/home/firtro/.config/mpd/playlists"
-#playlist_directory      "/mnt/nas_media/playlists/"
-# ~/.config/mpd es una carpeta compatible con instalaciones Linux actuales ...:
+# Opcion de listas en local o compartidas en una carpeta de red:
+#playlist_directory      "/mnt/path_to_shared_folder/playlists/"
+
+# --- DIECTORIO PARA USO INTERNO DE MPD
+# NOTA: ~/.config/mpd es una carpeta compatible con instalaciones MPD en Linux actuales.
 db_file                 "/home/firtro/.config/mpd/database"
 log_file                "/home/firtro/.config/mpd/log"
 pid_file                "/home/firtro/.config/mpd/pid"
@@ -22,7 +26,8 @@ bind_to_address         "any"
 # escucha socket unix:
 bind_to_address         "/home/firtro/.config/mpd/socket"
 
-# --- USUARIO que mostrará MPD al ejecutarse desde un usuario root (no interesa en FIRtro)
+# --- USUARIO que mostrará MPD al ejecutarse desde un usuario root
+# NOTA esto no interesa en FIRtro
 #user                    "firtro"
 #group                   "audio"
 
@@ -45,7 +50,7 @@ input {
 }
 
 # --- DECODERS ---
-# (ya suelen venir enabled "yes" en el programa mpd compilado.
+# nota: ya suelen venir habilitados en el binario mpd
 #decoder {
 #    plugin "flac"
 #    enabled "yes"
@@ -56,8 +61,7 @@ input {
 #}
     
 # --- SALIDAS ---
-
-# Salida a FIRtro (JACK)
+# --- Salida a FIRtro (JACK)
 audio_output {
     enabled         "yes"
     type            "jack"
@@ -70,11 +74,18 @@ audio_output {
     destination_ports    "brutefir:input-0,brutefir:input-1"
     # Forzado opcional del formarto "fs:bits:channels", admite asteriscos.
     #format          "*:*:2"
-    # Control de volumen ficticio para enlazar FIRtro con el control de volumen de MPD:
-    mixer_type "null"
 }
-
-# Salida de streaming para por ejemplo un navegador que quiera 
+# --- Salida ALSA DUMMY para poder tener un volumen ficticio sincronizado con FIRtro
+#     NOTA: se necesita tener cargado el module snd_dummy en /etc/modules
+audio_output {
+    enabled         "yes"
+    type            "alsa"
+    name            "alsa_dummy"
+    device          "hw:Dummy"
+    mixer_control   "Master"
+    mixer_type      "hardware"
+}
+# --- Salida de streaming para por ejemplo un navegador que quiera 
 # conectarse al servidor MPD
 audio_output {
     enabled         "no"
@@ -94,11 +105,9 @@ audio_output {
 }
 
 # --- RESAMPLING para adecuarse a la salida ---
-
 # Opcion standard:
 samplerate_converter       "Best Sinc Interpolator"
 # samplerate_converter       "Medium Sinc Interpolator"
-
 # Opcion SOX:
 #samplerate_converter        "soxr high"
 #samplerate_converter        "soxr very high"

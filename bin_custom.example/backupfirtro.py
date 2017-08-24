@@ -15,8 +15,12 @@
         La opcion "-dated" permite añadir un "comentario" que se
         añadirá con la fecha al nombre de la carpeta de destino.
 """
+#
 # v1.0 no se considera comprimir archivos ya que un snapshot
 # ocupa tan solo unos 20Mb aprox.
+#
+# v1.? pendiente considerar si es más adecuado usar 'Popen' en lugar de 'call'
+#
 
 from datetime import datetime
 from os import environ
