@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# initfirtro.py se encarga de hacer stop.
-#python /home/firtro/bin/stopfirtro.py
-
-python /home/firtro/bin/initfirtro.py
-
-exit
