@@ -1,0 +1,18 @@
+Filter Settings file
+
+Room EQ V5,01
+Dated: 25-sep-2016 19:48:47
+
+Notes:target flat 87.5dB
+
+Equaliser: DCX2496
+L fron=75 lat=75 terr_c
+Filter  1: ON  BP       Fc     296 Hz  Gain   8,2 dB  Q  2,00
+Filter  2: ON  BP       Fc     260 Hz  Gain -13,2 dB  Q 10,00
+Filter  3: ON  BP       Fc     419 Hz  Gain  -8,2 dB  Q  6,30
+Filter  4: ON  BP       Fc   3.310 Hz  Gain   2,2 dB  Q  1,40
+Filter  5: ON  BP       Fc     161 Hz  Gain  -8,6 dB  Q 10,00
+Filter  6: ON  BP       Fc   7.320 Hz  Gain   2,8 dB  Q  2,50
+Filter  7: ON  BP       Fc    54,4 Hz  Gain  -5,7 dB  Q 10,00
+Filter  8: ON  BP       Fc   1.090 Hz  Gain  -2,2 dB  Q  3,20
+

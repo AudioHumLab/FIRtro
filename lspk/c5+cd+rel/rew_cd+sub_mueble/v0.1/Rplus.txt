@@ -1,0 +1,30 @@
+Filter Settings file
+
+Room EQ V5,17
+Dated: 28-mar-2017 21:20:37
+
+Notes:
+
+Equaliser: Generic
+mar 28 21:09:32
+Filter  1: ON  PK       Fc    25,7 Hz  Gain  -6,2 dB  Q 10,30
+Filter  2: ON  PK       Fc    45,6 Hz  Gain  -6,5 dB  Q  8,97
+Filter  3: ON  PK       Fc    83,5 Hz  Gain  -5,4 dB  Q 11,79
+Filter  4: ON  PK       Fc     180 Hz  Gain  -3,3 dB  Q  7,49
+Filter  5: ON  PK       Fc     304 Hz  Gain  -3,0 dB  Q  4,00
+Filter  6: ON  None   
+Filter  7: ON  None   
+Filter  8: ON  None   
+Filter  9: ON  None   
+Filter 10: ON  None   
+Filter 11: ON  None   
+Filter 12: ON  None   
+Filter 13: ON  None   
+Filter 14: ON  None   
+Filter 15: ON  None   
+Filter 16: ON  None   
+Filter 17: ON  None   
+Filter 18: ON  None   
+Filter 19: ON  None   
+Filter 20: ON  None   
+

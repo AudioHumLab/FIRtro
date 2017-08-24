@@ -1,0 +1,9 @@
+Cajas C5 a lo largo del salón, sin filtrar (delta dirac)
+
+Puntos cucha a 3m de las cajas.
+
+Tomas multipuntoescucha
+
+EQ sobre la FR promediada.
+
+

@@ -1,0 +1,71 @@
+; Ejemplo:
+
+; [preset_N]
+; descrip   = texto descriptivo
+
+;     Ecualizador paramétrico PEQ
+; peq       = nombre del archivo .peq (sin la extensión) | off
+
+;     Filtrado DRC:
+; drc       = nombre del pcm sin el prefijo del canal ni la extensión | off
+
+;     Opción multivía:
+; lo        = nombre del pcm sin el prefijo de la fase ni la extensión
+; mi        = nombre del pcm sin el prefijo de la fase ni la extensión
+; hi        = nombre del pcm sin el prefijo de la fase ni la extensión
+; lo_delay  = delay de la via en ms
+; mi_delay  = delay de la via en ms
+; hi_delay  = delay de la via en ms
+
+;     Opción full range:
+; fr        = nombre del pcm sin el prefijo de la fase ni la extensión
+;             o "dirac pulse" para no filtrar la vía
+; fr_delay  = delay de la via en ms
+
+;     Opción subwoofer:
+; sw        = nombre del pcm sin el prefijo de la fase ni la extensión
+; sw_delay  = delay de la via en ms
+
+
+[preset_1]
+descrip     = filtroDirac
+fr          = dirac
+fr_delay    = 0
+peq         = peq1
+drc         = off
+balance     = 0
+
+[preset_2]
+descrip     = filtroPcm
+fr          = fr 
+fr_delay    = 0
+peq         = off
+drc         = _drc_p1
+balance     = 0
+
+[preset_3]
+descrip     = cd+sub(mueble)
+lo          = lo_arp
+lo_delay    = 0
+hi          = hi_celestion
+hi_delay    = 0
+sw          = sw_subRELterraza
+sw_delay    = 7.3
+peq         = cd+sub(mueble)
+;drc         = RRreq CD mueble
+drc         = off
+balance     = 0
+
+[preset_4]
+descrip     = cd+sub(front_1m)
+lo          = lo_arp
+lo_delay    = 0
+hi          = hi_celestion
+hi_delay    = 0
+sw          = sw_subRELterraza
+sw_delay    = 7.3
+peq         = CD+sub(front_1m)
+;drc         = RRreq CD front_1m
+drc         = off
+balance     = 0
+
