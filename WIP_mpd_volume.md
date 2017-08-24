@@ -39,6 +39,8 @@ Nuevo módulo residente **`client_mpd.py`** que escuchará al server MPD y en ca
 
 El módulo `server_process.py` de FIRtro actualizará el 'volume' de MPD cuando el usuario reajuste el 'level' de FIRtro. Basta con cargar `client_mpd` en server_process.py para poder actualizar a MPD.
 
+NOTA: aunque la opción mpd_volume_linked2firtro = False en audio/config los cambios de nivel en FIRtro se verán reflejados en el indicador de volumen del cliente MPD.
+
 ### Protección antibucle
 
 Los cambios en MPD se traducen por parte de `client_mpd.py` en términos de `gain` en FIRtro.
@@ -51,16 +53,41 @@ Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propaga
 
 ## Cambios
 
-`home/USER/.mpdconf`: _audio_output{type "jack" .... .... mixer_type  "null"}_
+- `home/USER/.mpdconf`
 
-`audio/config`, `getconfig.py`: se incluye la opción `mpd_volume_linked2firtro = True|False`
+Se descarta:
 
-`client_mpd.py`: nuevo script daemon, incluye _import client.py_ para hablar con FIRtro.
+    audio_output{type "jack" .... .... mixer_type  "null"}
 
-`ìnitfirtro.py`, `stopfirtro.py`: gestión de _client_mpd.py_
+Se usa:
 
-`server_process.py`: se incluye _import client_mpd_ para hablar con MPD cuando el usuario reajusta '`level`'
+    audio_output {
+        type            "alsa"
+        name            "alsa_dummy"
+        mixer_type      "hardware"
+        mixer_device    "hw:Dummy"
+        mixer_control   "Master"
+    }
 
-`python-mpd`: nuevo paquete Debian a instalar.
+
+- `audio/config`, `getconfig.py` 
+
+Se incluye la opción `mpd_volume_linked2firtro = True|False`
+
+- `client_mpd.py`
+
+Nuevo script daemon, incluye `import client.py` para hablar con FIRtro.
+
+- `ìnitfirtro.py`, `stopfirtro.py`
+
+Gestión de `client_mpd.py`
+
+- `server_process.py`
+
+Se incluye `import client_mpd` para hablar con MPD cuando el usuario reajusta 'level'
+
+- `python-mpd`
+
+Nuevo paquete Debian a instalar.
 
 
