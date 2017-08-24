@@ -1,0 +1,21 @@
+#!/bin/bash
+
+jack_disconnect system:capture_1 brutefir:input-0 > /dev/null 2>&1
+jack_disconnect system:capture_1 brutefir:input-1 > /dev/null 2>&1
+jack_disconnect system:capture_2 brutefir:input-0 > /dev/null 2>&1
+jack_disconnect system:capture_2 brutefir:input-1 > /dev/null 2>&1
+
+jack_disconnect system:capture_1 ecasound:in_1 > /dev/null 2>&1
+jack_disconnect system:capture_1 ecasound:in_2 > /dev/null 2>&1
+jack_disconnect system:capture_2 ecasound:in_1 > /dev/null 2>&1
+jack_disconnect system:capture_2 ecasound:in_2 > /dev/null 2>&1
+
+##### BRUTEFIR
+## conectamos la señal al canal R
+#jack_connect    system:capture_1 brutefir:input-1 > /dev/null 2>&1
+
+#### ECASOUND
+# conectamos la señal al canal R
+jack_connect    system:capture_1 ecasound:in_2 > /dev/null 2>&1
+
+

@@ -1,42 +1,25 @@
 [tasks]
-#   HH:MM  DoWeek   DoMonth   Month    COMMAND (if more than one please use a script)
-1 = 03:00  1        *         *        /home/firtro/bin_custom/otracosa.sh
-2 = 07:30  1-5      *         *        /home/firtro/bin_custom/alarmclock.sh
-
-[reles]
-1 = nousado
-2 = amplis
-3 = nousado
-4 = nousado
 
 # Regleta USB
+# toma   = etiqueta
 [regleta]
-#toma   = etiqueta
-1       = CD
-2       = FM
-3       = CO2
-4       = AMP
-
+1 = CD
+2 = FM-AMP2
+3 = CO2
+4 = AMP
 
 # BACKUP script configuration
 [backup_origins]
 firtro = /home/firtro
 [backup_destinations]
-mirror = /media/sda1/firtroMirror
-dated  = /media/sda1/firtroDated
+mirror = /media/sdb1/salon/firtroMirror
+dated  = /media/sdb1/salon/firtroDated
+
 [backup_patterns]
-exclude = *.pyc .aptitude/ .config/ .cache/ .ipython/ .local/ .mpd/ .ncmpcpp/ .client175 music/ tmp/ www/music/ Downloads/ Descargas/ Documents /Documentos /Images /Imágenes /Escritorio /Desktop /Música /Music /Public /Público /Video /Vídeos /Templates /Plantillas /.compiz /.dbus /.gnupg .lirc /.mozilla /.nano* /.pki /.putty /.gconf
+exclude = .X* .x* .ICE* .cddb* .ssh* .less* .lirc* .selected* .git* *.pyc .aptitude/ .config/ .cache/ .ipython/ .local/ .mpd/ .ncmpcpp/ .client175 music/ tmp/ www/music/ Downloads/ Descargas/ /Documents /Documentos /Images /Imágenes /Escritorio /Desktop /Música /Music /Public /Público /Video /Vídeos /Templates /Plantillas /.compiz /.dbus /.gnupg .lirc /.mozilla /.nano* /.pki /.putty /.gconf
 
-
-[ac3downmix]
-# AC3 5.1 to stereo downmix
-#     L    R
-FL = 1.0  0.0
-FR = 0.0  1.0
-SL = 0.5  0.0
-SR = 0.0  0.5
-CE = 0.7  0.7
-SW = 1.0  1.0
-
-
-
+# Canales TDT FAVORITOS:
+[tdtradio]
+1 = Radio Nacional
+2 = Radio Clasica HQ MPA
+3 = Radio Tres HQ

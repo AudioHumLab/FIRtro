@@ -126,6 +126,10 @@
         if ($value == "on") $json=firtro_socket ("syseq");
         else $json=firtro_socket ("syseq_off");
         }
+    elseif($command == 'peq_switch') {
+        if ($value == "on") $json=firtro_socket ("peq_reload");
+        else $json=firtro_socket ("peq_defeat");
+        }
     elseif(substr($command,0,3) == 'drc') {
         $value=substr($command, -1);
         $json=firtro_socket ("drc $value");

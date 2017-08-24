@@ -67,16 +67,16 @@
                 <div data-role="content" id="level_display" class="display display2 ui-corner-all">
                     <div class="ui-grid-solo" id="level_display1">Waiting...</div>
                     <div class="ui-grid-a">
-                        <div class="ui-block-a" id="level_display53" style="max-width:160px; min-width:130px"></div><!--mono-->
-                        <div class="ui-block-b" id="level_display51"></div><!--input-->
-                        <div class="ui-block-a" id="level_display32" style="max-width:160px; min-width:130px"></div><!--syseq-->
-                        <div class="ui-block-b" id="level_display22"></div><!--loudness-->
+                        <div class="ui-block-a" id="level_display21" style="max-width:160px; min-width:130px"></div><!--fs-->
+                        <div class="ui-block-b" id="level_display22"></div><!--louness-->
                         <div class="ui-block-a" id="level_display31" style="max-width:160px; min-width:130px"></div><!--drc-->
-                        <div class="ui-block-b" id="level_display55"></div><!--peq-->
+                        <div class="ui-block-b" id="level_display32"></div><!--syseq-->
                         <div class="ui-block-a" id="level_display41" style="max-width:160px; min-width:130px"></div><!--bass-->
                         <div class="ui-block-b" id="level_display42"></div><!--treble-->
-                        <div class="ui-block-a" id="level_display21" style="max-width:160px; min-width:130px"></div><!--fs-->
-                        <div class="ui-block-b" id="level_display52" style="max-width:160px; min-width:130px"></div><!--ftype-->
+                        <div class="ui-block-a" id="level_display51" style="max-width:160px; min-width:130px"></div><!--input-->
+                        <div class="ui-block-b" id="level_display52"></div><!--ftype-->
+                        <div class="ui-block-a" id="level_display53" style="max-width:160px; min-width:130px"></div><!--mono-->
+                        <div class="ui-block-b" id="level_display55" style="max-width:160px; min-width:130px"></div><!--peq-->
                     </div>
                   <div class="ui-grid-solo" id="level_display54" style="max-width:6400px; min-width:320px"></div><!--preset-->
                   

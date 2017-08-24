@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pkill -f shairport
+sleep .5
+#/usr/bin/python /usr/bin/mopidy > /dev/null 2>&1 &
+/home/firtro/.shairport/shairport -a Firtro_Salon > /dev/null 2>&1 &
+
+
