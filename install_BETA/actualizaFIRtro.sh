@@ -95,7 +95,7 @@ for file in audio/PEQx* ; do
     mv "$file" "$file.LAST"
 done
 # carpeta WWW
-cp www/config/config.ini    www/config/config.ini.LAST
+cp www/config/config.ini    audio/www_config.ini.LAST # en audio/ pq www/ desaparecerá
 
 #########################################################
 # Limpieza
@@ -105,7 +105,7 @@ rm CHANGES*
 rm LICENSE*
 rm README*
 rm WIP*
-rm -r bin/
+rm -rf bin/ # -f porque pueden haber *.pyc protegidos
 rm -r doc/
 rm -r www/
 rm .brutefir_c*
@@ -135,15 +135,16 @@ if [ $conservar ]; then
     mv .mplayer/config.LAST         .mplayer/config
     echo ".mplayer/channels.conf"
     mv .mplayer/channels.conf.LAST  .mplayer/channels.conf
+    # carpeta WWW
+    echo "www/config/config.ini"
+    mv audio/www_config.ini.LAST    www/config/config.ini.LAST
+    cp www/config/config.ini.LAST   www/config/config.ini
     # carpeta AUDIO:
     for file in audio/*LAST ; do
         nfile=${file%.LAST}         # elimina .LAST encontrado al final '%'
         echo $nfile
         mv $file $nfile
     done
-    # carpeta WWW
-    echo "www/config/config.ini"
-    cp www/config/config.ini.LAST   www/config/config.ini
 ########################################################################
 # Si NO se ha pedido conservar las configuraciones, se sobreescriben:
 ########################################################################
@@ -167,7 +168,7 @@ mkfifo cdda_fifo
 #########################################################
 # restaurando brutefir_convolver
 #########################################################
-echo \(i\) Un primer arranque de Brutefir para que genere en archivo de convolver
+echo \(i\) Un primer arranque de Brutefir para que genere archivos internos
 brutefir
 
 #########################################################
@@ -175,7 +176,7 @@ brutefir
 #########################################################
 chmod +x bin/*
 chmod -R 755 www/*
-chmod 644 www/config/config*
+chmod 666 www/config/config*
 
 #########################################################
 # FIN
