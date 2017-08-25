@@ -28,8 +28,8 @@ input "in_L", "in_R" {
 output "hi_L", "hi_R", "lo_L", "lo_R" {
 	# mapeo de las 4 salidas:
 	device: "jack" { ports:
-	"system:playback_1"/"hi_L", "system:playback_2"/"hi_R", 
-	"system:playback_1"/"lo_L", "system:playback_2"/"lo_R";
+	"system:playback_1"/"lo_L", "system:playback_2"/"lo_R",
+	"system:playback_3"/"hi_L", "system:playback_4"/"hi_R"; 
 	};
 	sample:   "AUTO";
 	channels: 4/0,1,2,3;
