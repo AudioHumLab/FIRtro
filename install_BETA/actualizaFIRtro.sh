@@ -105,7 +105,7 @@ rm CHANGES*
 rm LICENSE*
 rm README*
 rm WIP*
-rm -r bin/
+rm -rf bin/ # -f porque pueden haber *.pyc protegidos
 rm -r doc/
 rm -r www/
 rm .brutefir_c*
