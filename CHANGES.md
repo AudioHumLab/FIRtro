@@ -4,7 +4,7 @@
 
 - Se añade **'gmax'** en audio/config, define el tope de ganancia admitida en Brutefir, normalemnte 0. Relacionado con la revisión de la máquina de control de volumen en server_process.py.
 
-(Ver detalles en **CHANGES_volume_machine**).
+(Ver detalles en **dov/dev/VolumeMachine.md**).
 
 - Ajuste de tonos defeatable al arranque, mediante opción en audio/config.
 
