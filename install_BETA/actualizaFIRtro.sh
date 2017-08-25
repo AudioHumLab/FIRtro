@@ -135,15 +135,16 @@ if [ $conservar ]; then
     mv .mplayer/config.LAST         .mplayer/config
     echo ".mplayer/channels.conf"
     mv .mplayer/channels.conf.LAST  .mplayer/channels.conf
+    # carpeta WWW
+    echo "www/config/config.ini"
+    mv audio/www_config.ini.LAST    www/config/config.ini.LAST
+    cp www/config/config.ini.LAST   www/config/config.ini
     # carpeta AUDIO:
     for file in audio/*LAST ; do
         nfile=${file%.LAST}         # elimina .LAST encontrado al final '%'
         echo $nfile
         mv $file $nfile
     done
-    # carpeta WWW
-    echo "www/config/config.ini"
-    cp audio/www_config.ini.LAST   www/config/config.ini
 ########################################################################
 # Si NO se ha pedido conservar las configuraciones, se sobreescriben:
 ########################################################################
