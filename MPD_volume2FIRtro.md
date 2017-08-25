@@ -1,4 +1,4 @@
-# Volumen de MPD ligado a FIRtro (work in progress)
+# Volumen de MPD ligado a FIRtro
 
 ## Necesidad:
 
@@ -16,7 +16,7 @@ FIRtro dispone de:
 
 ## Solución propuesta: 
 
-MPD permite configurar un fake mixer de manera que no se aplica a la señal de salida (salida a jack en nuestro caso), pero el ajuste de volumen puede así ser leido por un cliente externo al objeto de gobernar un sistema de control de volumen externo como un amplificador o, en nuestro caso, FIRtro.
+MPD permite configurar un fake mixer de manera que no se aplica a la salida hacia FIRtro (salida a JACK), pero el ajuste de volumen puede así ser leido por un cliente externo al objeto de gobernar un sistema de control de volumen externo como un amplificador o, en nuestro caso, FIRtro.
 
 ## Servicios disponibles:
 
