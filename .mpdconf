@@ -1,14 +1,15 @@
-######################################
-## https://www.musicpd.org/doc/user ##
-######################################
+#############################################
+## Ayuda: https://www.musicpd.org/doc/user ##
+##        man mpd.conf                     ##
+#############################################
 
 # --- DIRECTORIO DE LA MUSICA ---
 music_directory         "/home/firtro/music"
 
 # --- DIRECTORIO DE PLAYLISTS ---
 playlist_directory      "/home/firtro/.config/mpd/playlists"
-# Opcion de listas en local o compartidas en una carpeta de red:
-#playlist_directory      "/mnt/path_to_shared_folder/playlists/"
+# Opcion de listas compartidas en una carpeta de red:
+#playlist_directory      "/mnt/path_to_shared_folder/playlists"
 
 # --- DIECTORIO PARA USO INTERNO DE MPD
 # NOTA: ~/.config/mpd es una carpeta compatible con instalaciones MPD en Linux actuales.
@@ -21,13 +22,13 @@ sticker_file            "/home/firtro/.config/mpd/sticker.sqlite"
 
 # --- LISTENING ---
 port                    "6600"
-# escucha tcp/ip:
+# direcciones ip de escucha:
 bind_to_address         "any"
 # escucha socket unix:
 bind_to_address         "/home/firtro/.config/mpd/socket"
 
 # --- USUARIO que mostrará MPD al ejecutarse desde un usuario root
-# NOTA esto no interesa en FIRtro
+# NOTA: esto no interesa en FIRtro
 #user                    "firtro"
 #group                   "audio"
 
