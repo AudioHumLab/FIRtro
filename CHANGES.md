@@ -51,4 +51,7 @@
 
 ## 2017- agosto. Cambios
 
-- Pausado opcional de MPD si no es la entrada activa.
+- Se hace opcional el pausado de reproductores (MPD, Mplayer, Mopidy) si no son la entrada activa para ahorro de %CPU.
+
+- Se implementa un mecanismo opcional que vincula el volumen de FIRtro con el de MPD.
+
