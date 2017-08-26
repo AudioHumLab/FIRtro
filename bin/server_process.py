@@ -810,10 +810,10 @@ def do (order):
                     gain_0 = gain_0 - balance
                 elif balance < 0:
                     gain_1 = gain_1 + balance
-                bf_cli('cfia 0 0 ' + str(-gain_0) + ' ; cfia 1 1 ' + str(-gain_1))
-                # AMR 2º Entrada de brutefir (para analogica con filtros mp):
-                # bf_cli('cfia 2 2 ' + str(-gain_0) + ' ; cfia 3 3 ' + str(-gain_1))
-                muted = False
+                if not muted:
+                    bf_cli('cfia 0 0 ' + str(-gain_0) + ' ; cfia 1 1 ' + str(-gain_1))
+                    # AMR 2º Entrada de brutefir (para analogica con filtros mp):
+                    # bf_cli('cfia 2 2 ' + str(-gain_0) + ' ; cfia 3 3 ' + str(-gain_1))
                 if not gain_direct and "level" in order:        ## <MPD> ##
                     # actualizamos el "falso volumen" de MPD
                     client_mpd.setvol(100 + gain)
