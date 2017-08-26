@@ -706,7 +706,8 @@ def do (order):
     if (change_gain or change_eq):
 
         # Info para el potenciómetro de volumen (p.ej el slider de la web) (recálculo)
-        maxlevel_i = gmax - ref_level_gain - input_gain
+        # nota:  con floor evitamos que el slider de volumen introduzca decimales
+        maxlevel_i = np.floor(gmax - ref_level_gain - input_gain)
 
         # 1a) Se pide cambio de 'level' (vol. calibrado)
         if not gain_direct:
@@ -791,8 +792,8 @@ def do (order):
 
         # 4) Priorizamos SysEQ bajando el level si NO hubiera HEADROOM:
         if 'syseq' in command and headroom < 0:
-            gain  -= ceil(-headroom)
-            level -= ceil(-headroom)
+            gain  -= np.ceil(-headroom)
+            level -= np.ceil(-headroom)
             headroom = gmax - gain - max(eq_mag)    # recalculamos el headroom
 
         headroom = round(headroom, 2)               # para que el display no muestre "-0.0 dB"
@@ -1042,7 +1043,8 @@ input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""
 # Info para un potenciómetro de volumen (p.ej se usará en el slider de la web)
-maxlevel_i = gmax - ref_level_gain - input_gain
+# nota:  con floor evitamos que el slider de volumen introduzca decimales
+maxlevel_i = np.floor(gmax - ref_level_gain - input_gain)
 
 #### <PEQ> indicador de estado de los paramétricos forzados a cero.
 peqdefeat = False
