@@ -15,3 +15,5 @@ rm $branch.zip
 rm -r FIRtro-$branch
 wget https://github.com/AudioHumLab/FIRtro/archive/$branch.zip
 unzip $branch.zip
+cp -f FIRtro-$branch/.install/* .
+cd
