@@ -252,11 +252,14 @@ function update_controls () {
             if ($("#vol_slider").attr("value") != $php_data['level']) {
                 $("#vol_slider").attr("value", $php_data['level']).slider("refresh");
             }
-            if ($("#vol_slider").attr("max") != $php_data['maxlevel_i']) {
-                $("#vol_slider").attr("max", $php_data['maxlevel_i']);
-                $("#vol_slider").attr("min", $php_data['maxlevel_i'] - $config['vol_slider_hr']);
+            // se redondea el alcance del slider para que no envíe valores con decimales ligados a
+            // los decimales de maxlevel_i (el tope de volumen proporcionado por el server)
+            if ($("#vol_slider").attr("max") != Math.round($php_data['maxlevel_i'])) {
+                $("#vol_slider").attr("max", Math.round($php_data['maxlevel_i']));
+                $("#vol_slider").attr("min", Math.round($php_data['maxlevel_i']) - $config['vol_slider_hr']);
                 $("#vol_slider").slider("refresh");
             }
+
             if ($("#bal_slider").attr("max") != $php_data['balance_variation']) {
                 $("#bal_slider").attr("max", $php_data['balance_variation']).slider("refresh");
             }
@@ -266,6 +269,7 @@ function update_controls () {
             if ($("#bal_slider").attr("value") != $php_data['balance']) {
                 $("#bal_slider").attr("value", $php_data['balance']).slider("refresh");
             }
+            
             if ($php_data['muted'] == true) {
                 $("#level_display1").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             }
