@@ -252,6 +252,8 @@ function update_controls () {
             if ($("#vol_slider").attr("value") != $php_data['level']) {
                 $("#vol_slider").attr("value", $php_data['level']).slider("refresh");
             }
+            // se redondea el alcance del slider para que no envíe valores con decimales ligados a
+            // los decimales de maxlevel_i (el tope de volumen proporcionado por el server)
             if ($("#vol_slider").attr("max") != Math.round($php_data['maxlevel_i'])) {
                 $("#vol_slider").attr("max", Math.round($php_data['maxlevel_i']));
                 $("#vol_slider").attr("min", Math.round($php_data['maxlevel_i']) - $config['vol_slider_hr']);
