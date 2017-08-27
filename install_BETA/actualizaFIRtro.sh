@@ -127,19 +127,19 @@ if [ $conservar ]; then
     echo "(i) Restaurando configuraciones de usuario"
 
     # carpeta RAIZ:
-    echo "    .mpdconf"
+    echo "    ".mpdconf
     mv .mpdconf.LAST                .mpdconf
     echo "    .brutefir_defaults"
     mv .brutefir_defaults.LAST      .brutefir_defaults
 
     # carpeta MPLAYER
-    echo "    .mplayer/config"
+    echo "    ".mplayer/config
     mv .mplayer/config.LAST         .mplayer/config
-    echo "    .mplayer/channels.conf"
+    echo "    ".mplayer/channels.conf
     mv .mplayer/channels.conf.LAST  .mplayer/channels.conf
 
     # carpeta WWW
-    echo "    www/config/config.ini"
+    echo "    "www/config/config.ini
     mv audio/www_config.ini.LAST    www/config/config.ini.LAST
     cp www/config/config.ini.LAST   www/config/config.ini
 
