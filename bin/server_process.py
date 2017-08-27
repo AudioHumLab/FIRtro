@@ -706,8 +706,7 @@ def do (order):
     if (change_gain or change_eq):
 
         # Info para el potenciómetro de volumen (p.ej el slider de la web) (recálculo)
-        # nota:  con floor evitamos que el slider de volumen introduzca decimales
-        maxlevel_i = np.floor(gmax - ref_level_gain - input_gain)
+        maxlevel_i = gmax - ref_level_gain - input_gain
 
         # 1a) Se pide cambio de 'level' (vol. calibrado)
         if not gain_direct:
@@ -1043,8 +1042,7 @@ input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""
 # Info para un potenciómetro de volumen (p.ej se usará en el slider de la web)
-# nota:  con floor evitamos que el slider de volumen introduzca decimales
-maxlevel_i = np.floor(gmax - ref_level_gain - input_gain)
+maxlevel_i = gmax - ref_level_gain - input_gain
 
 #### <PEQ> indicador de estado de los paramétricos forzados a cero.
 peqdefeat = False
