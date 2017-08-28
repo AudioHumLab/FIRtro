@@ -1,11 +1,17 @@
 #!/bin/bash
 
-# Grupos (OJO necesitaria firtro en sudo, se traslada a paquetesFIRtro.sh)
+# ADHESION A GRUPOS (OJO necesitaria firtro en sudo, se traslada a paquetesFIRtro.sh)
 # sudo usermod -a -G cdrom,audio,video,plugdev firtro
 
-# algunas variables de entorno
+# ALGUNAS VARIABLES DE ENTORNO
 
 f=/home/firtro/.bashrc
+
+if ! grep "bin_custom" $f >/dev/null 2>&1; then
+    echo ""
+    echo export PATH=\$HOME/bin_custom:\$HOME/bin:\$PATH >> $f
+fi
+
 if ! grep "src-hilite-lesspipe" $f >/dev/null 2>&1; then
     echo "" >> $f
     echo "# resaltado en color de codigo fuente con less" >> $f
@@ -29,12 +35,12 @@ if ! grep "set tabstospaces" $f >/dev/null 2>&1; then
     echo "set tabstospaces" >> $f
 fi
 
-# carpeta para mpd
+# CARPETA PARA MPD
 mkdir -p /home/firtro/.config/mpd/playlists
 mkdir -p /home/firtro/music
 
-# carpeta para mplayer
+# CARPETA PARA MPLAYER
 mkdir -p /home/firtro/.mplayer
 
-# carpeta temporal
+# CARPETA TEMPORAL
 mkdir -p /home/firtro/tmp
