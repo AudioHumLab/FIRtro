@@ -1,9 +1,9 @@
 #!/bin/bash
 
 verEstado () {
-grep "level ="  audio/status
-grep "input ="  audio/status
-grep "mono ="   audio/status
+grep "level ="  /home/firtro/audio/status
+grep "input ="  /home/firtro/audio/status
+grep "mono ="   /home/firtro/audio/status
 jack_conexiones.py ">"
 }
 
