@@ -348,8 +348,8 @@ def main(run_level):
         # v2.0 PRESETS: recuperamos el preset por DEFECTO (si estuviera declarado)
         if default_preset:
             client.firtro_socket("preset " + default_preset)
-            # nos actualizamos:
-            preset = status.get("general", "preset")
+            # nos ponemos al dia de los efectos del preset 
+            status.readfp(statusfile)
 
         # v2.0 desMuteamos la tarjeta a nivel ALSA
         print "(initfirtro) quitando MUTE en la tarjeta del sistema"
@@ -374,7 +374,7 @@ def main(run_level):
             wait4result("jack_lsp", "mplayer", tmax=5)
         print "(initfirtro) Recuperando INPUT ..."
         client.firtro_socket("input restore")
-
+        
         # Alguna información
         print "\n(initfirtro):"
         if tone_defeat_on_startup:
