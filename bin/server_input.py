@@ -30,22 +30,22 @@ from time import sleep
 from ConfigParser import ConfigParser
 import jack
 
-# módulos del FIRtro
 HOME = os_path.expanduser("~")
 sys_path.append(HOME + "/bin")
 
+# módulos del FIRtro
 from getconfig import *
 from basepaths import status_filename
-
-# FIRtro2: puertos de monitores de la señal (los convertimos a lista)
-ext_monitor_ports = jack_external_monitors.split()
-int_monitor_ports = jack_internal_monitors.split()
 
 # FIRtro2: gestiona sound cards adicionales resampleadas en jack
 import soundcards as sc
 
 # FIRtro2: para reconectar la radio debido a mplayer -ao jack:mplayer:noconnect
 import radio_channel
+
+# FIRtro2: puertos de monitores de la señal (los convertimos a lista)
+ext_monitor_ports = jack_external_monitors.split()
+int_monitor_ports = jack_internal_monitors.split()
 
 # Para el DEBUG de excepciones
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
@@ -120,7 +120,9 @@ def desconecta_fuentes_de(out_ports):
     except:
         logging.exception("error en desconexion de monitores")
 
+###########################################################################################
 # Funcion original de FIRtro1 levemente modificada para los puertos de monitoreo opcionales
+###########################################################################################
 def change_input(input_name, in_ports, out_ports, resampled="no"):
 
     # 'in_ports':   Lista [L,R] de los puertos capture de jack de la input elegida
