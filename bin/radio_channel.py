@@ -2,34 +2,37 @@
 # -*- coding: utf-8 -*-
 # from __future__ import with_statement # This isn't required in Python 2.6
 
-# Notas previas: 
-# Las variables 'radio' y 'radio_prev' se refieren a un Id de presintonia de los configurados en audio/radio
-# Este script se usaba desde un shell en FIRtro1
+# Notas previas:
+# - Las variables 'radio' y 'radio_prev' se refieren a
+#   un Id de presintonia de los configurados en audio/radio
+# - Este script se usa desde un shell como se hacía en FIRtro1,
+#   por tanto, debemos asegurar que la radio funcione con normalidad
+#   operando "por fuera del server".
 #
 # v1.1
 # - Adaptacion para ser usado también como módulo importable.
 # - Actualizacion de audio/status rotando las presintonias radio y radio_prev
+# v1.1b
+# - revision, bugs
 
 import sys
 from subprocess import *
 from getstatus import *
 from getradio import *
+import wait4
+from time import sleep
 
-# printados de este script si se usa por linea de comandos
-def messages():
-    print "Canal " + radio
-
-def _update_status(radio):
+def _update_radio_status(nuevo):
     """ actualiza el archivo de estado de FIRtro rotando los canales de radio actual y previo
     """
-    prev = status.get("inputs", "radio")
-    status.set('inputs', 'radio_prev', prev)
-    status.set('inputs', 'radio', radio)
-    statusfile = open(status_path, 'w')
-    status.write(statusfile)
-    statusfile.close
+    previo = status.get("inputs", "radio")
+    if nuevo <> previo:
+        status.set('inputs', 'radio_prev', previo)
+        status.set('inputs', 'radio', nuevo)
+        statusfile = open(status_path, 'w')
+        status.write(statusfile)
+        statusfile.close()
 
-# funciones accesibles para uso como módulo importado
 def select_channel(channel_name):
     """ configura directamente en mplayer un nombre de emisora
     """
@@ -40,46 +43,45 @@ def select_preset(radio):
     """
     # obtenemos el nombre del canal correspondiente a la presintonia solicitada
     channel_name = channels.get("channels", radio)
-    if channel_name == "":
-        print "El canal \"" + opcion + "\" no está configurado"
+    if channel_name <> "":
+        # reconfiguramoms mplayer con el canal deseado
+        select_channel(channel_name)
+        return True
+    else:
         return False
-        exit()
-
-    # reconfiguramoms mplayer con el canal deseado
-    select_channel(channel_name)
-
-    # actualizamos el estado de FIRtro
-    _update_status(radio)
     
-    return True
-
 if __name__ == "__main__":
 
-    # Lectura de la opcion proporcionada en línea de comandos
+    # Lectura de la línea de comandos
     if len(sys.argv) > 1:
         opcion = sys.argv[1]
     else:
-        messages()
-        exit()
+        sys.exit()
 
-    # (!) pendiente de revisar (no se usa)
-    old_input_name = input_name
-
-    # Evaluamos la opcion proporcionada en linea de comandos
-    # a) está pendiente aclarar esta opción
-    if opcion == "-c":
-        pass
-    # b) si se pide un Id de presintonia 
-    elif channels.has_option("channels", opcion):
+    # Evaluamos lo que se pide
+    if channels.has_option("channels", opcion):
         radio = opcion
-    # c) opción errónea
     else:
+        # Error: salimos.
         print "El canal \"" + opcion + "\" no existe"
-        exit()
+        sys.exit()
 
-    select_preset(radio)
+    # Si se valida lo que se pide, se resintoniza Mplayer:
+    if select_preset(radio):
+        # Actualizamos los canales en audio/status
+        _update_radio_status(radio)
+        print "Canal " + radio
+        # nota: antes de consultar esperamos un poco a que desaparezca Mplayer
+        sleep(3)
+        # Si FIRtro está escuchando la TDT le pedimos que restaure la entrada:
+        if "tdt" in input_name:
+            # Esperamos a que Mplayer vuelva a estar disponible en Jack
+            wait4.wait4result("jack_lsp", "mplayer_tdt", quiet=True)
+            Popen("control input restore", shell=True)
+        # Opcinalmente Mplayer puede printar lo que tiene en curso
+        # (solo visible por la consola de initfirtro)
+        # Popen("echo get_file_name > tdt_fifo", shell=True)
+    else:
+        print "El canal \"" + opcion + "\" no está configurado"
 
-    # informacion en el terminal
-    messages()
-
-
+        
