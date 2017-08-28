@@ -27,8 +27,8 @@ muted = False
 polarity = +
 
 [inputs]
-radio_prev = 3
-radio = 2
+radio_prev = 2
+radio = 1
 input = analog
 resampled = no
 mono = off
