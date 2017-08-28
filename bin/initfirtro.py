@@ -60,6 +60,9 @@
 # v2.2e
 # - Se usa el nuevo modulo mpdconf_adjust para reconfigurar MPD con el puerto adecuado brutefir o ecasound
 # - Se revisa la gestion de canales de radio
+#
+# v2.2f
+# - se recupera el uso de getstatus para consula
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -71,7 +74,7 @@ import time
 import client
 import stopfirtro
 from getconfig import *
-#from getstatus import * # v2.0 sustituido por ConfigParser
+from getstatus import *
 from subprocess import check_output, Popen, call
 import soundcards as sc
 import pulse_manager as pulse
@@ -80,21 +83,6 @@ from wait4 import wait4result
 import mpdconf_adjust
 
 HOME = os.path.expanduser("~")
-
-# sustituto de getstatus:
-from ConfigParser import ConfigParser
-st = ConfigParser()
-statusFile = "/home/firtro/audio/" + status_filename
-def read_status():
-    global input_name, filter_type, drc_eq, peq, fs, preset, radio
-    st.read(statusFile)
-    input_name  = st.get("inputs",  "input")
-    filter_type = st.get("general", "filter_type")
-    drc_eq      = st.get("room EQ", "drc_eq")
-    peq         = st.get("room EQ", "peq")
-    fs          = st.get("general", "fs")
-    preset      = st.get("general", "preset")
-    radio       = st.get("inputs", "radio")
 
 ##########
 # INICIO #
@@ -107,9 +95,9 @@ def read_status():
 # se usa para evitar algunos printados más abajo
 fnull = open(os.devnull, 'w')
 
-# v2.0 en sustitución de getstatus por ser estático.
-read_status()
 audio_folder = loudspeaker_folder + loudspeaker + "/" + fs + "/"
+
+# Puertos de entrada a FIRtro:
 if load_ecasound:
     firtro_ports = ecasound_ports
 else:
@@ -360,13 +348,12 @@ def main(run_level):
         # v2.0 PRESETS: recuperamos el preset por DEFECTO (si estuviera declarado)
         if default_preset:
             client.firtro_socket("preset " + default_preset)
+            # nos actualizamos:
+            preset = status.get("general", "preset")
 
         # v2.0 desMuteamos la tarjeta a nivel ALSA
         print "(initfirtro) quitando MUTE en la tarjeta del sistema"
         sc.alsa_mute_system_card("off")
-
-        # v2.0: Volvemos a leer el estado ya que hemos cargado un preset:
-        read_status()
 
         # V2.0 enlace con el control de volumen ficticio de MPD
         if mpd_volume_linked2firtro and load_mpd:
@@ -393,7 +380,9 @@ def main(run_level):
         if tone_defeat_on_startup:
             print "Se ha aplicado TONE DEFEAT." 
         if default_preset:
-            print "Se ha recuperado el PRESET por DEFECTO: " + default_preset
+            print "Se ha cargado el PRESET por DEFECTO: " + preset
+        else:
+            print "Se ha recuperado el PRESET: " + preset
         print "Cargado el ALTAVOZ \"" + loudspeaker + "\" con FS=" + fs + "."
         print "Activada la ENTRADA \"" + input_name + "\" y los FILTROS de tipo \"" + filter_type + "\"."
         print "La ecualización de sala (DRC FIR) es la número " + drc_eq + "."
