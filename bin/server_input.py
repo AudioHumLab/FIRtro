@@ -17,6 +17,10 @@
 # v2.1c
 # - Revisión del pausado opcional de fuentes para ahorro de CPU
 # - Rev de comentarios del código
+#
+# v2.1d
+# - Se recupera el uso de getstatus para leer un posible cambio de presintonía
+# - Se reordena el código para legibilidad
 
 # módulos genéricos
 from os import path as os_path, remove as os_remove
@@ -32,16 +36,16 @@ sys_path.append(HOME + "/bin")
 
 from getconfig import *
 from basepaths import status_filename
-import radio_channel
+
+# FIRtro2: puertos de monitores de la señal (los convertimos a lista)
+ext_monitor_ports = jack_external_monitors.split()
+int_monitor_ports = jack_internal_monitors.split()
+
 # FIRtro2: gestiona sound cards adicionales resampleadas en jack
 import soundcards as sc
 
-# Función auxilar para leer el status en dinámico
-st = ConfigParser()
-def read_status():
-    global radio
-    st.read("/home/firtro/audio/" + status_filename)
-    radio       = st.get("inputs", "radio")
+# FIRtro2: para reconectar la radio debido a mplayer -ao jack:mplayer:noconnect
+import radio_channel
 
 # Para el DEBUG de excepciones
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
@@ -53,15 +57,14 @@ if os_path.isfile(logFile):
 logging.basicConfig(filename=logFile, level=logging.ERROR)
 
 # Alias con temporización experimental para operaciones jack.con/disconnect
-tj = 0.1
 def jack_connect(p1, p2):
     jack.connect(p1, p2)
-    #sleep(tj)
+    #sleep(.1)
 def jack_disconnect(p1, p2):
     jack.disconnect(p1, p2)
-    #sleep(tj)
+    #sleep(.2)
 
-# Función para pausado opcional de fuentes para ahorro de CPU
+# Función auxiliar para pausado opcional de fuentes para ahorro de CPU
 def pausas_opcionales(input_name):
     # Pausa opcional de MPD
     if load_mpd and pause_mpd:
@@ -85,24 +88,44 @@ def pausas_opcionales(input_name):
             print "(server_input) Parando  MPLAYER."
             Popen("echo stop > " + HOME + "/tdt_fifo", shell=True)
         else:
-            # leemos el ultimo preset de radio escuchado (v2.1b)
-            read_status()
+            # releemos el estado por si se hubiera modificado la presintonia (v2.1b)
+            status.readfp(statusfile)
+            # recuperamos la presintonia
             print "(serve_input) Resintonizando TDT presintonía: " + radio
             if radio_channel.select_preset(radio):
                 print "(serve_input) Resintonizando TDT presintonía: " + radio
             else:
                 print "(serve_input) ERROR resintonizando TDT presintonía: " + radio
 
-# FIRtro2: puertos de monitores de la señal, al ser opcionales usaremos try más abajo...
-ext_monitor_ports = jack_external_monitors.split()
-int_monitor_ports = jack_internal_monitors.split()
+def desconecta_fuentes_de(out_ports):
+    """ Desconectamos todos los clientes de la entrada del FIRtro y de los monitores
+    """    
+    sources_L_firtro = jack.get_connections(out_ports[0])
+    sources_R_firtro = jack.get_connections(out_ports[1])
+    for source in sources_L_firtro:
+        jack_disconnect(source, out_ports[0])
+    for source in sources_R_firtro:
+        jack_disconnect(source, out_ports[1])
+
+    try: #los monitores son opcionales
+        if ext_monitor_ports:
+            sources_L_extMon = jack.get_connections(ext_monitor_ports[0])
+            sources_R_extMon = jack.get_connections(ext_monitor_ports[1])
+            for source in sources_L_extMon: jack_disconnect(source, ext_monitor_ports[0])
+            for source in sources_R_extMon: jack_disconnect(source, ext_monitor_ports[1])
+            sources_L_intMon = jack.get_connections(int_monitor_ports[0])
+            sources_R_intMon = jack.get_connections(int_monitor_ports[1])
+            for source in sources_L_intMon: jack_disconnect(source, int_monitor_ports[0])
+            for source in sources_R_intMon: jack_disconnect(source, int_monitor_ports[1])
+    except:
+        logging.exception("error en desconexion de monitores")
 
 # Funcion original de FIRtro1 levemente modificada para los puertos de monitoreo opcionales
 def change_input(input_name, in_ports, out_ports, resampled="no"):
 
-    # 'in_ports'  es la lista [L,R] de los puertos capture de jack de la input elegida
-    # 'out_ports' es la lista de los puertos de la variable 'firtro_ports'
-    # que se resuelve en server_process en función de si se usa Brutefir/Ecasound
+    # 'in_ports':   Lista [L,R] de los puertos capture de jack de la input elegida
+    # 'out_ports':  Lista de los puertos de la variable 'firtro_ports' que se resuelve
+    #               en server_process en función de si se usa Brutefir/Ecasound
 
     # Aquí evaluamos si la entrada requiere resampling por estar en una tarjeta adicional
     if resampled <> "no":
@@ -113,30 +136,12 @@ def change_input(input_name, in_ports, out_ports, resampled="no"):
 
     ####  cuerpo principal CASI como el original de FIRtro1:
     try:
-        jack.attach("server_input")
+        jack.attach("tmp")
+        
+        # primero desconectamos todo lo que hubiera en la entrada del firtro y monitores
+        desconecta_fuentes_de(out_ports)
 
-        # Desconectamos todos los clientes de la entrada del FIRtro y de los monitores
-        sources_L_firtro = jack.get_connections(out_ports[0])
-        sources_R_firtro = jack.get_connections(out_ports[1])
-        for source in sources_L_firtro:
-            jack_disconnect(source, out_ports[0])
-        for source in sources_R_firtro:
-            jack_disconnect(source, out_ports[1])
-
-        try: #los monitores son opcionales
-            if ext_monitor_ports:
-                sources_L_extMon = jack.get_connections(ext_monitor_ports[0])
-                sources_R_extMon = jack.get_connections(ext_monitor_ports[1])
-                for source in sources_L_extMon: jack_disconnect(source, ext_monitor_ports[0])
-                for source in sources_R_extMon: jack_disconnect(source, ext_monitor_ports[1])
-                sources_L_intMon = jack.get_connections(int_monitor_ports[0])
-                sources_R_intMon = jack.get_connections(int_monitor_ports[1])
-                for source in sources_L_intMon: jack_disconnect(source, int_monitor_ports[0])
-                for source in sources_R_intMon: jack_disconnect(source, int_monitor_ports[1])
-        except:
-            logging.exception("error en desconexion de monitores")
-
-        # Y conectamos la entrada a al FIRtro y a los monitores
+        # Y ahora conectamos la entrada deseada a al FIRtro y a los monitores
         for i in range(len(in_ports)):
             try:
                 jack_connect(in_ports[i], out_ports[i])
