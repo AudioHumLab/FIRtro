@@ -7,7 +7,7 @@ read -p "    - pulsa intro -" dummy
 echo ""
 
 read -r -p "ATENCION: deseas continuar? [y/N] " tmp
-if [ ! "$tmp" = "y" ] || [ ! "$tmp" = "Y" ]; then
+if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
     echo Bye.
     exit 0
 fi
