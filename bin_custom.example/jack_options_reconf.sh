@@ -1,21 +1,23 @@
 #!/bin/bash
 # v1.0
 
-if [ ! $1 ]; then
-    echo ""
-    echo "    Script para ayudar a reconfigurar las opciones de jack en audio/config"
+printdoc () {
+    echo "    Ayudar a reconfigurar las opciones ALSA de JACK en audio/config"
     echo "    Ejemplo de uso:  jack_options_reconf.sh  -p1024 -n3 -S"
     echo "    Nota:            omitir '-d device' y '-r rate'"
     echo ""
-    exit 0
-fi
+}
 
 f=/home/firtro/audio/config
-viejaLinea=$(grep "^jack_options" $f)
+viejaLinea=$(grep "^jack_options" $f | grep alsa)
 echo ""
 echo "actual: "$viejaLinea
 echo ""
 
+if [ ! $1 ]; then
+    printdoc
+    exit 0
+fi
 
 read -r -p "ATENCION: deseas continuar? [y/N] " tmp
 if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
@@ -23,7 +25,7 @@ if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
     exit 0
 fi
 
-# Leemos las opciones
+# Leemos las opciones proporcionadas $@
 opciones=""
 for x in "$@"; do
     opciones+=$x" "
