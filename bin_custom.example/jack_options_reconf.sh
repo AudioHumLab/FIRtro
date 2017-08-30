@@ -4,7 +4,8 @@
 if [ ! $1 ]; then
     echo ""
     echo "    Script para ayudar a reconfigurar las opciones de jack en audio/config"
-    echo "    Ejemplo de uso:  config_jack_option.sh  -p1024 -n3"
+    echo "    Ejemplo de uso:  jack_options_reconf.sh  -p1024 -n3 -S"
+    echo "    Nota:            omitir '-d device' y '-r rate'"
     echo ""
     exit 0
 fi
