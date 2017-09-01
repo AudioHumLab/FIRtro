@@ -21,10 +21,11 @@ if ! grep "src-hilite-lesspipe" $f >/dev/null 2>&1; then
 fi
 if ! grep "PYTHONDONTWRITEBYTECODE=1" $f >/dev/null 2>&1; then
     echo "" >> $f
-    echo "# esto evita la aparicion de archivos .pyc .pyo" >> /home/firtro/.bashrc
-    echo "export PYTHONDONTWRITEBYTECODE=1" >> /home/firtro/.bashrc
+    echo "# esto evita la aparicion de archivos .pyc .pyo" >> $f
+    echo "export PYTHONDONTWRITEBYTECODE=1" >> $f
 fi
 
+# Ajustes para el editor de archivos de texto nano
 f=/home/firtro/.nanorc
 if ! grep "set tabsize 4" $f >/dev/null 2>&1; then
     echo "" >> $f
@@ -33,6 +34,11 @@ fi
 if ! grep "set tabstospaces" $f >/dev/null 2>&1; then
     echo "" >> $f
     echo "set tabstospaces" >> $f
+fi
+
+# Ajustes DBUS para jackd2
+if ! grep "DBUS_SESSION_BUS_ADDRESS" /home/firtro/.profile >/dev/null 2>&1; then
+    echo "export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket" >> /home/firtro/.profile
 fi
 
 # CARPETA PARA MPD
