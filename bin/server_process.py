@@ -36,8 +36,10 @@
 # - Se separa la función 'firtroData' (antes 'fdata') que formatea en json 
 #   la información de FIRtro que se facilita a la página web de control.
 #
-# v2.0d (2017-ago)
+# v2.0d (2017-ago,sep)
 # - Debian 9.1: se asegura type integer en los índices de las arrays de tonos y loudness
+# - Levanta puertos dummy en jack para ser usados por ej por MPD
+# - Se pone write_status=False en la orden 'input restore'
 #
 #----------------------------------------------------------------------
 
@@ -69,6 +71,7 @@ import peq2fr                   ##        Módulo auxiliar para procesar archivo
 import client_mpd               ## <MPD>  Control de volumen enlazado con MPD.
 MPD_GAIN_FWD_TIMER = .2         ##        Temporizador que elude la orden 'gain' que llega de MPD
                                 ##        despueś de ejecutar aquí un ajuste de 'level'.
+import jack_dummy_ports         ## Levanta puertos dummy en jack para ser usados por ej MPD. Solo esta línea.
 
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
@@ -328,6 +331,7 @@ def do (order):
                     change_xovers = True
                     change_eq = True
                     muted = False
+                    write_status = False
                 elif name == input_name.lower():
                     # Si la entrada ya es la activa, y no estoy restaurandolas, no hago nada
                     writestatus = False
