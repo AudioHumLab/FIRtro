@@ -3,9 +3,9 @@
 """
     Uso:
     initfirtro.py [ audio | core | all* ]   (* por defecto)
-    audio: Jack, Brutefir, Ecasound.
-    core:  + Mpd y otros players, Netjack.
-    all:   + Server, Lirc
+    audio: Jack, Brutefir, Ecasound y el Server.
+    core:  + MPD y otros players, Netjack.
+    all:   + Lirc, etc...
 """
 #----------------------------------------------------------------------
 # v2.0 (2016-nov)
@@ -23,14 +23,11 @@
 #
 # - Al objeto de optimizar las esperas manuales tras el arranque de
 #   jackd, brutefir, ecasound, mpd y controlserver se sustituye
-#   time(command_delay) por un bucle de comprobación de cada proceso.
+#   sleep(command_delay) por un bucle de comprobación de cada proceso.
 #
 # - Recupera el último preset o el preset por defecto (opcional en audio/config)
 #
 # - Se añade información del PEQ al final del arranque (if load_ecasound)
-#
-# - En lugar de getstatus, se usa una instancia ConfigParser para poder
-# leer el estado del FIRtro también al finalizar este script.
 #
 # v2.1
 #
@@ -43,7 +40,7 @@
 #
 # v2.2a
 # - Se adapta la sección de arranque de mplayer
-# - se incorpora jacktrip
+# - Se incorpora jacktrip
 #
 # v2.2b
 # - Se permite zita o alsa_in/out para resampling de tarjetas externas (audio/config, soundcards.py)
@@ -59,10 +56,12 @@
 #
 # v2.2e
 # - Se usa el nuevo modulo mpdconf_adjust para reconfigurar MPD con el puerto adecuado brutefir o ecasound
-# - Se revisa la gestion de canales de radio
 #
 # v2.2f
-# - se recupera el uso de getstatus para consula
+# - Se recupera el uso de getstatus para consulta dinámica
+# - El server se arranca inmediatemante despues del nucleo del audio (jack+brutefir)
+#   para levantar los puertos dummy en jack que serán usados por MPD.
+# - Se deja de gestionar aquí el pausado de los players integrados.
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -70,15 +69,14 @@ import sys
 sys.path.append('/home/firtro/bin')
 
 import os
-import time
+from time import sleep
 import client
 import stopfirtro
 from getconfig import *
 from getstatus import *
-from subprocess import check_output, Popen, call
+from subprocess import Popen
 import soundcards as sc
 import pulse_manager as pulse
-import radio_channel # v2.2e
 from wait4 import wait4result
 import mpdconf_adjust
 
@@ -109,15 +107,13 @@ os.chdir(audio_folder)
 
 def main(run_level):
 
-    # para controlar si el server.py está running y atiende conexiones
-    serverisonline = False
-
+    # Jack, Brutefir, Ecasound, Server
     if run_level in ["audio", "core", "all"]:
 
         # STOPFIRTRO: paramos los procesos
         print "(initfirtro) Deteniendo procesos..."
         stopfirtro.main(run_level)
-        time.sleep(command_delay)
+        sleep(command_delay)
 
         # Digamos a PULSEAUDIO que deje de usar cualquier tarjeta:
         if pulse.pulse_detected():
@@ -213,25 +209,42 @@ def main(run_level):
         else:
             print "(initfirtro) NO se carga ECASOUND."
 
+        # Controlserver (v2.2f)
+        print "(initfirtro) Arrancando el SERVER ..."
+        control = Popen(["python", control_path], stdout=None, stderr=None)
+        # Esperamos hasta 10 segundos para máquinas lentas
+        segundos = 10
+        while segundos > 0:
+            try:
+                # OjO debemos usar "close" para terminar la conexión:
+                client.firtro_socket("close")
+                break
+            except:
+                pass
+            segundos -= 1
+            sleep(1)
+        if segundos > 0:
+            print "(initfirtro) Ha arrancado el SERVER."
+        else:
+            print "(initfirtro) Inicio interrumpido: el SERVER no está accesible :-/"
+            sys.exit() # INTERRUMPIMOS INITFIRTRO
+
+        # PLAYERS INTEGRADOS
         if run_level in ["core", "all"]:
 
             # MPD (v2.2e)
             if load_mpd:
 
                 # Antes de arrancar mpd, adecuamos destination_ports en ~/.mpdconf
-                if "brutefir" in firtro_ports:
-                    tmp = mpdconf_adjust.modifica_jack_destination_ports("brutefir")
-                else:
-                    tmp = mpdconf_adjust.modifica_jack_destination_ports("ecasound")
-                if tmp:
+                if mpdconf_adjust.modifica_jack_destination_ports("dummy"):
                     print "(initfirtro) Arrancando MPD ..."
-                    mpd = Popen([mpd_path] + mpd_options.split(), stdout=None, stderr=None)
+                    Popen([mpd_path] + mpd_options.split(), stdout=None, stderr=None)
                     # Aquí no es necesario esperar al arranque, lo comprobaremos más abajo para 'client_mpd.py'
                 else:
                     print "(initfirtro) Error validando .mpdconf, no se lanza  MPD."
             else:
                 print "(initfirtro) Está deshabilitada la carga de MPD."
-                
+
             # Mplayer1 (Nota: MPLAYER2 ha quedado discontinued, usamos MPLAYER)
             if load_mplayer_cdda or load_mplayer_tdt:
 
@@ -244,18 +257,14 @@ def main(run_level):
                 if load_mplayer_cdda:
                     opts += " -profile cdda -input file=" + cdda_fifo
                     print "(initfirtro) Arrancando MPLAYER (CDDA)..."
-                    mplayer = Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
+                    Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
 
                 # Mplayer TDT:
                 if load_mplayer_tdt:
                     opts += " -profile tdt -input file=" + tdt_fifo
                     print "(initfirtro) Arrancando MPLAYER (TDT)..."
-                    mplayer = Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
-                    # resintoniza la última emisora indicada en el archivo de estado (v2.2e)
-                    if radio_channel.select_preset(radio):
-                        print "(initfirtro) Resintonizando TDT presintonía: " + radio
-                    else:
-                        print "(initfirtro) (i) ERROR resintonizando TDT presintonía: " + radio
+                    Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
+
             # Jacktrip
             if load_jacktrip:
                 if "-s" in jacktrip_options:
@@ -264,53 +273,31 @@ def main(run_level):
                     jtmode = "CLIENT"
                 print "(initfirtro) Arrancando JACKTRIP " + jtmode + " ..."
                 jacktrip = Popen([jacktrip_path] + jacktrip_options.split(), stdout=None, stderr=None)
-                time.sleep(command_delay)
+                sleep(command_delay)
 
             # Netjack
             if load_netjack:
                 print "(initfirtro) Arrancando NETJACK ..."
                 netjack = Popen([netjack_path] + netjack_options.split(), stdout=None, stderr=None)
-                time.sleep(command_delay)
+                sleep(command_delay)
 
             # Shairport
             if load_shairport:
                 shairport = Popen([shairport_path] + shairport_options.split(), stdout=fnull, stderr=fnull)
-                time.sleep(command_delay)
+                sleep(command_delay)
 
             # Squeezeslave
             if load_squeezeslave:
                 squeezeslave = Popen([squeezeslave_path] + squeezeslave_options.split(), stdout=None, stderr=None)
-                time.sleep(command_delay)
+                sleep(command_delay)
 
             # Mopidy
             if load_mopidy:
                 mopidy = Popen([mopidy_path] + mopidy_options.split(), stdout=None, stderr=None)
-                time.sleep(command_delay)
+                sleep(command_delay)
 
+            # RESTO DE FUNCIONES
             if run_level in ["all"]:
-
-                # Cargamos el resto
-
-                # Controlserver (v2.2c)
-                print "(initfirtro) Arrancando el SERVER ..."
-                control = Popen(["python", control_path], stdout=None, stderr=None)
-                # Esperamos hasta 10 segundos para máquinas lentas
-                segundos = 10
-                while segundos > 0:
-                    try:
-                        # OjO debemos usar "close" para terminar la conexión:
-                        client.firtro_socket("close")
-                        serverisonline = True
-                        break
-                    except:
-                        pass
-                    segundos -= 1
-                    time.sleep(1)
-                if segundos > 0:
-                    print "(initfirtro) Ha arrancado el SERVER."
-                else:
-                    print "(initfirtro) Inicio interrumpido: el SERVER no está accesible :-/"
-                    sys.exit() # INTERRUMPIMOS INITFIRTRO
 
                 # Lirc
                 if load_irexec:
@@ -319,28 +306,28 @@ def main(run_level):
                 # client175
                 if load_client175:
                     client175 = Popen(["python", client175_path] + client175_options.split(), stdout=fnull, stderr=fnull)
-                    time.sleep(command_delay)
+                    sleep(command_delay)
 
                 # mpdlcd (MPD client for lcdproc)
                 if load_mpdlcd:
                     mpdlcd = Popen([mpdlcd_path] + mpdlcd_options.split(), stdout=None, stderr=None)
-                    time.sleep(command_delay)
+                    sleep(command_delay)
 
         # NOTA: arriba hemos comprobado que el server esté en ejecucion.
 
         # Restaura el estado anterior
-        # Para que no salga todo el status que devuelve la funcion firtro_socket
-        # primero guardamos stdout
+        # (Para que no salga todo el status que devuelve 
+        # la funcion firtro_socket primero guardamos stdout)
         original_stdout = sys.stdout
         # redirigimos la salida a null
         sys.stdout = fnull
         # enviamos la orden
         client.firtro_socket("config")
-        time.sleep(command_delay)
+        sleep(command_delay)
         # y restauramos stdout
         sys.stdout = original_stdout
 
-        # v2.0d Opción de TONE DEFEAT
+        # v2.0 Opción de TONE DEFEAT
         if tone_defeat_on_startup:
             client.firtro_socket("bass 0")
             client.firtro_socket("treble 0")
@@ -348,16 +335,12 @@ def main(run_level):
         # v2.0 PRESETS: recuperamos el preset por DEFECTO (si estuviera declarado)
         if default_preset:
             client.firtro_socket("preset " + default_preset)
-            # nos ponemos al dia de los efectos del preset 
+            # nos ponemos al dia de los efectos del preset
             status.readfp(statusfile)
-
-        # v2.0 desMuteamos la tarjeta a nivel ALSA
-        print "(initfirtro) quitando MUTE en la tarjeta del sistema"
-        sc.alsa_mute_system_card("off")
 
         # V2.0 enlace con el control de volumen ficticio de MPD
         if mpd_volume_linked2firtro and load_mpd:
-            print "(initfirtro) Esperando a MPD ... (10 seg)"
+            print "(initfirtro) Esperando a MPD ..."
             if wait4result("pgrep -l mpd", "mpd", tmax=10, quiet=True):
                 print "(initfirtro) Ha arrancado MPD."
                 print "(initfirtro) Arrancando CLIENT_MPD ..."
@@ -366,19 +349,13 @@ def main(run_level):
                 print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
 
         # Restaura las entradas
-        # v2.0d: Antes de recuperar la entrada de status, en caso de ser algun player
-        # conviene cerciorarse de que el player haya arrancado para que la conexión sea efectiva.
-        if "mpd" in input_name:
-            wait4result("jack_lsp", "mpd", tmax=5)
-        if "tdt" in input_name or "cdda" in input_name:
-            wait4result("jack_lsp", "mplayer", tmax=5)
-        print "(initfirtro) Recuperando INPUT ..."
+        print "(initfirtro) Recuperando INPUT: " + input_name
         client.firtro_socket("input restore")
-        
+
         # Alguna información
         print "\n(initfirtro):"
         if tone_defeat_on_startup:
-            print "Se ha aplicado TONE DEFEAT." 
+            print "Se ha aplicado TONE DEFEAT."
         if default_preset:
             print "Se ha cargado el PRESET por DEFECTO: " + preset
         else:
@@ -388,6 +365,10 @@ def main(run_level):
         print "La ecualización de sala (DRC FIR) es la número " + drc_eq + "."
         if load_ecasound:
             print "El ecualizador paramétrico PEQ es: " + peq
+
+        # v2.0 desMuteamos la tarjeta a nivel ALSA
+        print "(initfirtro) quitando MUTE en la tarjeta del sistema"
+        sc.alsa_mute_system_card("off")
 
     else:
         print __doc__
