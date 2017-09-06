@@ -14,13 +14,16 @@ config.readfp(configfile)
 configfile.close
 
 #[misc]
-tone_defeat_on_startup = config.get('misc', 'tone_defeat_on_startup')
-gmax = config.getfloat('misc', 'gmax')
+tone_defeat_on_startup =  config.get('misc', 'tone_defeat_on_startup')
+gmax =                    config.getfloat('misc', 'gmax')
 command_delay = config.getfloat('misc', 'command_delay')
-beep_options = config.get('misc', 'beep_options')
-enable_lcd = config.getboolean('misc', 'enable_lcd')
+beep_options =  config.get('misc', 'beep_options')
+enable_lcd =    config.getboolean('misc', 'enable_lcd')
 jack_internal_monitors = config.get('misc', 'jack_internal_monitors')
 jack_external_monitors = config.get('misc', 'jack_external_monitors')
+dummy_ports =    config.get('misc', 'dummy_ports')
+pause_players =  config.getboolean('misc', 'pause_players')
+resume_players = config.getboolean('misc', 'resume_players')
 
 #[presets]
 default_preset = config.get('presets', 'default_preset')
@@ -54,7 +57,6 @@ load_mpd = config.getboolean('path', 'load_mpd')
 mpd_path = config.get('path', 'mpd_path')
 mpd_options = config.get('path', 'mpd_options')
 mpd_volume_linked2firtro = config.getboolean('path', 'mpd_volume_linked2firtro')
-pause_mpd = config.getboolean('path', 'pause_mpd')
 
 load_mplayer_tdt  = config.getboolean('path', 'load_mplayer_tdt')
 load_mplayer_cdda = config.getboolean('path', 'load_mplayer_cdda')
@@ -62,13 +64,10 @@ mplayer_path = config.get('path', 'mplayer_path')
 mplayer_options = config.get('path', 'mplayer_options')
 cdda_fifo = HOME + "/cdda_fifo"
 tdt_fifo  = HOME + "/tdt_fifo"
-pause_mplayer_tdt = config.getboolean('path', 'pause_mplayer_tdt')
-pause_mplayer_cdda = config.getboolean('path', 'pause_mplayer_cdda')
 
 load_mopidy = config.getboolean('path', 'load_mopidy')
 mopidy_path = config.get('path', 'mopidy_path')
 mopidy_options = config.get('path', 'mopidy_options')
-pause_mopidy = config.getboolean('path', 'pause_mopidy')
 
 load_shairport = config.getboolean('path', 'load_shairport')
 shairport_path = config.get('path', 'shairport_path')
