@@ -2,15 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """
-    v1.1
+    v1.2
     modulo auxiliar para reconfigurar ~/.mpdconf con los puertos jack
     adecuados a la configuracion de FIRtro: brutefir o ecasound
 
     uso desde linea de comandos:
-        mpdconf_adjust.py  brutefir|ecasound
+        mpdconf_adjust.py  brutefir|ecasound|dummy
 """
-# v1.1
+# v1.1:
 # se añade la revisión del archivo ~/.mpdconf modificado
+# v1.2:
+# se incluye dummy de jack
 
 from os import path as os_path
 from sys import argv as sys_argv
@@ -46,7 +48,8 @@ def _revisa(lineas):
     # antes de compararlos con los puertos brutefir/ecasound de audio/config
     puertos =  puertos.replace(',', ' ' )
 
-    if puertos == getconfig.brutefir_ports or puertos == getconfig.ecasound_ports:
+    if puertos == getconfig.brutefir_ports or puertos == getconfig.ecasound_ports \
+       or puertos == getconfig.dummy_ports:
         puertos_son_correctos = True
     else:
         print "(mpdconf_adjust) (!) ERROR en .mpdconf. Revisar destination ports:", puertos
@@ -62,6 +65,9 @@ def _busca_firtro_ports_deseados(opcion):
 
     elif opcion == "ecasound":
         firtro_ports = getconfig.ecasound_ports.replace(" ", ",")
+
+    elif opcion == "dummy":
+        firtro_ports = getconfig.dummy_ports.replace(" ", ",")
 
     else:
         return False
