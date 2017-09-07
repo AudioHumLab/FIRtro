@@ -14,9 +14,11 @@
 # - Actualizacion de audio/status rotando las presintonias radio y radio_prev
 # v1.1b
 # - revision, bugs
+# v1.1c
+# - comprobamos si el proceso mplayer está accesible
 
 import sys
-from subprocess import *
+from subprocess import Popen, check_output
 from getstatus import *
 from getradio import *
 import wait4
@@ -51,6 +53,11 @@ def select_preset(radio):
         return False
     
 if __name__ == "__main__":
+
+    # verificamos que el proceso mplayer para tdt esté accesible:
+    if not "tdt_fifo" in check_output("pgrep -fa mplayer", shell=True):
+        print "(radio_channel) (!) No se localiza el proceso MPLAYER TDT"
+        sys.exit()
 
     # Lectura de la línea de comandos
     if len(sys.argv) > 1:
