@@ -335,8 +335,10 @@ def main(run_level):
         # v2.0 PRESETS: recuperamos el preset por DEFECTO (si estuviera declarado)
         if default_preset:
             client.firtro_socket("preset " + default_preset)
-            # nos ponemos al dia de los efectos del preset
-            status.readfp(statusfile)
+        else:
+            client.firtro_socket("preset " + preset)
+        # y nos ponemos al dia de los efectos del preset
+        status.readfp(statusfile)
 
         # V2.0 enlace con el control de volumen ficticio de MPD
         if mpd_volume_linked2firtro and load_mpd:
