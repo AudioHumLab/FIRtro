@@ -17,8 +17,10 @@ enable_lcd = False
 
 ; -- Tope de ganancia (dB) admitada en Brutefir.
 gmax = 0
-; -- Tonos a cero en el arranque
+; -- Tonos a cero en el arranque (True/False)
 tone_defeat_on_startup = True
+; -- Volumen al encendido (opcional)
+level_on_startup = -30
 
 ; -- Declaracion de puertos dummy:
 dummy_ports: dummy:null_0 dummy:null_1
