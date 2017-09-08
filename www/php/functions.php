@@ -103,6 +103,9 @@
     elseif($command == 'mute') {
         $json=firtro_socket ("toggle");
         }
+    elseif($command == 'mono') {
+        $json=firtro_socket ("mono toggle");
+        }
     elseif($command == 'status') {
         $json=firtro_socket ("status");
         }
