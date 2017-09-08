@@ -124,7 +124,7 @@
                         <li data-role="list-divider">Sections</li>
                         <li class="ui-btn-active"><a href="#">Volume</a></li>
                         <li><a href="#drc_page">DRC</a></li>
-                        <li><a href="#tone_page">Tone/Balance</a></li>
+                        <li><a href="#tone_page">Tone / Balance</a></li>
                         <li><a href="#loudness_page">Loudness</a></li>
                         <li><a href="#inputs_page">Inputs</a></li>
                         <li><a href="#presets_page">Presets</a></li>
@@ -203,7 +203,7 @@
                         <li data-role="list-divider">Sections</li>
                         <li><a href="#level_page">Volume</a></li>
                         <li class="ui-btn-active"><a href="#">DRC</a></li>
-                        <li><a href="#tone_page">Tone/Balance</a></li>
+                        <li><a href="#tone_page">Tone / Balance</a></li>
                         <li><a href="#loudness_page">Loudness</a></li>
                         <li><a href="#inputs_page">Inputs</a></li>
                         <li><a href="#presets_page">Presets</a></li>
@@ -285,7 +285,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li class="ui-btn-active"><a href="#">Tone/Balance</a></li>
+                            <li class="ui-btn-active"><a href="#">Tone / Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -359,7 +359,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone/Balance</a></li>
+                            <li><a href="#tone_page">Tone / Balance</a></li>
                             <li class="ui-btn-active"><a href="#">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -418,7 +418,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone/Balance</a></li>
+                            <li><a href="#tone_page">Tone / Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li class="ui-btn-active"><a href="#">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -479,7 +479,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone/Balance</a></li>
+                            <li><a href="#tone_page">Tone / Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li class="ui-btn-active"><a href="#">Presets</a></li>
@@ -590,7 +590,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone/Balance</a></li>
+                            <li><a href="#tone_page">Tone / Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -663,7 +663,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone/Balance</a></li>
+                            <li><a href="#tone_page">Tone / Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
