@@ -92,24 +92,27 @@
                 <input type="range" name="vol_slider" id="vol_slider" value="-10" min="-30" max="0" data-highlight="true" readonly />
                 </div>
                 <div class="ui-grid-a">
-                <div class="ui-block-a">
-                  <input name="level_down" type="submit" id="level_down" value="1dB" data-icon="minus" />
-                  <input name="level_down_3" type="submit" id="level_down_3" value="3dB" data-icon="minus" />
+                    <div class="ui-block-a">
+                      <input name="level_down" type="submit" id="level_down" value="1dB" data-icon="minus" />
+                      <input name="level_down_3" type="submit" id="level_down_3" value="3dB" data-icon="minus" />
+                    </div>
+                    <div class="ui-block-b">
+                      <input name="level_up" type="submit" id="level_up" value="1dB" data-icon="plus" data-iconpos="right" />
+                      <input name="level_up_3" type="submit" id="level_up_3" value="3dB" data-icon="plus" data-iconpos="right" />
+                    </div>
                 </div>
-                <div class="ui-block-b">
-                  <input name="level_up" type="submit" id="level_up" value="1dB" data-icon="plus" data-iconpos="right" />
-                  <input name="level_up_3" type="submit" id="level_up_3" value="3dB" data-icon="plus" data-iconpos="right" />
-                </div>
-                </div>
+                <!--
                 <div class="ui-grid-solo">
                     <input name="mute" type="submit" value="Mute" />
                 </div>
-                <p></p>
-                <div style="text-align:left;">Balance</div>
-                <hr></hr>
-                <p></p>
-                <div id="bal_div">
-                <input type="range" name="bal_slider" id="bal_slider" value="0" min="-12" max="12" data-highlight="false" readonly />
+                -->
+                <div class="ui-grid-a">
+                    <div class="ui-block-a">
+                      <input name="mono" type="submit" id="mono" value="Mono" data-icon="delete" data-iconpos="left" />
+                    </div>
+                    <div class="ui-block-b">
+                      <input name="mute" type="submit" id="mute" value="Mute" data-icon="grid" data-iconpos="right" />
+                    </div>
                 </div>
                 
             </div> <!--/content-primary -->
@@ -121,7 +124,7 @@
                         <li data-role="list-divider">Sections</li>
                         <li class="ui-btn-active"><a href="#">Volume</a></li>
                         <li><a href="#drc_page">DRC</a></li>
-                        <li><a href="#tone_page">Tone</a></li>
+                        <li><a href="#tone_page">Tone/Balance</a></li>
                         <li><a href="#loudness_page">Loudness</a></li>
                         <li><a href="#inputs_page">Inputs</a></li>
                         <li><a href="#presets_page">Presets</a></li>
@@ -200,7 +203,7 @@
                         <li data-role="list-divider">Sections</li>
                         <li><a href="#level_page">Volume</a></li>
                         <li class="ui-btn-active"><a href="#">DRC</a></li>
-                        <li><a href="#tone_page">Tone</a></li>
+                        <li><a href="#tone_page">Tone/Balance</a></li>
                         <li><a href="#loudness_page">Loudness</a></li>
                         <li><a href="#inputs_page">Inputs</a></li>
                         <li><a href="#presets_page">Presets</a></li>
@@ -264,7 +267,15 @@
                       <input name="eq_flat" type="submit" id="eq_flat" value="Flat" data-icon="delete" />
                   </div> 
                   <div id="tone_chartdiv" style="height:200px; width:100%; margin: 0 auto; text-align:center;"></div>
-                  
+
+                <p></p>
+                <div style="text-align:left;">Balance</div>
+                <hr></hr>
+                <p></p>
+                <div id="bal_div">
+                <input type="range" name="bal_slider" id="bal_slider" value="0" min="-12" max="12" data-highlight="false" readonly />
+                </div>
+                 
             </div> <!--/content-primary -->
 
             <div class="content-secondary">
@@ -274,7 +285,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li class="ui-btn-active"><a href="#">Tone</a></li>
+                            <li class="ui-btn-active"><a href="#">Tone/Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -348,7 +359,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone</a></li>
+                            <li><a href="#tone_page">Tone/Balance</a></li>
                             <li class="ui-btn-active"><a href="#">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -407,7 +418,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone</a></li>
+                            <li><a href="#tone_page">Tone/Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li class="ui-btn-active"><a href="#">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -468,7 +479,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone</a></li>
+                            <li><a href="#tone_page">Tone/Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li class="ui-btn-active"><a href="#">Presets</a></li>
@@ -579,7 +590,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone</a></li>
+                            <li><a href="#tone_page">Tone/Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
@@ -652,7 +663,7 @@
                             <li data-role="list-divider">Sections</li>
                             <li><a href="#level_page">Volume</a></li>
                             <li><a href="#drc_page">DRC</a></li>
-                            <li><a href="#tone_page">Tone</a></li>
+                            <li><a href="#tone_page">Tone/Balance</a></li>
                             <li><a href="#loudness_page">Loudness</a></li>
                             <li><a href="#inputs_page">Inputs</a></li>
                             <li><a href="#presets_page">Presets</a></li>
