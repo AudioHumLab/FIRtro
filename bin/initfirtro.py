@@ -375,6 +375,10 @@ def main(run_level):
         print "(initfirtro) Recuperando INPUT ..."
         client.firtro_socket("input restore")
         
+        # v2.0 Volumen opcional al arranque
+        if level_on_startup:
+            client.firtro_socket("level " + str(level_on_startup))
+
         # Alguna información
         print "\n(initfirtro):"
         if tone_defeat_on_startup:
