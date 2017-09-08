@@ -260,16 +260,6 @@ function update_controls () {
                 $("#vol_slider").slider("refresh");
             }
 
-            if ($("#bal_slider").attr("max") != $php_data['balance_variation']) {
-                $("#bal_slider").attr("max", $php_data['balance_variation']).slider("refresh");
-            }
-            if ($("#bal_slider").attr("min") != -$php_data['balance_variation']) {
-                $("#bal_slider").attr("min", -$php_data['balance_variation']).slider("refresh");
-            }
-            if ($("#bal_slider").attr("value") != $php_data['balance']) {
-                $("#bal_slider").attr("value", $php_data['balance']).slider("refresh");
-            }
-            
             if ($php_data['muted'] == true) {
                 $("#level_display1").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             }
@@ -414,9 +404,16 @@ function update_controls () {
         case 'tone_page':
         
             $("#tone_display").empty();
-            if ($php_data['muted'] == true) $("#tone_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
-            else $("#tone_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
+            if ($php_data['muted'] == true) 
+                $("#tone_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
+            else
+                $("#tone_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
+            
             $("#tone_display").append("<br/>Bass: " + $php_data["bass"] + " --- Treble: " + $php_data["treble"]);
+            
+            // traslado del balance aqui:
+            $("#tone_display").append("<br/>Balance: " + $php_data["balance"]);
+            
             //if ($php_data['warnings'] != "") $("#tone_display").append("<br/>Warning: "+$php_data['warnings']);
             // Array de warnings
             if ($php_data['warnings'] != "") {
@@ -441,7 +438,20 @@ function update_controls () {
                 $tone_plot.data=[$tone_plot_data]; // Esta es la linea que slo hace falta asignar una vez al grafico
                 $tone_plot.replot([$tone_plot_data]); // En el replot hay que pasarle la variable tamben, sino no funciona
                 //console.log ("Grafico de tonos actualizado");
-            }            
+            }
+
+            // Slider de balance (antes en level_page)
+            if ($("#bal_slider").attr("max") != $php_data['balance_variation']) {
+                $("#bal_slider").attr("max", $php_data['balance_variation']).slider("refresh");
+            }
+            if ($("#bal_slider").attr("min") != -$php_data['balance_variation']) {
+                $("#bal_slider").attr("min", -$php_data['balance_variation']).slider("refresh");
+            }
+            if ($("#bal_slider").attr("value") != $php_data['balance']) {
+                $("#bal_slider").attr("value", $php_data['balance']).slider("refresh");
+            }
+            
+                       
             break;
 
         case 'loudness_page':
@@ -675,13 +685,6 @@ $(document).on('pageinit', '#level_page', function(){
         event.preventDefault();
     });
     
-    // Slider de balance. Se envía el nombre y el valor al código PHP cada vez que cambie
-    $('#bal_slider').on('slidestop', function(event) {
-        //var $slider_name=event.currentTarget.name;
-        //var $value=event.currentTarget.value;
-        send_command (event.currentTarget.name, event.currentTarget.value);
-        event.preventDefault();
-    });
 });
 
 $(document).on('pageinit', '#drc_page', function(){
@@ -707,6 +710,14 @@ $(document).on('pageinit', '#tone_page', function(){
         
     // Creamos el objeto, con datos vacios. Posteriormente en la funcion update_controls() nos ocuparemos de actualizarlos.
     $tone_plot=$.jqplot('tone_chartdiv', [['']], $plot_options);
+
+    // Slider de balance. Se envía el nombre y el valor al código PHP cada vez que cambie
+    $('#bal_slider').on('slidestop', function(event) {
+        //var $slider_name=event.currentTarget.name;
+        //var $value=event.currentTarget.value;
+        send_command (event.currentTarget.name, event.currentTarget.value);
+        event.preventDefault();
+    });
 });
 
 $(document).on('pageinit', '#loudness_page', function(){
