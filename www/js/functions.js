@@ -264,7 +264,11 @@ function update_controls () {
                 $("#level_display1").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             }
             else {
-                $("#level_display1").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)"); 
+                //$("#level_display1").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)"); 
+                $("#level_display1").text("Vol: " + $php_data["level"]
+                                          + " dB (Hr: " + $php_data["headroom"] + " dB)"
+                                          + " Bal: " + $php_data["balance"]
+                                          ); 
             }
             
             $("#level_display21").text("FS: " + $php_data["fs"] + " Hz");
