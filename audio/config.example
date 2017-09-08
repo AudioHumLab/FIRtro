@@ -8,22 +8,29 @@
 
 [misc]
 
-; -- Tope de ganancia (dB) admitada en Brutefir.
-gmax = 0
-
-; -- Tonos a cero en el arranque
-tone_defeat_on_startup = True
-
 ; -- Retardo entre órdenes en segundos
 command_delay = .5
-
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
-
 ; -- Usar LCD externo (requiere servidor lcdproc en ejecucion)
 enable_lcd = False
 
-; -- Monitores de señal opcionales a los que también se conectará la input de FIRtro (opcional):
+; -- Tope de ganancia (dB) admitada en Brutefir.
+gmax = 0
+; -- Tonos a cero en el arranque (True/False)
+tone_defeat_on_startup = True
+; -- Volumen al encendido (opcional)
+level_on_startup = -30
+
+; -- Declaracion de puertos dummy:
+dummy_ports: dummy:null_0 dummy:null_1
+
+; Pausar players integrados si no son la input seleccionada (ahorro de %CPU):
+pause_players = True
+resume_players = True
+
+; --- MONITORES DE SEÑAL (Opcionales) NOTA: dejar en blanco si no se usan.
+; --- El selector de entradas conectara la fuente seleccionada también aquí
 ; - monitores internos (software):
 jack_internal_monitors = 
 ;jack_internal_monitors = ebumeter:in.L ebumeter:in.R JackTrip:send_1 JackTrip:send_2
