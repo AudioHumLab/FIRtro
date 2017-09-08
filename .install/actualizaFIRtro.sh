@@ -72,13 +72,15 @@ cd $destino
 # Preventivo: hacemos respaldos .LAST de lo que hubiera ya configurado
 ######################################################################
 echo "(i) Guardando respaldos *.LAST de archivos de configuración"
-# carpeta RAIZ:
+
+## carpeta RAIZ:
 cp .mpdconf                 .mpdconf.LAST
 cp .brutefir_defaults       .brutefir_defaults.LAST
-# carpeta MPLAYER
+## carpeta MPLAYER
 cp .mplayer/config          .mplayer/config.LAST
 cp .mplayer/channels.conf   .mplayer/channels.conf.LAST
-# carpeta AUDIO:
+
+## carpeta AUDIO:
 cp audio/status             audio/status.LAST
 cp audio/inputs             audio/inputs.LAST
 cp audio/config             audio/config.LAST
@@ -94,8 +96,14 @@ rm -f audio/PEQx*LAST       # por si hubiera anteriores no los replicamos
 for file in audio/PEQx* ; do
     mv "$file" "$file.LAST"
 done
-# carpeta WWW
-cp www/config/config.ini    audio/www_config.ini.LAST # en audio/ pq www/ desaparecerá
+
+## carpeta WWW:
+cp www/config/config.ini    tmp/www_config.ini.LAST # en tmp/ pq www/ desaparecerá
+
+## carpeta BIN/ (scripts de los BOTONES CUSTOM de la WEB):
+if ls bin/webcustombutton* >/dev/null 2>&1; then
+    cp bin/webcustombutton* tmp/
+fi
 
 #########################################################
 # Limpieza
@@ -140,7 +148,7 @@ if [ $conservar ]; then
 
     # carpeta WWW
     echo "    "www/config/config.ini
-    mv audio/www_config.ini.LAST    www/config/config.ini.LAST
+    mv -f tmp/www_config.ini.LAST    www/config/config.ini.LAST
     cp www/config/config.ini.LAST   www/config/config.ini
 
     # carpeta AUDIO:
@@ -161,6 +169,12 @@ else
     cp www/config/config.ini.example    www/config/config.ini
 fi
 
+########################################################################
+## carpeta BIN: scripts previos de los BOTONES CUSTOM de la WEB
+########################################################################
+if ls tmp/webcustombutton* >/dev/null 2>&1; then
+    mv -f tmp/webcustombutton* bin/
+fi
 
 #########################################################
 # restaurando FIFOS
