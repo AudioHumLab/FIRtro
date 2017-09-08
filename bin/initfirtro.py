@@ -62,6 +62,7 @@
 # - El server se arranca inmediatemante despues del nucleo del audio (jack+brutefir)
 #   para levantar los puertos dummy en jack que serán usados por MPD.
 # - Se deja de gestionar aquí el pausado de los players integrados.
+# - Nueva opción de volumen predefinido al arranque
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -349,6 +350,10 @@ def main(run_level):
                 control = Popen(["python",  "/home/firtro/bin/client_mpd.py"], stdout=None, stderr=None)
             else:
                 print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
+
+        # v2.0 Volumen opcional al arranque
+        if level_on_startup:
+            client.firtro_socket("level " + str(level_on_startup))
 
         # Restaura las entradas
         print "(initfirtro) Recuperando INPUT: " + input_name
