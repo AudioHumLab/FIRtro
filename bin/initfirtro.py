@@ -352,8 +352,8 @@ def main(run_level):
                 print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
 
         # v2.0 Volumen opcional al arranque
-        if level_on_startup:
-            client.firtro_socket("level " + str(level_on_startup))
+        if max_level_on_startup and level > max_level_on_startup:
+            client.firtro_socket("level " + str(max_level_on_startup))
 
         # Restaura las entradas
         print "(initfirtro) Recuperando INPUT: " + input_name
