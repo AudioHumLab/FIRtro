@@ -106,6 +106,26 @@ else:
 # (nota: esto es innecesario si se usan path completos en brutefir_config)
 os.chdir(audio_folder)
 
+def limit_level(level_on_startup, max_level_on_startup):
+    """ limita el volumen según lo configurado opcionalmente en audio/config
+    """
+    if max_level_on_startup:
+        max_level_on_startup = float(max_level_on_startup)
+    else:
+        max_level_on_startup = 0.00
+
+    # Si se especifica nivel un fijo al arranque...
+    if level_on_startup:
+        level_on_startup = float(level_on_startup)
+        # ... aún así le aplicaremos el límite:
+        newlevel = min(level_on_startup, max_level_on_startup)
+        client.firtro_socket("level " + str(newlevel))
+
+    # si no se pide nivel fijo
+    else:
+        if level > max_level_on_startup:
+            client.firtro_socket("level " + str(max_level_on_startup))
+
 def main(run_level):
 
     # Jack, Brutefir, Ecasound, Server
@@ -341,6 +361,9 @@ def main(run_level):
         # y nos ponemos al dia de los efectos del preset
         status.readfp(statusfile)
 
+        # v2.0 Volumen limitado opcional al arranque
+        limit_level(level_on_startup, max_level_on_startup)
+
         # V2.0 enlace con el control de volumen ficticio de MPD
         if mpd_volume_linked2firtro and load_mpd:
             print "(initfirtro) Esperando a MPD ..."
@@ -350,10 +373,6 @@ def main(run_level):
                 control = Popen(["python",  "/home/firtro/bin/client_mpd.py"], stdout=None, stderr=None)
             else:
                 print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
-
-        # v2.0 Volumen opcional al arranque
-        if max_level_on_startup and level > max_level_on_startup:
-            client.firtro_socket("level " + str(max_level_on_startup))
 
         # Restaura las entradas
         print "(initfirtro) Recuperando INPUT: " + input_name
