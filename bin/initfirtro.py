@@ -106,9 +106,8 @@ else:
 # (nota: esto es innecesario si se usan path completos en brutefir_config)
 os.chdir(audio_folder)
 
+# Para limitar el volumen según lo configurado opcionalmente en audio/config
 def limit_level(level_on_startup, max_level_on_startup):
-    """ limita el volumen según lo configurado opcionalmente en audio/config
-    """
     if max_level_on_startup:
         max_level_on_startup = float(max_level_on_startup)
     else:
