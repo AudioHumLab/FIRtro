@@ -14,7 +14,9 @@ config.readfp(configfile)
 configfile.close
 
 #[misc]
-max_level_on_startup   =  config.getfloat('misc', 'max_level_on_startup')
+max_level_on_startup   =  config.get('misc', 'max_level_on_startup')
+level_on_startup       =  config.get('misc', 'level_on_startup')
+tone_defeat_on_startup =  config.getboolean('misc', 'tone_defeat_on_startup')
 tone_defeat_on_startup =  config.get('misc', 'tone_defeat_on_startup')
 gmax =                    config.getfloat('misc', 'gmax')
 command_delay = config.getfloat('misc', 'command_delay')
