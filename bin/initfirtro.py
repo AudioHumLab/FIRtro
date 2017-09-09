@@ -376,8 +376,8 @@ def main(run_level):
         client.firtro_socket("input restore")
         
         # v2.0 Volumen opcional al arranque
-        if level_on_startup:
-            client.firtro_socket("level " + str(level_on_startup))
+        if max_level_on_startup and level > max_level_on_startup:
+            client.firtro_socket("level " + str(max_level_on_startup))
 
         # Alguna información
         print "\n(initfirtro):"
