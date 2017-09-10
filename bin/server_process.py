@@ -201,7 +201,6 @@ def do (order):
     change_peq = False
     change_input = False
     change_mono = False         ## <MONO> ##
-    monoCompens = 0.0           ## No computada en el cálculo de headroom, se suma a la gain enviada a Brutefir.
     write_status = True
     # write_speaker = False     ## obsoleto (ahora system_eq se guarda temporalmente en audio/status)
     change_polarity = False
@@ -240,7 +239,7 @@ def do (order):
     global muted
     global input_name
     global resampled            ## posible entrada resampleada ##
-    global mono                 ## <MONO> ##
+    global mono, monoCompens    ## <MONO> ##
     global replaygain_track
     global loudness_level_info
     global inputs
@@ -1043,6 +1042,7 @@ except:
     sys.exit(-1)
 
 #### Niveles:
+monoCompens = 0.0  ## <MONO> interno, no computado en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
 input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""
