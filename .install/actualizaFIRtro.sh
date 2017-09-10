@@ -56,7 +56,7 @@ if [ "$tmp" = "n" ] || [ "$tmp" = "N" ]; then
 fi
 
 read -r -p "ATENCION: deseas continuar con la actualización? [y/N] " tmp
-if [ "$tmp" = "n" ] || [ "$tmp" = "N" ]; then
+if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
     echo Bye.
     exit 0
 fi
