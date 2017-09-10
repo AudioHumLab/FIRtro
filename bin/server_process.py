@@ -201,6 +201,7 @@ def do (order):
     change_peq = False
     change_input = False
     change_mono = False         ## <MONO> ##
+    monoCompens = 0.0           ## No computada en el cálculo de headroom, se suma a la gain enviada a Brutefir.
     write_status = True
     # write_speaker = False     ## obsoleto (ahora system_eq se guarda temporalmente en audio/status)
     change_polarity = False
@@ -620,14 +621,14 @@ def do (order):
             # hacemos el cruce de canales de entrada:
             monostereo.setMono("on")
             # COMPENSAMOS NIVELES por la mezcla de canales
-            level += -6.0
+            monoCompens = -6.0
         else:
             # esto simplemente desconecta las entradas.
             monostereo.setMono("off")
             # marcamos para restaurar las entradas
             change_input = True
             # y COMPENSAMOS NIVELES
-            level += 6.0
+            monoCompens = +0.0
 
     ## v2.0a <CLOCK> no incluido en v2.0 :-|, se ha recuperado de Testing3 (OjO se ha reescrito)
     ## NOTA:    los cambios de CLOCK o de FS pueden ser:
@@ -805,8 +806,8 @@ def do (order):
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
-                gain_0 = gain
-                gain_1 = gain
+                gain_0 = gain + monoCompens
+                gain_1 = gain + monoCompens
                 if abs(balance) > balance_variation:
                     balance = copysign(balance_variation,balance)
                 if balance > 0:
