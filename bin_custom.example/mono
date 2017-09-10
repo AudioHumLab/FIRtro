@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# averiguamos los puertos de entrada a FIRtro
+loadEcasound=$(grep load_ecasound /home/firtro/audio/config | cut -d"=" -f2)
+if [ $loadEcasound == True ]; then
+    pfirtro="ecasound"
+else
+    pfirtro="brutefir"
+fi
+
+# funcion principal
+verMono () {
+grep "mono ="   /home/firtro/audio/status
+jack_conexiones.py ">" | grep " "$pfirtro | sort
+}
+
+# wrapper del control de FIRtro
+if [ $1 ]; then
+    control mono $1
+fi
+verMono
+echo ""
