@@ -1042,7 +1042,10 @@ except:
     sys.exit(-1)
 
 #### Niveles:
-monoCompens = 0.0  ## <MONO> interno, no computado en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
+## <MONO> compensacion interna, no computada en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
+monoCompens = 0.0
+if mono:
+    monoCompens = -6.0
 input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""
