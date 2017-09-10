@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ $1 ]; then
+    echo ""
+    echo "'ba' Brutefir attenuation"
+    echo "     Muestra la atenuación aplicada en las entradas de Brutefir."
+    echo "     Nota: puede diferir de 'gain' si estuviera activado 'mono'."
+    echo ""
+    exit 0
+fi
+
+lf | grep "from inputs" | cut -f10 -d" " | head -n2
