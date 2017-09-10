@@ -239,7 +239,7 @@ def do (order):
     global muted
     global input_name
     global resampled            ## posible entrada resampleada ##
-    global mono                 ## <MONO> ##
+    global mono, monoCompens    ## <MONO> ##
     global replaygain_track
     global loudness_level_info
     global inputs
@@ -620,14 +620,14 @@ def do (order):
             # hacemos el cruce de canales de entrada:
             monostereo.setMono("on")
             # COMPENSAMOS NIVELES por la mezcla de canales
-            level += -6.0
+            monoCompens = -6.0
         else:
             # esto simplemente desconecta las entradas.
             monostereo.setMono("off")
             # marcamos para restaurar las entradas
             change_input = True
             # y COMPENSAMOS NIVELES
-            level += 6.0
+            monoCompens = +0.0
 
     ## v2.0a <CLOCK> no incluido en v2.0 :-|, se ha recuperado de Testing3 (OjO se ha reescrito)
     ## NOTA:    los cambios de CLOCK o de FS pueden ser:
@@ -805,8 +805,8 @@ def do (order):
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
-                gain_0 = gain
-                gain_1 = gain
+                gain_0 = gain + monoCompens
+                gain_1 = gain + monoCompens
                 if abs(balance) > balance_variation:
                     balance = copysign(balance_variation,balance)
                 if balance > 0:
@@ -1042,6 +1042,10 @@ except:
     sys.exit(-1)
 
 #### Niveles:
+## <MONO> compensacion interna, no computada en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
+monoCompens = 0.0
+if mono:
+    monoCompens = -6.0
 input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""
