@@ -6,6 +6,7 @@
         presets.py  list        listado de presets disponibles
                     nombre      detalla los presets que coincidan
                     #número     carga un preset del listado
+                                sin argumentos muestra preset actual
 """
 # v1.1:
 # - Permite indicar "dirac_pulse" en vías full range (en ese caso no existe un pcm real).
@@ -258,19 +259,11 @@ def lista_de_presets():
 def printa_presets(x=''):
     """ muestra los presets definidos en el archivo presets.ini del altavoz
     """
-    if x in ("all", "list"):
+    if x in ("all", "list") or "-l" in x:
         i = 0
         for preset in presets.sections():
             i += 1
             print str(i) + ":", preset
-
-    elif x.isdigit():
-        i = 0
-        for preset in presets.sections():
-            i += 1
-            if int(x) == i:
-                print "(presets) Configurando preset: " + preset
-                Popen("control preset " + preset, shell=True)
 
     else:
         print
@@ -283,8 +276,28 @@ def printa_presets(x=''):
             print
 
 if __name__ == '__main__':
+
     if sys_argv[1:]:
-        printa_presets(sys_argv[1].lower())
+        opc = sys_argv[1]
+
+        # Ayuda
+        if "-h" in opc:
+            print __doc__
+            sys_exit(0)
+
+        # Selecciona un preset
+        elif opc.isdigit():
+            i = 0
+            for preset in presets.sections():
+                i += 1
+                if int(opc) == i:
+                    print "(presets) Configurando preset: " + preset
+                    Popen("control preset " + preset, shell=True)
+
+        # lista de presets
+        else:
+            printa_presets(opc)
+
+    # sin argumentos muestra el preset configurado
     else:
-        print __doc__
-        sys_exit(0)
+        Popen("grep preset /home/firtro/audio/status", shell=True)
