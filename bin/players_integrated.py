@@ -4,7 +4,10 @@
     para pausar/reaundar los players integrados
     al objeto de poder ahorrar %CPU en máquinas pequeñas.
 """
-# v1.0
+# v1.0b
+# - En algunos sistemas con escritorio, puede que mpd no arranque con FIRtro, aunque 
+#   si arrancará si FIRtro se reinicia durante la sesión de escritorio (under investigation).
+#   Para salvar este inconveniente se relanza MPD si resume_players=True.
 
 # NOTAS para mplayer:
 #   Si ordenamos "stop", mplayer desaparecerá de jack (noconnect en .mplayer/config),
@@ -13,7 +16,7 @@
 #   La solución es recurrir a los prefixes 'pausing' detallados en:
 #   http://www.mplayerhq.hu/DOCS/tech/slave.txt
 
-from subprocess import Popen
+from subprocess import Popen, check_output
 from getconfig import *
 from getstatus import *
 from wait4 import wait4result
@@ -43,6 +46,11 @@ def manage_pauses(input_name):
     if pause_players and resume_players:
 
         if 'mpd'    in input_name.lower() and load_mpd:
+            try:
+                check_output("pgrep mpd", shell=True)
+            except:
+                Popen("mpd > /dev/null 2>&1", shell=True)
+                wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
             print "(players) Reanudando MPD."
             Popen("mpc play > /dev/null 2>&1", shell=True)
 
