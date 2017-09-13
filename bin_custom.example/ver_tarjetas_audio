@@ -1,0 +1,10 @@
+#!/bin/bash
+# v2.0 se muestra el estado de las tarjetas y los procesos que usan los devices de audio
+
+echo ""
+echo "Estado de las tarjetas:"
+echo ""
+ver_tarjetas_audio.py
+echo ""
+
+ver_devices_audio
