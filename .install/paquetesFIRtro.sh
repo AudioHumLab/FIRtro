@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # v0.1
-# v0.2 se incluye la instalacion de py-jack desde sourceforge
+# v0.2 se incluye la instalacion de py-jack
 
 echo ""
 echo "(i) para instalar los paquetes debes ser"
