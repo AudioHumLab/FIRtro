@@ -68,7 +68,7 @@ sudo apt-get install python-dev gcc flex
 
 # Modulo py-jack para comunicar con Jack desde Python (no es paquete Debian)
 # OPC 1:
-# primero instala pip y actualiza la utilidad de paquetes python
+# primero instala pip y lo actualiza (pip es la utilidad de paquetes python)
 sudo apt-get install pip
 sudo pip install --upgrade pip
 # e instala py-jack
