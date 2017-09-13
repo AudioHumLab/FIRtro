@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# v0.1
+# v0.2 se incluye la instalacion de py-jack desde sourceforge
+
 echo ""
 echo "(i) para instalar los paquetes debes ser"
 echo "    un usuario autorizado (sudoer)"
@@ -52,12 +55,32 @@ sudo apt-get install brutefir
 sudo apt-get install ecasound ecatools python-ecasound ladspa-sdk fil-plugins
 
 # 4.7 Otro software
+# SoX
 sudo apt-get install sox libsox-dev libsoxr-dev libsoxr-lsr0
+# source-highlight
 sudo apt-get install source-highlight
+# librería para ALSA
 sudo apt-get install libasound2-dev
-# !!! OJO asumimos JACK2
+# Librerias para JACK (!) OJO asumimos JACK2
 sudo apt-get install libjack-jackd2-dev
+# Librerias para Python y para compilar
 sudo apt-get install python-dev gcc flex
+
+# Modulo py-jack para comunicar con Jack desde Python (no es paquete Debian)
+# OPC 1:
+# primero instala pip y actualiza la utilidad de paquetes python
+sudo apt-get install pip
+sudo pip install --upgrade pip
+# e instala py-jack
+sudo pip install py-jack
+# OPC 2: (se usa la 1)
+#cd /tmp
+#wget https://netix.dl.sourceforge.net/project/py-jack/py-jack/0.5.2/pyjack-0.5.2.tar.gz
+#tar -xf pyjack-0.5.2.tar.gz
+#cd pyjack-0.5.2
+#sudo sh install.sh
+#sudo rm -rf /tmp/pyjack-0.5.2*
+#cd
 
 # 7.1 Servidor de música MPD (Music Player Daemon)
 sudo apt-get install mpd mpc
