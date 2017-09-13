@@ -4,7 +4,7 @@ while :
 do
     clear
     echo "---------------------------------------------"
-    ver_tarjetas_audio $1
+    ver_tarjetas_audio.py $1
     sleep 3
 done
 
