@@ -131,7 +131,7 @@ cp -r $origen/.mplayer*     $destino/
 ########################################################################
 # Si se ha pedido conservar las configuraciones las restauramos:
 ########################################################################
-if [ $conservar ]; then
+if [ "$conservar" ]; then
     echo "(i) Restaurando configuraciones de usuario"
 
     # carpeta RAIZ:
