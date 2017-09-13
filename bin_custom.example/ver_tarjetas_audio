@@ -2,9 +2,13 @@
 # v2.0 se muestra el estado de las tarjetas y los procesos que usan los devices de audio
 
 echo ""
+ver_orden_tarjetas
+
+echo ""
 echo "Estado de las tarjetas:"
 echo ""
 ver_tarjetas_audio.py
 echo ""
 
+# muestra los procesos que usan los /dev/snd/*
 ver_devices_audio
