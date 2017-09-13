@@ -1,10 +1,8 @@
 #!/bin/bash
 
-
 echo ""
 echo "Procesos que usan los dispositivos de audio:"
 echo ""
-
 fuser -v /dev/snd/*
 
 echo ""
@@ -15,7 +13,11 @@ echo "              c      current directory.
               F      open file for writing.  F is omitted in default display mode.
               r      root directory.
               m      mmap'ed file or shared library."
+echo ""
 
-echo ""
-echo "    Nota:     'pulseaudio' puede usar una tarjeta no declarada en ~/audio/config."
-echo ""
+# truqui cutre
+printado=$(fuser -v /dev/snd/* 2>&1)
+if [[ $printado == *"pulseaudio"* ]]; then
+    echo "    Nota:     'pulseaudio' puede usar una tarjeta no declarada en ~/audio/config."
+    echo ""
+fi
