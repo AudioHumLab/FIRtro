@@ -265,9 +265,9 @@ function update_controls () {
             }
             else {
                 //$("#level_display1").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)"); 
-                $("#level_display1").text("VOL: " + $php_data["level"] + " dB"
-                                          + " / Hr: " + $php_data["headroom"] + " dB"
-                                          + " / Bal: " + $php_data["balance"]
+                $("#level_display1").text("VOL " + $php_data["level"] + " dB"
+                                          + " / Hr " + $php_data["headroom"] + " dB"
+                                          + " / Bal " + $php_data["balance"]
                                           ); 
             }
             
