@@ -33,19 +33,16 @@ sudo apt-get install python-numpy python-scipy python-matplotlib python-mpd
 # 4.3 Jack (OJO asumimos JACK2)
 sudo apt-get install jackd2
 sudo adduser firtro audio
-# QUEDA PENDIENTE editar /etc/dbus-1/system.conf
-#   <busconfig>
-#     ...
-#     ...
-#     ...
-#     <!-- FIRtro -->
-#       <policy user="firtro">
-#         <allow own="org.freedesktop.ReserveDevice1.Audio0"/>
-#         <allow own="org.freedesktop.ReserveDevice1.Audio1"/>
-#         <allow own="org.freedesktop.ReserveDevice1.Audio2"/>
-#         <allow own="org.freedesktop.ReserveDevice1.Audio3"/>
-#       </policy>
-#   </busconfig>
+# Ajuste policy en d-bus para que 'firtro' tenga acceso a los Device de Audio:
+tmp="  <!-- FIRtro -->\n \
+ <policy user=\"firtro\">\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio0\"\/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio1\"\/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio2\"\/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio3\"\/>\n \
+ <\/policy\>\n \
+\n<\/busconfig>\n"
+sudo sed -i -e "s/<\/busconfig>/$tmp/" /etc/dbus-1/system.conf
 
 # 4.4 Brutefir
 sudo apt-get install brutefir
