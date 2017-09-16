@@ -23,6 +23,7 @@ sudo apt-get install htop mc unzip rsync ipython # usbmount
 
 
 # 4.0 ALSA
+sudo apt-get install alsa-utils
 if ! grep "snd_dummy" /etc/modules >/dev/null 2>&1; then
     echo snd_dummy >> /etc/modules
 fi
