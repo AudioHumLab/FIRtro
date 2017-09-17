@@ -34,16 +34,39 @@ sudo apt-get install python-numpy python-scipy python-matplotlib python-mpd
 # 4.3 Jack (OJO asumimos JACK2)
 sudo apt-get install jackd2
 sudo adduser firtro audio
-# Ajuste policy en d-bus para que 'firtro' tenga acceso a los Device de Audio:
-tmp="  <!-- FIRtro -->\n \
+
+# Jack, ajuste policy en d-bus para que 'firtro' tenga acceso a los Device de Audio:
+fconfig=/etc/dbus-1/system-local.conf
+#  Variable auxiliar para crear un fichero de configuracion de dbus
+newcontent="<busconfig>\n\n \
+ <!-- FIRtro -->\n \
+ <policy user=\"firtro\">\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio0\"/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio1\"/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio2\"/>\n \
+   <allow own=\"org.freedesktop.ReserveDevice1.Audio3\"/>\n \
+ </policy>\n \
+\n</busconfig>"
+#  Para la edicion de un fichero existente con sed hay que escapar las barras,
+#  entonces usamos otra variable auxiliar:
+toadd="\n  <!-- FIRtro -->\n \
  <policy user=\"firtro\">\n \
    <allow own=\"org.freedesktop.ReserveDevice1.Audio0\"\/>\n \
    <allow own=\"org.freedesktop.ReserveDevice1.Audio1\"\/>\n \
    <allow own=\"org.freedesktop.ReserveDevice1.Audio2\"\/>\n \
    <allow own=\"org.freedesktop.ReserveDevice1.Audio3\"\/>\n \
- <\/policy\>\n \
-\n<\/busconfig>\n"
-sudo sed -i -e "s/<\/busconfig>/$tmp/" /etc/dbus-1/system.conf
+ <\/policy>\n \
+\n<\/busconfig>"
+# Si ya exitiera el fichero de configuracion dbus, lo editamos:
+if [ -f $fconfig ]; then
+    sudo sed -i -e "s/<\/busconfig>/$toadd/" $fconfig
+# pero si no existe lo creamos:
+else
+    # el 'echo' directo no funciona, usamos un paso intermedio:
+    echo $newcontent > $HOME"/tmp/system-local.conf"
+    sudo cp $HOME"/tmp/system-local.conf" $fconfig
+    rm $HOME"/tmp/system-local.conf"
+fi
 
 # 4.4 Brutefir
 sudo apt-get install brutefir
