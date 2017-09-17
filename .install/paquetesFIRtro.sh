@@ -121,6 +121,3 @@ sudo apt-get install mplayer
 echo "Limpieza de paquetes con apt autoremove:"
 sudo apt autoremove
 
-# grupos para el usuario firtro
-sudo usermod -a -G cdrom,audio,video,plugdev firtro
-
