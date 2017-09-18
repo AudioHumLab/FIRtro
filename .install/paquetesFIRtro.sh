@@ -103,6 +103,9 @@ sudo pip install py-jack
 #sudo rm -rf /tmp/pyjack-0.5.2*
 #cd
 
+# 6. Servidor de la página web
+sudo apt-get install apache2 libapache2-mod-php
+
 # 7.1 Servidor de música MPD (Music Player Daemon)
 sudo apt-get install mpd mpc
 # Servicios SystemV
