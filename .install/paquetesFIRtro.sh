@@ -67,6 +67,8 @@ else
     sudo cp $HOME"/tmp/system-local.conf" $fconfig
     rm $HOME"/tmp/system-local.conf"
 fi
+# reinicio del servicio DBUS
+sudo service dbus restart
 
 # 4.4 Brutefir
 sudo apt-get install brutefir
