@@ -48,11 +48,15 @@ mkdir -p /home/firtro/.mplayer
 # CARPETA TEMPORAL
 mkdir -p /home/firtro/tmp
 
+# Configuraciones con permisos de administrador:
 echo "(i) A continuación se solicitan credenciales 'sudo'"
 
+# Pertenencia a grupos de audio
 echo "Incluimos al usuario 'firtro' en grupos"
 sudo usermod -a -G cdrom,audio,video,plugdev firtro
 
+# Anulamos el uso de la particion de swap 
+# (OjO solo se procesa la primera posible particion declarada en /etc/fstab)
 echo "ANULA en /etc/fstab el uso de la partición de swap"
 linea=$(grep swap /etc/fstab | grep -v "#")
 if [ "$linea" ]; then
@@ -61,5 +65,4 @@ if [ "$linea" ]; then
 else
     echo "(i) no se ha localizado linea de swap en '/etc/fstab'"
 fi
-
 
