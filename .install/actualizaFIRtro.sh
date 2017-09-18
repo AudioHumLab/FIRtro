@@ -201,6 +201,28 @@ cd
 #########################################################
 # FIN
 #########################################################
-echo
+echo ""
 echo "(i) Hecho. Para probar la configuración de prueba de FIRtro ejecutar el comando:"
 echo "    initfirtro.py"
+echo ""
+
+#########################################################
+# Website 'FIRtro'
+#########################################################
+forig=$origen"/.install/FIRtro.conf"
+fdest=/etc/apache2/sites-available/FIRtro.conf"
+echo ""
+echo "(i) Comprobando el website 'FIRtro'"
+echo "    /etc/apache2/sites-available/FIRtro.conf"
+if ! cmp --quiet $forig $fdest; then
+    echo "(i) Se dispone de una nueva version."
+    echo "    Atención se necesitan permisos de administrador (sudo)."
+    sudo cp $forig $fdest
+    sudo a2ensite FIRtro.conf
+    sudo a2dissite 000-default.conf
+    sudo service apache2 reload
+else
+    echo "(i) No ha cambios en el website"
+fi
+
+
