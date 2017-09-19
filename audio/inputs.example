@@ -1,16 +1,20 @@
 ; Cada sección de este archivo será una entrada de FIRtro
 ; Las opciones admitidas en cada sección son:
 ;
-; in_ports:   puerto1 puerto2       Nombre de los puertos de lectura que ofrece la fuente en jack, 
-;                                   separados por espacios (*)
-; gain:       float(dB)             Ganancia a añadir a la entrada
+; in_ports:   puerto1 puerto2       (*) Nombre de los puertos de lectura que ofrece la fuente en jack, 
+;                                   separados por espacios.
+; gain:       float(dB)             Offset de ganancia de la entrada
 ; xo:         [lp|mp]               Tipo de crossover por defecto al conectar
 ; fs:         [44100|48000|...]     Fs deseada (deben existir filtros en la carpeta del altavoz)
-; clock:      [card|word|spdif]     Referencia para tarjetas con clock externo (ej:1010LT)
+; clock:      [card|word|spdif]     Referencia para tarjetas con clock externo (ej: M-Audio 1010LT)
 ; resampled:  [no|44100|48000|...]  Para fuentes a través de tarjetas resampleadas añadidas a jack
-; lirc_event: ID del evento de LIRC para el mando a distancia IR infrarrojos
+; lirc_event: ID del evento de LIRC Sirve para el mando a distancia IR infrarrojos
 ;
-; (*) Información sobre los nombres de los puertos de las distintas fuentes:
+; Nota: Podemos definir dos entradas que usan los mismos puertos jack, pero por ejemplo
+;       con un filtrado lp o mp según nos convenga.
+;       O bien con distintas ganancias, si fuera de interés.
+;
+; (*) Información sobre los nombres de los puertos de las distintas fuentes (abajo se proporcionan ejemplos):
 ;
 ; - MPD son los definidos en ~/.mpdconf,
 ;   combinando client_name + ':' + source_ports, por ejemplo: mpd_jack:out_0 mpd_jack:out_1
@@ -18,7 +22,7 @@
 ; - MPLAYER para TDT o CDDA son los definidos en ~/.mplayer/config,
 ;   sustituyendo 'noconnect' por 'out_0' y 'out_1', por ejemplo: mplayer_tdt:out_0 mplayer_tdt:out_1
 ;
-; - PULSEAUDIO no son definibles por el usuario.
+; - PULSEAUDIO no son definibles por el usuario, ver el ejemplo proporcionado abajo en [pulse].
 ;
 ; - TARJETA DE SONIDO principal (la gobernada por JACK) son:
 ;       system:capture_X 
