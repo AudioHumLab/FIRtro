@@ -194,6 +194,7 @@ brutefir
 # restaurando permisos
 #########################################################
 chmod +x bin/*
+chmod +x bin_custom/*
 chmod -R 755 www/*
 chmod 666 www/config/config*
 cd
