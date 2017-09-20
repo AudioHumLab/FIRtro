@@ -61,7 +61,7 @@ mpd_options =               config.get('path', 'mpd_options')
 mpd_volume_linked2firtro =  config.getboolean('path', 'mpd_volume_linked2firtro')
 
 load_mplayer_tdt  =         config.getboolean('path', 'load_mplayer_tdt')
-load_mplayer_cdd            config.getboolean('path', 'load_mplayer_cdda')
+load_mplayer_cdd =          config.getboolean('path', 'load_mplayer_cdda')
 mplayer_path =              config.get('path', 'mplayer_path')
 mplayer_options =           config.get('path', 'mplayer_options')
 cdda_fifo =                 HOME + "/cdda_fifo"
@@ -79,63 +79,63 @@ load_squeezeslave =         config.getboolean('path', 'load_squeezeslave')
 squeezeslave_path =         config.get('path', 'squeezeslave_path')
 squeezeslave_options =      config.get('path', 'squeezeslave_options')
 
-load_jacktrip =         config.getboolean('path', 'load_jacktrip')
-jacktrip_path =         config.get('path', 'jacktrip_path')
-jacktrip_options =      config.get('path', 'jacktrip_options')
+load_jacktrip =             config.getboolean('path', 'load_jacktrip')
+jacktrip_path =             config.get('path', 'jacktrip_path')
+jacktrip_options =          config.get('path', 'jacktrip_options')
 
-load_netjack =          config.getboolean('path', 'load_netjack')
-netjack_path =          config.get('path', 'netjack_path')
-netjack_options =       config.get('path', 'netjack_options')
+load_netjack =              config.getboolean('path', 'load_netjack')
+netjack_path =              config.get('path', 'netjack_path')
+netjack_options =           config.get('path', 'netjack_options')
 
-load_client175 =        config.getboolean('path', 'load_client175')
-client175_path =        config.get('path', 'client175_path')
-client175_options =     config.get('path', 'client175_options')
+load_client175 =            config.getboolean('path', 'load_client175')
+client175_path =            config.get('path', 'client175_path')
+client175_options =         config.get('path', 'client175_options')
 
-load_mpdlcd =           config.getboolean('path', 'load_mpdlcd')
-mpdlcd_path =           config.get('path', 'mpdlcd_path')
-mpdlcd_options =        config.get('path', 'mpdlcd_options')
+load_mpdlcd =               config.getboolean('path', 'load_mpdlcd')
+mpdlcd_path =               config.get('path', 'mpdlcd_path')
+mpdlcd_options =            config.get('path', 'mpdlcd_options')
 
-load_irexec =           config.getboolean('path', 'load_irexec')
-irexec_path =           config.get('path', 'irexec_path')
-irexec_options =        config.get('path', 'irexec_options')
+load_irexec =               config.getboolean('path', 'load_irexec')
+irexec_path =               config.get('path', 'irexec_path')
+irexec_options =            config.get('path', 'irexec_options')
 
 #[net]
-ip_address =            config.get('net', 'ip_address')
-bfcli_address =         config.get('net', 'bfcli_address')
-#port =                 config.getint('net', 'bfcli_port')
-bfcli_port =            config.getint('net', 'bfcli_port')
-control_address =       config.get('net', 'control_address')
-control_port =          config.getint('net', 'control_port')
+ip_address =                config.get('net', 'ip_address')
+bfcli_address =             config.get('net', 'bfcli_address')
+#port =                     config.getint('net', 'bfcli_port')
+bfcli_port =                config.getint('net', 'bfcli_port')
+control_address =           config.get('net', 'control_address')
+control_port =              config.getint('net', 'control_port')
 
 #[speakers]
-loudspeaker =           config.get('speakers', 'loudspeaker')
+loudspeaker =               config.get('speakers', 'loudspeaker')
 
 #[equalizer]
-freq_filename =         config.get('equalizer', 'frequencies')
-loudness_mag_filename = config.get('equalizer', 'loudness_mag_curves')
-loudness_pha_filename = config.get('equalizer', 'loudness_pha_curves')
-treble_mag_filename =   config.get('equalizer', 'treble_mag_curves')
-treble_pha_filename =   config.get('equalizer', 'treble_pha_curves')
-bass_mag_filename =     config.get('equalizer', 'bass_mag_curves')
-bass_pha_filename =     config.get('equalizer', 'bass_pha_curves')
-syseq_mag_filename =    config.get('equalizer', 'syseq_mag_curve')
-syseq_pha_filename =    config.get('equalizer', 'syseq_pha_curve')
+freq_filename =             config.get('equalizer', 'frequencies')
+loudness_mag_filename =     config.get('equalizer', 'loudness_mag_curves')
+loudness_pha_filename =     config.get('equalizer', 'loudness_pha_curves')
+treble_mag_filename =       config.get('equalizer', 'treble_mag_curves')
+treble_pha_filename =       config.get('equalizer', 'treble_pha_curves')
+bass_mag_filename =         config.get('equalizer', 'bass_mag_curves')
+bass_pha_filename =         config.get('equalizer', 'bass_pha_curves')
+syseq_mag_filename =        config.get('equalizer', 'syseq_mag_curve')
+syseq_pha_filename =        config.get('equalizer', 'syseq_pha_curve')
 
-step =                  config.getfloat('equalizer', 'step')
-loudness_SPLref =       config.getfloat('equalizer', 'loudness_SPLref')
-loudness_SPLmax =       config.getfloat('equalizer', 'loudness_SPLmax')
-loudness_SPLmin =       config.getfloat('equalizer', 'loudness_SPLmin')
-tone_variation =        config.getfloat('equalizer', 'tone_variation')
-balance_variation =     config.getfloat('equalizer', 'balance_variation')
-loudness_variation = config.getfloat('equalizer', 'loudness_variation')
-no_phase_xo = config.get('equalizer', 'no_phase_xo')
+step =                      config.getfloat('equalizer', 'step')
+loudness_SPLref =           config.getfloat('equalizer', 'loudness_SPLref')
+loudness_SPLmax =           config.getfloat('equalizer', 'loudness_SPLmax')
+loudness_SPLmin =           config.getfloat('equalizer', 'loudness_SPLmin')
+tone_variation =            config.getfloat('equalizer', 'tone_variation')
+balance_variation =         config.getfloat('equalizer', 'balance_variation')
+loudness_variation =        config.getfloat('equalizer', 'loudness_variation')
+no_phase_xo =               config.get('equalizer', 'no_phase_xo')
 
-syseq_mag_path = config_folder + syseq_mag_filename
-syseq_pha_path = config_folder + syseq_pha_filename
-loudness_mag_path = config_folder + loudness_mag_filename
-loudness_pha_path = config_folder + loudness_pha_filename
-treble_mag_path = config_folder + treble_mag_filename
-treble_pha_path = config_folder + treble_pha_filename
-bass_mag_path = config_folder + bass_mag_filename
-bass_pha_path = config_folder + bass_pha_filename
-freq_path = config_folder + freq_filename
+syseq_mag_path =            config_folder + syseq_mag_filename
+syseq_pha_path =            config_folder + syseq_pha_filename
+loudness_mag_path =         config_folder + loudness_mag_filename
+loudness_pha_path =         config_folder + loudness_pha_filename
+treble_mag_path =           config_folder + treble_mag_filename
+treble_pha_path =           config_folder + treble_pha_filename
+bass_mag_path =             config_folder + bass_mag_filename
+bass_pha_path =             config_folder + bass_pha_filename
+freq_path =                 config_folder + freq_filename
