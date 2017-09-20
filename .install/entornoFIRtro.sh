@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ALGUNAS VARIABLES DE ENTORNO
-
+echo "(i) configurando variables de entorno en ~/.bashrc"
 f=/home/firtro/.bashrc
 
 if ! grep "bin_custom" $f >/dev/null 2>&1; then
@@ -23,6 +23,7 @@ if ! grep "PYTHONDONTWRITEBYTECODE=1" $f >/dev/null 2>&1; then
 fi
 
 # Ajustes para el editor de archivos de texto nano
+echo "(i) configurando el editor nano"
 f=/home/firtro/.nanorc
 if ! grep "set tabsize 4" $f >/dev/null 2>&1; then
     echo "" >> $f
@@ -34,10 +35,12 @@ if ! grep "set tabstospaces" $f >/dev/null 2>&1; then
 fi
 
 # Ajustes DBUS para jackd2
+echo "(i) configurando sesion DBUS en ~/.profile"
 if ! grep "DBUS_SESSION_BUS_ADDRESS" /home/firtro/.profile >/dev/null 2>&1; then
     echo "export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket" >> /home/firtro/.profile
 fi
 
+echo "(i) creando subcarpetas en /home/firtro/"
 # CARPETA PARA MPD
 mkdir -p /home/firtro/.config/mpd/playlists
 mkdir -p /home/firtro/music
