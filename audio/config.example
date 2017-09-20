@@ -28,8 +28,8 @@ max_level_on_startup    =
 dummy_ports: dummy:null_0 dummy:null_1
 
 ; Pausar players integrados si no son la input seleccionada (ahorro de %CPU):
-pause_players = True
-resume_players = True
+pause_players = False
+resume_players = False
 
 ; --- MONITORES DE SEÑAL (opcionales dejar en blanco si no se usan)
 ; --- El selector de entradas conectara la fuente seleccionada también aquí
