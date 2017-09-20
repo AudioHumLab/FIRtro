@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 """
     FIRtro 2.0 Módulo de gestión de presets usado por server_process.
-    Uso informativo en línea de comando:
-        presets.py [list | preset*]  (*: detalla los que coincidan)
+    Uso en línea de comando:
+        presets.py  list        listado de presets disponibles
+                    nombre      detalla los presets que coincidan
+                    #número     carga un preset del listado
+                                sin argumentos muestra preset actual
 """
-# v1.1: 
+# v1.1:
 # - Permite indicar "dirac_pulse" en vías full range (en ese caso no existe un pcm real).
 # v1.2
 # - Gestiona PEQ (EQ paramétrico basado en Ecasound).
@@ -17,9 +20,11 @@
 # v1.3c
 # - Se deja de usar nc localhost para hablar con Brutefir, ahora usamos el cliente brutefir_cli.py
 # - Se continuá la ejecución en caso de que Brutefir no esté accesible
+# v1.3d
+# - Se amplían las opciones por línea de comandos
 
 import brutefir_cli
-import subprocess
+from subprocess import Popen
 import os
 from sys import path as sys_path, argv as sys_argv, exit as sys_exit
 import socket
@@ -65,7 +70,7 @@ presets.read(altavoz_folder + "/presets.ini")
 avisos = []
 
 def configura_preset(presetID, filter_type):
-    """ Esta función se encarga de configurar en el proceso brutefir el coeff de los xover 
+    """ Esta función se encarga de configurar en el proceso brutefir el coeff de los xover
         y subwoofer si procede, como se haya definido en el archivo de presets de usuario.
         Y devuelve los siguientes valores a server_process para que se actualize en el sistema:
         - la descripción del preset
@@ -81,7 +86,7 @@ def configura_preset(presetID, filter_type):
 
         for opcion in presets.options(presetID):
             valor = presets.get(presetID, opcion)
-            
+
             if opcion in ["drc"]:
                 drc_num = configura_drc_coeff(valor)
 
@@ -100,9 +105,9 @@ def configura_preset(presetID, filter_type):
 
             if opcion in ["peq"]:
                 peq = ajusta_peq(valor)
-        
+
         avisos += ["(presets) Enjoy!"]
-        # Conectamos a la tarjeta solo las vias definidas en el preset:      
+        # Conectamos a la tarjeta solo las vias definidas en el preset:
         conecta_tarjeta(viasActivas)
 
     else:
@@ -110,11 +115,11 @@ def configura_preset(presetID, filter_type):
         drc_num = drc_status
         balance = "0"
         peq = None
-        
+
     for aviso in avisos:
         print aviso
     avisos = []
-    
+
     return presetID, drc_num, balance, peq
 
 def busca_preset(presetID):
@@ -127,12 +132,12 @@ def ajusta_balance(balance):
     # para ajustar el balance hay que hablar con el FIRtro para que quede reflejado en la web y en status
     # o sea que esta función no hace nada :-)
     return balance
-           
+
 def ajusta_peq(peq):
     # para ajustar el PEQ hay que hablar con el FIRtro para que quede reflejado en la web y en status
     # o sea que esta función no hace nada :-)
     return peq
-           
+
 def configura_drc_coeff(fName):
     """ funcion auxiliar para cargar el drc del preset seleccionado
     """
@@ -148,7 +153,7 @@ def configura_drc_coeff(fName):
 
     # aquí vamos a hablar con el FIRtro en lugar de directamente con Brutefir
     # al objeto de respetar la gestión de DRCs integrada en el FIRtro.
-    drc_nums = []            
+    drc_nums = []
 
     for drc_coeff in drc_coeffs:
         # e.g.: 'c_drc2_L' --> '2'
@@ -163,7 +168,7 @@ def configura_drc_coeff(fName):
     except:
         return "0"
         avisos += ["(presets) algo no ha ido bien localizando el drc"]
-                
+
 def configura_via_coeff(via, fName, filter_type):
     """ funcion auxiliar para cargar en Brutefir (orden CLI: cfc) el filtro de xover del preset seleccionado
     """
@@ -172,13 +177,13 @@ def configura_via_coeff(via, fName, filter_type):
         filtro_pcm = "dirac pulse"
     else:
         filtro_pcm = filter_type + "-" + fName + ".pcm"
-        
+
     for coeff in brutefir.coeffs[2:]:           # eludimos recorrer los primeros coeff del EQ
 
         if filtro_pcm == coeff[2]:              # coeff[2] es el nombre del pcm
-            
+
             bCoeff = coeff[1]                   # coeff[1] es el nombre del coeff en Brutefir
-            
+
             for bFilter in vias_como_esta(via):
                 # enviamos el comando a Brutefir:
                 tmp = 'cfc "' + bFilter + '" "' + bCoeff + '"; quit;'
@@ -186,27 +191,27 @@ def configura_via_coeff(via, fName, filter_type):
                 brutefir_cli.bfcli(tmp)
 
 def configura_via_atten(via, atten):
-    """ funcion auxiliar para configurar la atten de una vía en Brutefir (orden CLI: cfoa) 
+    """ funcion auxiliar para configurar la atten de una vía en Brutefir (orden CLI: cfoa)
     """
     #global avisos
     for bFilter in vias_como_esta(via):
-        
+
         atten = str(float(atten))
 
         # enviamos el comando a Brutefir:
         tmp = 'cfoa "' + bFilter + '" "' + bFilter[2:] + '" ' + atten + '; quit;'
         #print ">>>>>>>  comando a Brutefir:", tmp # DEBUG
         brutefir_cli.bfcli(tmp)
-    
+
 def configura_via_delay(via, delay):
-    """ funcion auxiliar para configurar el retardo de una vía en Brutefir (orden CLI: cod) 
+    """ funcion auxiliar para configurar el retardo de una vía en Brutefir (orden CLI: cod)
     """
     #global avisos
     for bFilter in vias_como_esta(via):
-        
+
         bOutput = bFilter[2:]
         delaySamples = str(int(float(delay)/1000*44100))
-        
+
         # enviamos el comando a Brutefir:
         tmp = 'cod "' + bOutput + '" ' + delaySamples + '; quit;'
         #print ">>>>>>>  comando a Brutefir:", tmp # DEBUG
@@ -216,7 +221,7 @@ def configura_via_delay(via, delay):
 # del tipo indicado (fr, hi, mi, lo o sw):
 def vias_como_esta(tipoVia):
     """ funcion auxiliar que proporciona las vias de subwoofer definidas en brutefir
-    """ 
+    """
     viasComoEsta = []
     for filtroRunning in brutefir.filters_running:
         if tipoVia in filtroRunning[0]:
@@ -228,11 +233,10 @@ def conecta_tarjeta(viasActivas):
 
     # disponemos de la funcion brutefir.outputs que contiene el mapeo de vias
     for output in brutefir.outputs:
-        
+
         brutefirPort = "brutefir:" + output.split("/")[1].replace('"', '')
         jackPort     =               output.split("/")[0].replace('"', '')
-    
-    
+
         # ahora debemos evaluar si es una salida de una via activa
         salidaActiva = False
         for viaActiva in viasActivas:
@@ -244,33 +248,56 @@ def conecta_tarjeta(viasActivas):
             jack.disconnect(brutefirPort, jackPort)
 
     jack.detach()
-    
+
 # OjO no simplificar, usado en server_process para pasarla a la web via json
 def lista_de_presets():
     """ devuelve la lista de presets
     """
     return presets.sections()
-    
+
 # Para uso en la línea de comandos
 def printa_presets(x=''):
     """ muestra los presets definidos en el archivo presets.ini del altavoz
     """
-    if x in ("all", "list"):
-        print "\n--- Presets disponibles:"
+    if x in ("all", "list") or "-l" in x:
+        i = 0
         for preset in presets.sections():
-            print preset
+            i += 1
+            print str(i) + ":", preset
+
     else:
+        print
         for preset in lista_de_presets():
             if x in preset:
-                print "\n[" + preset + "]"
+                print "[" + preset + "]"
                 print "via:".ljust(12), " ".ljust(4), "atten delay   filtro"
                 for option in presets.options(preset):
-                    print option.ljust(12), "=".ljust(4), presets.get(preset, option) 
-    print
+                    print option.ljust(12), "=".ljust(4), presets.get(preset, option)
+            print
 
 if __name__ == '__main__':
+
     if sys_argv[1:]:
-        printa_presets(sys_argv[1].lower())
+        opc = sys_argv[1]
+
+        # Ayuda
+        if "-h" in opc:
+            print __doc__
+            sys_exit(0)
+
+        # Selecciona un preset
+        elif opc.isdigit():
+            i = 0
+            for preset in presets.sections():
+                i += 1
+                if int(opc) == i:
+                    print "(presets) Configurando preset: " + preset
+                    Popen("control preset " + preset, shell=True)
+
+        # lista de presets
+        else:
+            printa_presets(opc)
+
+    # sin argumentos muestra el preset configurado
     else:
-        print __doc__
-        sys_exit(0)
+        Popen("grep preset /home/firtro/audio/status", shell=True)

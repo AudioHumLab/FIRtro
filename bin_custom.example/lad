@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ $1 ]; then
+    control level_add $1
+fi
+grep "level =" /home/firtro/audio/status

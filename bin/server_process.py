@@ -36,8 +36,10 @@
 # - Se separa la función 'firtroData' (antes 'fdata') que formatea en json 
 #   la información de FIRtro que se facilita a la página web de control.
 #
-# v2.0d (2017-ago)
+# v2.0d (2017-ago,sep)
 # - Debian 9.1: se asegura type integer en los índices de las arrays de tonos y loudness
+# - Levanta puertos dummy en jack para ser usados por ej por MPD
+# - Se pone write_status=False en la orden 'input restore'
 #
 #----------------------------------------------------------------------
 
@@ -69,6 +71,7 @@ import peq2fr                   ##        Módulo auxiliar para procesar archivo
 import client_mpd               ## <MPD>  Control de volumen enlazado con MPD.
 MPD_GAIN_FWD_TIMER = .2         ##        Temporizador que elude la orden 'gain' que llega de MPD
                                 ##        despueś de ejecutar aquí un ajuste de 'level'.
+import jack_dummy_ports         ## Levanta puertos dummy en jack para ser usados por ej MPD. Solo esta línea.
 
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
@@ -236,7 +239,7 @@ def do (order):
     global muted
     global input_name
     global resampled            ## posible entrada resampleada ##
-    global mono                 ## <MONO> ##
+    global mono, monoCompens    ## <MONO> ##
     global replaygain_track
     global loudness_level_info
     global inputs
@@ -328,6 +331,7 @@ def do (order):
                     change_xovers = True
                     change_eq = True
                     muted = False
+                    write_status = False
                 elif name == input_name.lower():
                     # Si la entrada ya es la activa, y no estoy restaurandolas, no hago nada
                     writestatus = False
@@ -616,14 +620,14 @@ def do (order):
             # hacemos el cruce de canales de entrada:
             monostereo.setMono("on")
             # COMPENSAMOS NIVELES por la mezcla de canales
-            level += -6.0
+            monoCompens = -6.0
         else:
             # esto simplemente desconecta las entradas.
             monostereo.setMono("off")
             # marcamos para restaurar las entradas
             change_input = True
             # y COMPENSAMOS NIVELES
-            level += 6.0
+            monoCompens = +0.0
 
     ## v2.0a <CLOCK> no incluido en v2.0 :-|, se ha recuperado de Testing3 (OjO se ha reescrito)
     ## NOTA:    los cambios de CLOCK o de FS pueden ser:
@@ -801,8 +805,8 @@ def do (order):
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
-                gain_0 = gain
-                gain_1 = gain
+                gain_0 = gain + monoCompens
+                gain_1 = gain + monoCompens
                 if abs(balance) > balance_variation:
                     balance = copysign(balance_variation,balance)
                 if balance > 0:
@@ -1038,6 +1042,10 @@ except:
     sys.exit(-1)
 
 #### Niveles:
+## <MONO> compensacion interna, no computada en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
+monoCompens = 0.0
+if mono:
+    monoCompens = -6.0
 input_gain = 0
 gain = level + input_gain + ref_level_gain
 loudness_level_info = ""

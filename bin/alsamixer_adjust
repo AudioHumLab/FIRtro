@@ -1,0 +1,41 @@
+#!/bin/bash
+# v1.0
+
+if [ ! $1 ]; then
+    echo
+    echo "(i) Se muestra el mixer de cada tarjeta para poder reajustarlo"
+    echo "    y guardar los ajustes en /home/firtro/audio/asound.TARJETA,"
+    echo "    que se usarán al arranque de FIRtro"
+    echo ""
+    echo "    Uso:"
+    echo "    alsamixer_adjust  all | <TARJETA>"
+    echo ""
+    exit 0
+
+else
+    if [ "$1" == "all" ]; then
+        # Leemos la coleccion de todas las tarjetas del sistema, aunque no se usen en FIRtro.
+        cards=$(cat /proc/asound/cards | cut -s -d"[" -f2 | cut -s -d"]" -f1)
+    else
+        cards=$1
+    fi
+fi
+
+for card in $cards; do
+    echo ""
+    read -r -p "--- tarjeta: "$card" (pulsa INTRO, luego ESCAPE para salir del mixer)"
+    alsamixer -Dhw:$card
+    ftarget="/home/firtro/audio/asound."$card
+    read -r -p "ATENCION: deseas guardar los ajustes en "$ftarget"? [y/N] " tmp
+    if [ "$tmp" == "y" ] || [ "$tmp" == "Y" ]; then
+        asoundfile="/home/firtro/audio/asound."$card
+        if [ -f $asoundfile ]; then
+            cp $asoundfile $asoundfile".bak"
+            echo "(i) Se ha guardado copia del anterior en "$asoundfile".bak"
+        else
+            echo "(i) Ajustes guardados. No se ha localizado ajuste previo"
+        fi
+        alsactl --file $asoundfile store $card
+    fi
+    echo ""
+done

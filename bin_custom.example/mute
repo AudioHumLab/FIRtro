@@ -1,0 +1,22 @@
+#!/bin/bash
+
+function printhelp () {
+    echo
+    echo "    A shortcut for 'control mute | unmute | toggle'"
+    echo "    Use:  mute on|off     to set"
+    echo "          mute            toggle"
+    echo
+}
+
+# wrapper del control de FIRtro
+if   [ "$1" == "on" ]; then
+    control mute
+elif [ "$1" == "off" ]; then
+    control unmute
+elif [[ "$1" == *"-h"* ]]; then
+    printhelp
+    exit 0
+else
+    control toggle
+fi
+grep muted /home/firtro/audio/status

@@ -56,7 +56,7 @@ if [ "$tmp" = "n" ] || [ "$tmp" = "N" ]; then
 fi
 
 read -r -p "ATENCION: deseas continuar con la actualización? [y/N] " tmp
-if [ "$tmp" = "n" ] || [ "$tmp" = "N" ]; then
+if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
     echo Bye.
     exit 0
 fi
@@ -201,6 +201,37 @@ cd
 #########################################################
 # FIN
 #########################################################
-echo
+echo ""
 echo "(i) Hecho. Para probar la configuración de prueba de FIRtro ejecutar el comando:"
 echo "    initfirtro.py"
+echo ""
+
+
+#########################################################
+# Website 'FIRtro'
+#########################################################
+forig=$origen"/.install/FIRtro.conf"
+fdest="/etc/apache2/sites-available/FIRtro.conf"
+actualizar=1
+echo ""
+echo "(i) Comprobando el website 'FIRtro'"
+echo "    /etc/apache2/sites-available/FIRtro.conf"
+echo ""
+
+if [ -f $fdest ]; then
+    if ! cmp --quiet $forig $fdest; then
+        echo "(i) Se dispone de una nueva version en "
+        echo "    "$forig"\n"
+    else
+        echo "(i) No ha cambios en el website\n"
+        actualizar=""
+    fi
+fi
+if [ "$actualizar" ]; then
+    echo "Atencion se necesitan permisos de administrador (sudo).\n"
+    sudo cp $forig $fdest
+    sudo a2ensite FIRtro.conf
+    sudo a2dissite 000-default.conf
+    sudo service apache2 reload
+fi
+

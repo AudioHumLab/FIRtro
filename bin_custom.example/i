@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ $1 ]; then
+    control input $1
+fi
+grep "input =" /home/firtro/audio/status

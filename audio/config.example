@@ -18,9 +18,11 @@ enable_lcd = False
 ; -- Tope de ganancia (dB) admitada en Brutefir.
 gmax = 0
 ; -- Tonos a cero en el arranque (True/False)
-tone_defeat_on_startup = True
-; -- Volumen maximo al encendido (opcional)
-max_level_on_startup = -30
+tone_defeat_on_startup  = True
+; -- Volumen al encendido (opcional o dejar en blanco)
+level_on_startup        = -30
+; -- Volumen maximo al encendido (opcional o dejar en blanco)
+max_level_on_startup    =
 
 ; -- Declaracion de puertos dummy:
 dummy_ports: dummy:null_0 dummy:null_1
@@ -29,18 +31,20 @@ dummy_ports: dummy:null_0 dummy:null_1
 pause_players = True
 resume_players = True
 
-; --- MONITORES DE SEÑAL (Opcionales) NOTA: dejar en blanco si no se usan.
+; --- MONITORES DE SEÑAL (opcionales dejar en blanco si no se usan)
 ; --- El selector de entradas conectara la fuente seleccionada también aquí
-; - monitores internos (software):
-jack_internal_monitors = 
+; - monitores "INTERNOS" (puertos de la tarjeta principal o SW presente en jack)
 ;jack_internal_monitors = ebumeter:in.L ebumeter:in.R JackTrip:send_1 JackTrip:send_2
-; - monitores externos (tarjetas de sonido):
-jack_external_monitors = 
+jack_internal_monitors = 
+; - monitores "EXTERNOS" (tarjetas de sonido diferentes de la principal):
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
+jack_external_monitors = 
+
 
 [speakers]
 
 loudspeaker = ejemplo2vias
+
 
 [presets]
 
@@ -105,8 +109,6 @@ ecasound_ports = ecasound:in_1 ecasound:in_2
 load_mpd = False
 mpd_path = /usr/bin/mpd
 mpd_options = 
-; Pausar mpd si no es la input seleccionada (ahorro de %CPU):
-pause_mpd = False
 ; El volumen de MPD puede gobernar el volumen de FIRtro (OjO en fase BETA):
 mpd_volume_linked2firtro = False
 
@@ -116,9 +118,6 @@ load_mplayer_cdda = False
 load_mplayer_tdt  = False
 ; -- Opciones: -quiet para ver como cambia de canal, -really-quiet para no ver nada, -nolirc desactiva Lirc:
 mplayer_options = -quiet -nolirc
-; Dejar mplayer en idle si no es la input seleccionada (ahorro de %CPU):
-pause_mplayer_tdt = False
-pause_mplayer_cdda = False
 
 ; -- SHAIRPORT -- Opcional (FIRtro como altavoz AirPlay)
 load_shairport = False
@@ -135,8 +134,6 @@ squeezeslave_options = -F -R -M/home/firtro/.squeezeslave/squeezeslave.log
 load_mopidy = False
 mopidy_path = /usr/bin/mopidy
 mopidy_options = 
-; Pausar mopidy si no es la input seleccionada (ahorro de %CPU):
-pause_mopidy = False
 
 ; -- NETJACK -- Opcional
 load_netjack = False

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# ADHESION A GRUPOS (OJO necesitaria firtro en sudo, se traslada a paquetesFIRtro.sh)
-# sudo usermod -a -G cdrom,audio,video,plugdev firtro
-
 # ALGUNAS VARIABLES DE ENTORNO
 
 f=/home/firtro/.bashrc
@@ -50,3 +47,22 @@ mkdir -p /home/firtro/.mplayer
 
 # CARPETA TEMPORAL
 mkdir -p /home/firtro/tmp
+
+# Configuraciones con permisos de administrador:
+echo "(i) A continuación se solicitan credenciales 'sudo'"
+
+# Pertenencia a grupos de audio
+echo "Incluimos al usuario 'firtro' en grupos"
+sudo usermod -a -G cdrom,audio,video,plugdev firtro
+
+# Anulamos el uso de la particion de swap 
+# (OjO solo se procesa la primera posible particion declarada en /etc/fstab)
+echo "ANULA en /etc/fstab el uso de la partición de swap"
+linea=$(grep swap /etc/fstab | grep -v "#")
+if [ "$linea" ]; then
+    echo "ATENCION: se va a deshabilitar el uso de swap en '/etc/fstab'"
+    sudo sed -i -e "s/$linea/#ANULADO FIRtro:$linea/" /etc/fstab
+else
+    echo "(i) no se ha localizado linea de swap en '/etc/fstab'"
+fi
+
