@@ -19,9 +19,9 @@ enable_lcd = False
 gmax = 0
 ; -- Tonos a cero en el arranque (True/False)
 tone_defeat_on_startup  = True
-; -- Volumen al encendido (opcional)
+; -- Volumen al encendido (opcional o dejar en blanco)
 level_on_startup        = -30
-; -- Volumen maximo al encendido (opcional)
+; -- Volumen maximo al encendido (opcional o dejar en blanco)
 max_level_on_startup    =
 
 ; -- Declaracion de puertos dummy:
@@ -31,19 +31,20 @@ dummy_ports: dummy:null_0 dummy:null_1
 pause_players = True
 resume_players = True
 
-; --- MONITORES DE SEÑAL (Opcionales) NOTA: dejar en blanco si no se usan.
+; --- MONITORES DE SEÑAL (opcionales dejar en blanco si no se usan)
 ; --- El selector de entradas conectara la fuente seleccionada también aquí
-; - monitores internos (software):
-jack_internal_monitors = 
+; - monitores "INTERNOS" (puertos de la tarjeta principal o SW presente en jack)
 ;jack_internal_monitors = ebumeter:in.L ebumeter:in.R JackTrip:send_1 JackTrip:send_2
-; - monitores externos (tarjetas de sonido):
-jack_external_monitors = 
+jack_internal_monitors = 
+; - monitores "EXTERNOS" (tarjetas de sonido diferentes de la principal):
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
+jack_external_monitors = 
 
 
 [speakers]
 
 loudspeaker = ejemplo2vias
+
 
 [presets]
 
