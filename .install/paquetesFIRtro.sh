@@ -15,10 +15,10 @@ if [ "$tmp" != "y" ] && [ "$tmp" != "Y" ]; then
     exit 0
 fi
 
-# Actualizamos las BD de paquetes
+echo "(i) Actualizamos las BD de paquetes"
 sudo apt-get update
 
-# 3 Paquetes de software de utilidad general
+# Paquetes de software de utilidad general
 sudo apt-get install htop mc unzip rsync ipython # usbmount
 
 
@@ -72,7 +72,7 @@ sudo service dbus restart
 
 # 4.4 Brutefir
 sudo apt-get install brutefir
-# !!!  OjO AQUI FALTARIA INSERTAR swappoff -a antes del exit 0 en /etc/rc.local
+# Nota el ajuste de swapoff se gestiona en otro script de instalacion
 
 # 4.5 Ecasound
 sudo apt-get install ecasound ecatools python-ecasound ladspa-sdk fil-plugins
@@ -107,6 +107,7 @@ sudo pip install py-jack
 
 # 6. Servidor de la página web
 sudo apt-get install apache2 libapache2-mod-php
+# Nota: la activacion del site web se gestiona en otro script.
 
 # 7.1 Servidor de música MPD (Music Player Daemon)
 sudo apt-get install mpd mpc
