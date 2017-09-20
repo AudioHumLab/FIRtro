@@ -127,3 +127,7 @@ sudo apt-get install mplayer
 echo "Limpieza de paquetes con apt autoremove:"
 sudo apt autoremove
 
+echo ""
+echo "FIN de la instalacion y autolimpieza de paquetes"
+echo ""
+
