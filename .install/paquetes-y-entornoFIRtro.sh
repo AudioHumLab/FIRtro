@@ -1,4 +1,4 @@
 #!/bin/bash
 
-/home/firtro/tmp/entornoFIRtro.sh
-/home/firtro/tmp/paquetesFIRtro.sh
+sh /home/firtro/tmp/entornoFIRtro.sh
+sh /home/firtro/tmp/paquetesFIRtro.sh
