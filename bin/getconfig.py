@@ -61,7 +61,7 @@ mpd_options =               config.get('path', 'mpd_options')
 mpd_volume_linked2firtro =  config.getboolean('path', 'mpd_volume_linked2firtro')
 
 load_mplayer_tdt  =         config.getboolean('path', 'load_mplayer_tdt')
-load_mplayer_cdd =          config.getboolean('path', 'load_mplayer_cdda')
+load_mplayer_cda =          config.getboolean('path', 'load_mplayer_cdda')
 mplayer_path =              config.get('path', 'mplayer_path')
 mplayer_options =           config.get('path', 'mplayer_options')
 cdda_fifo =                 HOME + "/cdda_fifo"
