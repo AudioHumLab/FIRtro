@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function printhelp () {
+    echo
+    echo "    A shortcut for 'radio_channel.py <channel#>'"
+    echo
+}
+
+# wrapper del control de FIRtro
+if   [ "$1" ]; then
+    radio_channel.py $1
+else
+    printhelp
+fi
+grep radio /home/firtro/audio/status
