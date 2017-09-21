@@ -12,7 +12,7 @@
 command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
-; -- Usar LCD externo (requiere servidor lcdproc en ejecucion)
+; -- Usar LCD externo (requiere que esté corriendo el servidor LCDd de la suite lcdproc)
 enable_lcd = False
 
 ; -- Tope de ganancia (dB) admitada en Brutefir.
@@ -164,12 +164,6 @@ client175_path = /home/firtro/.client175/server.py
 client175_options = >/dev/null 2>&1
 
 ; ---- DISPLAYS: ----
-
-; -- LCD_STUFF -- Opcional (para mostrar info de mpd en el lcd externo)
-; Da problemas con GLIB, se sustituye por MPDLCD
-; load_lcd_stuff = False
-; lcd_stuff_path = /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff
-; lcd_stuff_options = -c /usr/local/bin/lcdproc/clients/lcd-stuff/lcd-stuff.conf -f 0
 
 ; -- MPDLCD -- Opcional (para mostrar info de mpd en el lcd externo)
 ; https://pypi.python.org/pypi/mpdlcd
