@@ -1,8 +1,8 @@
 [room EQ]
 system_eq = True
-room_gain = 3.0
+room_gain = 4.5
 house_atten = 2.0
-peq = cd+sub
+peq = off
 peqdefeat = False
 drc_eq = 0
 
@@ -15,7 +15,7 @@ bass = 0.0
 [level]
 replaygain_track = False
 level = -24.0
-headroom = 26.0
+headroom = 26.2
 balance = 0
 
 [general]
@@ -29,6 +29,6 @@ polarity = +
 [inputs]
 radio_prev = 2
 radio = 1
-input = analog
+input = mpd
 resampled = no
 mono = off
