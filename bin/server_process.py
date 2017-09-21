@@ -622,7 +622,8 @@ def do (order):
             # COMPENSAMOS NIVELES por la mezcla de canales
             monoCompens = -6.0
         else:
-            # esto simplemente desconecta las entradas.
+            mono = "off" # corrige si se pide una opcion incorrecta
+            # esto simplemente desconecta las entradas:
             monostereo.setMono("off")
             # marcamos para restaurar las entradas
             change_input = True
