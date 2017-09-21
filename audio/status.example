@@ -29,6 +29,6 @@ polarity = +
 [inputs]
 radio_prev = 2
 radio = 1
-input = mpd
+input = analog
 resampled = no
 mono = off
