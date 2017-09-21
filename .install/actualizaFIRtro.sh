@@ -148,8 +148,7 @@ if [ "$conservar" ]; then
 
     # carpeta WWW
     echo "    "www/config/config.ini
-    mv -f tmp/www_config.ini.LAST    www/config/config.ini.LAST
-    cp www/config/config.ini.LAST   www/config/config.ini
+    cp tmp/www_config.ini.LAST      www/config/config.ini
 
     # carpeta AUDIO:
     for file in audio/*LAST ; do
@@ -168,6 +167,9 @@ else
     cp audio/inputs.example             audio/inputs
     cp www/config/config.ini.example    www/config/config.ini
 fi
+
+# Caso especial que se ha tratado en tmp/ lo quitamos de ahí
+mv -f tmp/www_config.ini.LAST    www/config/config.ini.LAST
 
 ########################################################################
 ## carpeta BIN: scripts previos de los BOTONES CUSTOM de la WEB
