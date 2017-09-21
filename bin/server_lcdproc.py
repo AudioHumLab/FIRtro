@@ -24,7 +24,7 @@ def lcd_cmd(lcdproc_cmd):
     lcdproc_out = lcdproc_socket.recv(1024).strip('\n')
     #lcdproc_out = lcdproc_out.strip('\n')
     return(lcdproc_out)
-    
+
 def lcd_cmd_s(lcdproc_cmd):
     lcdproc_socket.send(lcdproc_cmd + '\n')
 
@@ -54,13 +54,19 @@ def lcd_close():
     lcdproc_socket.close()
 
 def lcd_configure():
-    # Creamos las páginas
+    # Creamos la(s) páginas
+    # SCREEN_1
     lcd_cmd_s('screen_add scr_1')
-    lcd_cmd_s('widget_add scr_1 level string')
-    lcd_cmd_s('widget_add scr_1 bass string')
-    lcd_cmd_s('widget_add scr_1 treble string')
-    lcd_cmd_s('widget_add scr_1 loud string')
-    lcd_cmd_s('widget_add scr_1 input string')
+    lcd_cmd_s('widget_add scr_1 level       string')
+    lcd_cmd_s('widget_add scr_1 headroom    string')
+    lcd_cmd_s('widget_add scr_1 balance     string')
+    lcd_cmd_s('widget_add scr_1 bass        string')
+    lcd_cmd_s('widget_add scr_1 treble      string')
+    lcd_cmd_s('widget_add scr_1 loud        string')
+    lcd_cmd_s('widget_add scr_1 input       string')
+    lcd_cmd_s('widget_add scr_1 preset      string')
+    lcd_cmd_s('widget_add scr_1 mono        string')
+    lcd_cmd_s('widget_add scr_1 ftype       string')
 
 def init(client_name):
     lcd_size = lcd_open(client_name)
@@ -69,16 +75,37 @@ def init(client_name):
     return lcd_size
 
 def set_data (type, value):
+                                            #   COL ROW
     if (type == 'level'):
-        lcd_cmd_s('widget_set scr_1 level 1 1 "Volume: ' + value + ' dB"')
+        lcd_cmd_s('widget_set scr_1 level       1   1   "V ' + value + '"')
+
+    elif (type == 'headroom'):
+        lcd_cmd_s('widget_set scr_1 headroom    9   1   "Hr ' + value + '"')
+
+    elif (type == 'balance'):
+        lcd_cmd_s('widget_set scr_1 balance     17  1   "B ' + value + '"')
+
     elif (type == 'bass'):
-        lcd_cmd_s('widget_set scr_1 bass 1 2 "Bass: ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 bass        1   2   "Bas ' + value + '"')
+
     elif (type == 'treble'):
-        lcd_cmd_s('widget_set scr_1 treble 10 2 "Trbl: ' + value + '"')
-    elif (type == 'loudness'):
-        lcd_cmd_s('widget_set scr_1 loud 1 3 "Loud: ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 treble      9   2   "Tre ' + value + '"')
+
+    elif (type == 'mono'):
+        lcd_cmd_s('widget_set scr_1 mono        19  2   "' + value + '"')
+
     elif (type == 'input'):
-        lcd_cmd_s('widget_set scr_1 input 1 4 "Input: ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 input       1   3   "' + value + '"')
+
+    elif (type == 'loud'):
+        lcd_cmd_s('widget_set scr_1 loud        15  3   "Ld:' + value + '"')
+
+    elif (type == 'preset'):
+        lcd_cmd_s('widget_set scr_1 preset      1   4   "' + value + '"')
+
+    elif (type == 'ftype'):
+        lcd_cmd_s('widget_set scr_1 ftype      19 4 "' + value + '"')
+
     elif (type == 'info'):
         # Creamos una pantalla de informacion
         string=lcd_cmd('screen_add scr_info')
@@ -94,35 +121,52 @@ def set_data (type, value):
         for data in split_by_n(value,20):
             lcd_cmd_s('widget_set scr_info info_txt' + str(line) + ' 1 ' + str(line) + ' "' + data + '"')
             line = line + 1
-            if (line == 5): break
+            if (line == 5):
+                break
 
     elif (type == 'test'):
         lcd_cmd_s('widget_set scr_1 volume 1 1 "   Test LCD FIRtro"')
 
 def decode_data (data):
-    # Actualizamos los datos de la pantalla
+    # Descofificamos los datos para presentarlos en la pantalla
     data=json.loads(data)
-    set_data('level', str(data['level']))
-    set_data('bass', str(int(data['bass'])))
-    set_data('treble', str(int(data['treble'])))
-    if (data['loudness_track'] == False): loudness_data = "OFF"
-    else: loudness_data = data['loudness_level_info']
-    set_data('loudness', loudness_data)
-    set_data('input', data['input_name'])
-    # Mostramos el comando recibido, excepto si es un 'status'
-    if (len(data['warnings'])>0): set_data('info', data['warnings'][0])
-    elif (data['order'] !='status'): set_data('info', data['order'])
+    set_data('preset',      data['preset'])
+    set_data('ftype',       data['filter_type'])
+    set_data('input',       data['input_name'])
+    set_data('level',       str(data['level']))
+    set_data('bass',        str(int(data['bass'])))
+    set_data('treble',      str(int(data['treble'])))
+    set_data('balance',     str(int(data['balance'])))
+    set_data('headroom',    str(data['headroom']))
+    # adaptamos loudness:
+    if data['loudness_track'] == True:
+        set_data('loud', " ON") # data['loudness_level_info']
+    else:
+        set_data('loud', "OFF")
+    # adaptamos mono/stereo:
+    if data['mono'] == "on":
+        set_data('mono', "MO")
+    else:
+        set_data('mono', "ST")
 
+    # Mostramos el comando recibido, excepto si es un 'status'
+    if (len(data['warnings']) > 0):
+        set_data('info', data['warnings'][0])
+    elif (data['order'] != 'status'):
+        set_data('info', data['order'])
 
 def test():
     lcd_size = init('FIRtro')
-    if (lcd_size == -1): return -1
+    if (lcd_size == -1):
+        return -1
     print '=> LCD ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
     set_data ('test', '')
     while True:
         string = raw_input('Mensaje emergente (quit para salir): ')
-        if (string == 'quit'): break
+        if (string == 'quit'):
+            break
         set_data ('info', string)
     lcd_close()
 
-if __name__ == "__main__": test()
+if __name__ == "__main__":
+    test()
