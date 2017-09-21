@@ -197,6 +197,7 @@ brutefir
 #########################################################
 chmod +x bin/*
 chmod +x bin_custom/*
+chmod +x bin_custom.example/*
 chmod -R 755 www/*
 chmod 666 www/config/config*
 cd
