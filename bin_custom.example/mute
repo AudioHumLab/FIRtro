@@ -19,4 +19,5 @@ elif [[ "$1" == *"-h"* ]]; then
 else
     control toggle
 fi
+sleep .5
 grep muted /home/firtro/audio/status
