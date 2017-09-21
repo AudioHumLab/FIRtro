@@ -1,0 +1,9 @@
+## La seccion server
+[server]
+DriverPath=/xx/xxx/xxxx/server/drivers/   <<<< OjO importante el slash al final
+Driver=hd44780
+
+## La seccion driver
+## Hitachi HD44780 driver ##
+[hd44780]
+ConnectionType=usb4all
