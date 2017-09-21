@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function printhelp () {
+    echo
+    echo "    A shortcut for 'control   loudness_track | loudness_track_off'"
+    echo "    Use:  loud on|off"
+    echo
+}
+
+# wrapper del control de FIRtro
+if   [ "$1" == "on" ]; then
+    control loudness_track
+elif [ "$1" == "off" ]; then
+    control loudness_track_off
+elif [[ "$1" == *"-h"* ]]; then
+    printhelp
+    exit 0
+fi
+sleep .5
+grep loudness /home/firtro/audio/status
