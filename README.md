@@ -20,4 +20,5 @@ FIRtro is a "black box" software package, intended to filter and to equalise act
 - [netjack](http://jackaudio.org/faq/netjack.html) | [Jack Wiki](https://github.com/jackaudio/jackaudio.github.com/wiki)
 - [jacktrip](https://github.com/jcacerec/jacktrip)
 - [shairport](https://github.com/abrasive/shairport)
+- [usb4all](http://www.sprut.de/electronic/pic/projekte/usb4all/usb4all_en.html#allgemein)
 

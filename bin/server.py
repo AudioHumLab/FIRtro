@@ -51,8 +51,8 @@ def lcd_check():
             print "(server) Warning: Can not connect to lcdproc. LCD is disabled"
             return False
         else:
-            return True
             print '(server) LCD enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
+            return True
     else:
         return False
 

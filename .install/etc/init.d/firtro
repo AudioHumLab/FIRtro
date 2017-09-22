@@ -1,0 +1,39 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          FIRtro
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start FIRtro at boot time
+# Description:       MPD-Jack-Brutefir
+### END INIT INFO
+#
+# /etc/init.d/firtro
+# Some things that run always
+touch /var/lock/firtro
+#
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    tput clear
+    #Cambiamos permisos para poder acceder a la pantalla principal desde el usuario firtro
+    chown firtro /dev/tty1
+    #Para poder monitorizar la salida con un tail desde el usuario firtro
+    chown firtro /dev/vcs1
+    echo "Iniciando script FIRtro..."
+    su -c "/home/firtro/bin/initfirtro.py all" -l firtro
+    ;;
+  stop)
+    echo "Deteniendo script FIRtro..."
+    su -c "python /home/firtro/bin/stopfirtro.py all" -l firtro
+    #Desmontamos share de red
+    /usr/local/bin/umount_cifs
+    ;;
+  *)
+    echo "Uso: /etc/init.d/firtro {start|stop}"
+    exit 1
+    ;;
+esac
+#
+exit 0
