@@ -161,7 +161,8 @@ def show_widget(type, value):
         
         # nota: este esquema no requiere transformaciones
 
-    # lanzamiento de los comandos para mostrar los widgets:
+    # Lanzamiento de los comandos para mostrar los widgets.
+    # Recordatorio: los widgets DEBEN ESTAR DECLARADOS en lcd_configure_main_screen()
     if type == 'level':
         lcd_cmd_s('widget_set scr_1 level       ' + posi(Cvol) + ' "' + Lvol + value + '"')
     elif type == 'headroom':
@@ -225,7 +226,8 @@ def show_status(data):
     #ver_tipos_json(data) # debug
 
     # Visualizamos cada uno de los datos recibidos
-    # NOTA se deben enviar strings a los widgets
+    # NOTA: se deben enviar strings a los widgets.
+    #       Los widgets DEBEN ESTAR DECLARADOS en lcd_configure_main_screen()
     show_widget('preset',      data['preset'])
     show_widget('ftype',       data['filter_type'])
     show_widget('input',       data['input_name'])
