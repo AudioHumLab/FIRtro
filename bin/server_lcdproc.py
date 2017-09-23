@@ -129,7 +129,7 @@ def show_widget(type, value):
         # Transformaciones de algunos values ya que en este esquema
         # los mostraremos solo si están activos
         if type == 'loud':
-            if value == "True": value = "Lns"
+            if value == "True": value = "LNS"
             else:               value = " - "
         if type == 'syseq':
             if value == "True": value = "sEQ"
@@ -142,7 +142,7 @@ def show_widget(type, value):
             else:               value = "PQ"
         if type == 'mono':
             if value=="off":    value = "ST"
-            else:               value = "  "
+            else:               value = "MO"
 
     # ------- ESQUEMA 1 (POR DEFECTO) ------------
     else:
