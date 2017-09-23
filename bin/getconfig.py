@@ -18,9 +18,14 @@ level_on_startup =          config.get('misc', 'level_on_startup')
 max_level_on_startup =      config.get('misc', 'max_level_on_startup')
 gmax =                      config.getfloat('misc', 'gmax')
 tone_defeat_on_startup =    config.getboolean('misc', 'tone_defeat_on_startup')
+
 command_delay =             config.getfloat('misc', 'command_delay')
 beep_options =              config.get('misc', 'beep_options')
+
 enable_lcd =                config.getboolean('misc', 'enable_lcd')
+lcd_info_timeout =          config.getfloat('misc', 'lcd_info_timeout')
+lcd_opc =                   config.getfloat('misc', 'lcd_opc')
+
 dummy_ports =               config.get('misc', 'dummy_ports')
 pause_players =             config.getboolean('misc', 'pause_players')
 resume_players =            config.getboolean('misc', 'resume_players')
