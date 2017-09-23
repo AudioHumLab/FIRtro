@@ -12,8 +12,13 @@
 command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
-; -- Usar LCD externo (requiere que esté corriendo el servidor LCDd de la suite lcdproc)
+
+; -- Usar LCD externo (requiere servicio LCDproc accesible))
 enable_lcd = False
+; tiempo de presentacion de informaciones temporales
+lcd_info_timeout = 1
+; opcion de presentacion LCD (consultar con bin/server_lcdproc.py -opc)
+lcd_opc = 3
 
 ; -- Tope de ganancia (dB) admitada en Brutefir.
 gmax = 0
