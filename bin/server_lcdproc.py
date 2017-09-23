@@ -2,8 +2,21 @@
 # -*- coding: utf-8 -*-
 # from __future__ import with_statement # This isn't required in Python 2.6
 
+# v2.0
+# - Se revisa el codigo y se renombran funciones para legibilidad
+#   decode_data -->     show_status
+#   set_data    -->     show_widget
+#
+# - Se separa en una función la screen adicional para mostrar info
+#
+# - Distinos esquemas de presentación del status de FIRtro
+#   que se pueden seleccionar en audio/config. De momento  hay dos ...
+#   Se pueden consultar los esquemas con "server_lcdproc.py -h"
+#   como se indica en audio/config. Es codigo hardwired pero algo es algo...
+
 # acceso a variables de FIRtro para configurar el LCD
 import getconfig
+from sys import argv as sys_argv
 
 # http://lcdproc.sourceforge.net/docs/current-dev.html
 import socket
@@ -56,65 +69,155 @@ def lcd_close():
     #lcd_cmd('screen_del ' + screen_id)
     lcdproc_socket.close()
 
-def show_widget(type, value):
+def posi(coord):
+    # auxiliar para colocar los widgets, usada por show_widgets
+    # notese que se devuelve "columna  fila"
+    return " ".join(str(x) for x in coord[::-1])
 
-    # esquema:
-    # 12345678901234567890
-    # V -32.0 H 34.0  B -2
-    # B -2 T -3 sEQ DRC PQ
-    # entrada       Lns ST
-    # preset            mp
-    #                                          COL ROW
+def printa_layouts():
+    # ABAJO se deben  configurar estos  esquemas de presentacion
+    print
+    print " ----- ESQUEMA 1 (por defecto) ----"
+    print "    12345678901234567890"
+    print " 1  Vol: -12.5 HR: 22.0 "
+    print " 2  Bass: -2 Treble: -3 "
+    print " 3  input: analog       "
+    print " 4  Loud: 12 (6.47 dB)  "
+    print
+    print " ----- ESQUEMA 2 ------------------"
+    print "    12345678901234567890"
+    print " 1  V -32.0 H 34.0  B -2"
+    print " 2  B -2 T -3 sEQ DRC PQ"
+    print " 3  input         Lns ST"
+    print " 4  preset            mp"
+    print
+
+def show_widget(type, value):
+    
+    # Usamos nombres de tres letras para identificar los widgets aquí
+    # al objeto de ayudar en las lineas de lanzamiento de widgets de más abajo
+    #
+    # Hay dos propiedades que definir:
+    #   1 - Las coordenadas del widget, ejemplo       Cvol=1,1
+    #       Nota: para que NO SE MUESTRE pondremos    Cvol=0,0
+    #       OjO:  cuidado de no solapar widgets en la misma linea
+    #
+    #   2 - La etiqueta antes de mostrar el value del widget
+    #       Ejemplo   Lvol = "Vol: "
+    #
+    # Puede ser necesario transformar values como se hace en el esquema 2
+
+    # Inicializamos coordenadas y etiquetas a cero:
+    Cvol=0,0; Chea=0,0; Cbal=0,0; Cbas=0,0; Ctre=0,0; Cseq=0,0; Cdrc=0,0;
+    Cpeq=0,0; Cinp=0,0; Clns=0,0; Cmon=0,0; Cpre=0,0; Cfty=0,0; Clni=0,0;
+    Lvol="";  Lhea="";  Lbal="";  Lbas="";  Ltre="";  Lseq="";  Ldrc="";
+    Lpeq="";  Linp="";  Llns="";  Lmon="";  Lpre="";  Lfty="";  Llni="";
+
+    # ---------- ESQUEMA 2 ------------
+    if getconfig.lcd_layout == "2":
+
+        # coordenadas
+        Cvol=1,1;       Chea=1,9;                     Cbal=1,17;
+        Cbas=2,1;  Ctre=2,6;  Cseq=2,11;  Cdrc=2,15;  Cpeq=2,19;
+        Cinp=3,1;                         Clns=3,15;  Cmon=3,19;
+        Cpre=4,1;                                     Cfty=4,19;
+
+        # etiquetas para algunos values:
+        Lvol="V ";     Lhea="H ";                 Lbal="B "
+        Lbas="B ";   Ltre="T ";
+
+        # Transformaciones de algunos values ya que en este esquema
+        # los mostraremos solo si están activos
+        if type == 'loud':
+            if value == "True": value = "Lns"
+            else:               value = " - "
+        if type == 'syseq':
+            if value == "True": value = "sEQ"
+            else:               value = " - "
+        if type == 'drc':
+            if value<>"0":      value = "DRC"
+            else:               value = " - "
+        if type == 'peq':
+            if value=="off":    value = "- "
+            else:               value = "PQ"
+        if type == 'mono':
+            if value=="off":    value = "ST"
+            else:               value = "  "
+
+    # ------- ESQUEMA 1 (POR DEFECTO) ------------
+    else:
+
+        # coordenadas
+        Cvol=1,1;            Chea=1,12;
+        Cbas=2,1;         Ctre=2,10;
+        Cinp=3,1;
+        Clni=4,1; # loudness_level_info de server_process
+
+        # etiquetas para el value:
+        Lvol="Vol: ";     Lhea="HR: "
+        Lbas="Bass: ";   Ltre="Treb: ";
+        Linp="Input: ";
+        Llni="Loud: "
+        
+        # nota: este esquema no requiere transformaciones
+
+    # lanzamiento de los comandos para mostrar los widgets:
     if type == 'level':
-        lcd_cmd_s('widget_set scr_1 level       1   1   "V ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 level       ' + posi(Cvol) + ' "' + Lvol + value + '"')
     elif type == 'headroom':
-        lcd_cmd_s('widget_set scr_1 headroom    9   1   "H ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 headroom    ' + posi(Chea) + ' "' + Lhea + value + '"')
     elif type == 'balance':
-        lcd_cmd_s('widget_set scr_1 balance     17  1   "B ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 balance     ' + posi(Cbal) + ' "' + Lbal + value + '"')
 
     elif type == 'bass':
-        lcd_cmd_s('widget_set scr_1 bass        1   2   "B ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 bass        ' + posi(Cbas) + ' "' + Lbas + value + '"')
     elif type == 'treble':
-        lcd_cmd_s('widget_set scr_1 treble      6   2   "T ' + value + '"')
+        lcd_cmd_s('widget_set scr_1 treble      ' + posi(Ctre) + ' "' + Ltre + value + '"')
     elif type == 'syseq':
-        lcd_cmd_s('widget_set scr_1 syseq       11  2   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 syseq       ' + posi(Cseq) + ' "' + Lseq + value + '"')
     elif type == 'drc':
-        lcd_cmd_s('widget_set scr_1 drc         15  2   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 drc         ' + posi(Cdrc) + ' "' + Ldrc + value + '"')
     elif type == 'peq':
-        lcd_cmd_s('widget_set scr_1 peq         19  2   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 peq         ' + posi(Cpeq) + ' "' + Lpeq + value + '"')
 
     elif type == 'input':
-        lcd_cmd_s('widget_set scr_1 input       1   3   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 input       ' + posi(Cinp) + ' "' + Linp + value + '"')
     elif type == 'loud':
-        lcd_cmd_s('widget_set scr_1 loud        15  3   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 loud        ' + posi(Clns) + ' "' + Llns + value + '"')
     elif type == 'mono':
-        lcd_cmd_s('widget_set scr_1 mono        19  3   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 mono        ' + posi(Cmon) + ' "' + Lmon + value + '"')
+
+    elif type == 'loudinfo':
+        lcd_cmd_s('widget_set scr_1 loudinfo    ' + posi(Clni) + ' "' + Llni + value + '"')
 
     elif type == 'preset':
-        lcd_cmd_s('widget_set scr_1 preset      1   4   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 preset      ' + posi(Cpre) + ' "' + Lpre + value + '"')
     elif type == 'ftype':
-        lcd_cmd_s('widget_set scr_1 ftype      19   4   "' + value + '"')
+        lcd_cmd_s('widget_set scr_1 ftype       ' + posi(Cfty) + ' "' + Lfty + value + '"')
 
     elif type == 'info':
-        # Creamos una SCREEN ADICIONAL con informacion (efímera)
-        string = lcd_cmd('screen_add scr_info')
-        lcd_cmd_s('screen_set scr_info priority foreground timeout ' + str(info_timeout))
-        if string[:4] <> 'huh?': # huh? en el lenguaje lcdproc significa ¿comooooor?
-            # La pantalla no existe, creamos los widgets
-            lcd_cmd_s('widget_add scr_info info_tit title')
-            lcd_cmd_s('widget_add scr_info info_txt2 string')
-            lcd_cmd_s('widget_add scr_info info_txt3 string')
-            lcd_cmd_s('widget_add scr_info info_txt4 string')
-        lcd_cmd_s('widget_set scr_info info_tit "FIRtro info"')
-        line = 2
-        for data in split_by_n(value,20):
-            lcd_cmd_s('widget_set scr_info info_txt' + str(line) + ' 1 ' + str(line) + ' "' + data + '"')
-            line = line + 1
-            if line == 5:
-                break
+        show_screenInfo(value)
 
     elif type == 'test':
         lcd_cmd_s('widget_set scr_1 volume 1 1 "   Test LCD FIRtro"')
+
+def show_screenInfo(value):
+    # Creamos una SCREEN ADICIONAL con informacion efímera (timeout)
+    string = lcd_cmd('screen_add scr_info')
+    lcd_cmd_s('screen_set scr_info priority foreground timeout ' + str(info_timeout))
+    if string[:4] <> 'huh?': # huh? en el lenguaje lcdproc significa ¿comooooor?
+        # La pantalla no existe, creamos los widgets
+        lcd_cmd_s('widget_add scr_info info_tit title')
+        lcd_cmd_s('widget_add scr_info info_txt2 string')
+        lcd_cmd_s('widget_add scr_info info_txt3 string')
+        lcd_cmd_s('widget_add scr_info info_txt4 string')
+    lcd_cmd_s('widget_set scr_info info_tit "FIRtro info"')
+    line = 2
+    for data in split_by_n(value,20):
+        lcd_cmd_s('widget_set scr_info info_txt' + str(line) + ' 1 ' + str(line) + ' "' + data + '"')
+        line = line + 1
+        if line == 5:
+            break
 
 def show_status(data):
     # Descofificamos los datos entregados que son json
@@ -122,6 +225,7 @@ def show_status(data):
     #ver_tipos_json(data) # debug
 
     # Visualizamos cada uno de los datos recibidos
+    # NOTA se deben enviar strings a los widgets
     show_widget('preset',      data['preset'])
     show_widget('ftype',       data['filter_type'])
     show_widget('input',       data['input_name'])
@@ -130,31 +234,20 @@ def show_status(data):
     show_widget('treble',      str(int(data['treble'])))
     show_widget('balance',     str(int(data['balance'])).rjust(2))
     show_widget('headroom',    str(data['headroom']))
-    # adaptamos loudness (boolean):
-    if data['loudness_track'] == True:
-        show_widget('loud', "Lns") # data['loudness_level_info']
+    show_widget('drc',         data['drc_eq'])
+    show_widget('loud',        str(data['loudness_track']))
+    show_widget('mono',        data['mono'])
+    show_widget('syseq',       str(data['system_eq']))
+    # caso especial tener en cuenta si peq está defeated
+    if not data['peqdefeat']:
+        show_widget('peq',         data['peq'])
     else:
-        show_widget('loud', "   ")
-    # adaptamos mono (unicode):
-    if data['mono'] == "on":
-        show_widget('mono', "MO")
+        show_widget('peq',         "off")
+    # Loudness:
+    if data['loudness_track']:
+        show_widget('loudinfo',    str(data['loudness_level_info']))
     else:
-        show_widget('mono', "ST")
-    # adaptamos system_eq (boolean)
-    if data['system_eq'] == True:
-        show_widget('syseq', "sEQ")
-    else:
-        show_widget('syseq', "   ")
-    # adaptamos drc_eq (unicode)
-    if data['drc_eq'] <> "0":
-        show_widget('drc', "DRC")
-    else:
-        show_widget('drc', "   ")
-    # adaptamos peq (unicode)
-    if data['peq'] <> "off" and data['peqdefeat'] == False:
-        show_widget('peq', "PQ")
-    else:
-        show_widget('peq', "  ")
+        show_widget('loudinfo',    "off")
 
     # Mostramos warnings o el comando recibido excepto si es 'status'
     if len(data['warnings']) > 0:
@@ -162,15 +255,17 @@ def show_status(data):
     elif data['order'] != 'status':
         show_widget('info', data['order'])
 
-def lcd_configure():
-    # Widgets utilizables en la screen principal de este modulo
+def lcd_configure_main_screen():
+    # definimos la SCREEN principal de este módulo
     lcd_cmd_s('screen_add scr_1')
+    # WIDGETS utilizables en la screen principal de este modulo
     lcd_cmd_s('widget_add scr_1 level       string')
     lcd_cmd_s('widget_add scr_1 headroom    string')
     lcd_cmd_s('widget_add scr_1 balance     string')
     lcd_cmd_s('widget_add scr_1 bass        string')
     lcd_cmd_s('widget_add scr_1 treble      string')
     lcd_cmd_s('widget_add scr_1 loud        string')
+    lcd_cmd_s('widget_add scr_1 loudinfo    string')
     lcd_cmd_s('widget_add scr_1 input       string')
     lcd_cmd_s('widget_add scr_1 preset      string')
     lcd_cmd_s('widget_add scr_1 mono        string')
@@ -200,8 +295,11 @@ def init(client_name):
     lcd_size = lcd_open(client_name)
     if lcd_size == -1:
         return -1
-    lcd_configure()
+    lcd_configure_main_screen()
     return lcd_size
 
 if __name__ == "__main__":
-    test()
+    if len(sys_argv) > 1:
+        printa_layouts()
+    else:
+        test()
