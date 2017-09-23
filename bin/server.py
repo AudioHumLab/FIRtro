@@ -118,7 +118,7 @@ if __name__ == "__main__":
                 sc.send(status)
 
                 if use_lcd:
-                    lcd.decode_data(status)
+                    lcd.show_status(status)
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
