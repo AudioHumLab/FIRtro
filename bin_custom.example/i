@@ -1,7 +1,22 @@
 #!/bin/bash
 
+function ayuda () {
+    echo ""
+    echo "    selecciona entrada"
+    echo "    uso:   i  entrada"
+    echo ""
+}
+
 if [ $1 ]; then
-    control input $1
+    if [[ "$1" == *"-h"* ]]; then
+        ayuda  
+        exit 0
+    else
+        control input $1
+    fi
+else
+    grep "^\[" /home/firtro/audio/inputs
+    echo ""
 fi
 sleep .5
 grep "input =" /home/firtro/audio/status
