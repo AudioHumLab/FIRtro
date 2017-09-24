@@ -106,14 +106,14 @@ def draw_plus():
     lcd_cmd('widget_set vol plus4   3 3 "#"')
     lcd_cmd('widget_set vol plus5   2 4 "#"')
 
-def crea_cliente():
-    if lcd_open("cliente1"):
+def crea_cliente(cname="big"):
+    if lcd_open(cname):
         #print "tamaño:", lcd_get_size()
         pass
 
 if __name__ == "__main__":
 
-    crea_cliente()
+    crea_cliente("tmp")
 
     vol = ""
     if len(sys_argv) > 1:
