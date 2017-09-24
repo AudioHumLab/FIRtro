@@ -5,18 +5,22 @@
 # - se printa un separador en caso de control_clear=False en audio/config
 # - algunos cambios en la sintaxis (espacios, paréntesis, comentarios)
 
-# v2.0beta
+# v2.0 beta
 # - Incorporación del socket con MPD, para control de volumen enlazado:
 #     Se separa el código de creación del socket
 # - también se separa el código de inicialización del LCD
+
+# v2.0a beta
+# - se añade el lcd_big
 
 import socket
 import sys
 from time import sleep
 import os
 import server_process
-import server_lcdproc as lcd
 import getconfig
+import server_lcdproc as lcd
+import server_lcd_big as lcd_big
 
 def getsocket(host, port):
     try:
@@ -51,6 +55,8 @@ def lcd_check():
             print "(server) Warning: Can not connect to lcdproc. LCD is disabled"
             return False
         else:
+            # Añadimos el cliente LCD en numeros gordos
+            lcd_big.crea_cliente()
             print '(server) LCD enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
             return True
     else:
@@ -58,7 +64,9 @@ def lcd_check():
 
 if __name__ == "__main__":
 
+    # Uso del LCD
     use_lcd = lcd_check()
+
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
     # Bucle PRINCIPAL para procesar las posibles conexiones.
@@ -105,12 +113,13 @@ if __name__ == "__main__":
                     print "(server) Closing connection..."
                 if use_lcd:
                     lcd.lcd_close()
+                    lcd_big.lcd_close()
                 sc.close()
                 fsocket.close()
                 sys.exit(1)
             else:
                 # SE HA RECIBIDO UNA ORDEN en 'data',
-                # ENVIAMOS la orden al gestor de FIRtro (server_process.py) 
+                # ENVIAMOS la orden al gestor de FIRtro (server_process.py)
                 # que nos responde con el estado)
                 status = server_process.do(data)
 
@@ -118,11 +127,15 @@ if __name__ == "__main__":
                 sc.send(status)
 
                 if use_lcd:
+                    # pantalla general del lcd
                     lcd.show_status(status)
+                    # nuevo cliene lcd que muestra el level con numeros grandes:
+                    tmp = status[status.index('"level":'):]
+                    tmp = tmp.split(",")[0].split()[-1]
+                    lcd_big.show_level(tmp)
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
 
         sleep(0.05)
-
 
