@@ -14,6 +14,9 @@
 #   Se pueden consultar los esquemas con "server_lcdproc.py -h"
 #   como se indica en audio/config. Es codigo hardwired pero algo es algo...
 
+# v2.0a
+# - Si audio/config lcd_info_timeout=0 no se presenta la pantalla efímera del comando ejecutado
+
 # acceso a variables de FIRtro para configurar el LCD
 import getconfig
 from sys import argv as sys_argv
@@ -196,7 +199,7 @@ def show_widget(type, value):
     elif type == 'ftype':
         lcd_cmd_s('widget_set scr_1 ftype       ' + posi(Cfty) + ' "' + Lfty + value + '"')
 
-    elif type == 'info':
+    elif type == 'info' and info_timeout > 0:
         show_screenInfo(value)
 
     elif type == 'test':
