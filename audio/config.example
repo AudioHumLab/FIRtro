@@ -15,7 +15,7 @@ beep_options =
 
 ; -- Usar LCD externo (requiere servicio LCDproc accesible))
 enable_lcd = False
-; tiempo de presentacion de informaciones temporales
+; tiempo de presentacion de informaciones temporales (con 0 no se presentan)
 lcd_info_timeout = 1
 ; opcion de presentacion LCD (consultar con "bin/server_lcdproc.py -h" )
 lcd_layout = 1
