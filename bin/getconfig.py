@@ -25,6 +25,7 @@ beep_options =              config.get('misc', 'beep_options')
 enable_lcd =                config.getboolean('misc', 'enable_lcd')
 lcd_info_timeout =          config.getfloat('misc', 'lcd_info_timeout')
 lcd_layout =                config.get('misc', 'lcd_layout')
+enable_lcd_big =            config.getboolean('misc', 'enable_lcd_big')
 
 dummy_ports =               config.get('misc', 'dummy_ports')
 pause_players =             config.getboolean('misc', 'pause_players')
