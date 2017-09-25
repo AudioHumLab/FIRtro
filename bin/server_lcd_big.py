@@ -5,6 +5,8 @@
 
 # Colección de iconos disponiles:
 # https://github.com/lcdproc/lcdproc/blob/master/server/widget.c
+# NOTA: Cuando se dibujan widgets 'num' (numeros gordos) los widget 'icon' se cuartean :-/
+#       No hay buena compatibilidad usando 'num' con 'icon', usaremos 'string'.
 
 import subprocess as sp
 from time import sleep
@@ -66,8 +68,6 @@ def lcd_close():
     lcdproc_socket.close()
 
 def show_level(x):
-    # NOTA: cuando se dibujan widgets 'num' (numeros gordos) los iconos se cuartean :-/
-
     create_screen()
     cad = str(x)
 
@@ -76,15 +76,11 @@ def show_level(x):
     i = 1
     for c in cad:
         if c.isdigit():
-            tmp = 'widget_add vol dig' + str(i) + ' num'
-            lcd_cmd_s(tmp)
-            tmp = 'widget_set vol dig' + str(i) + ' ' + str(i*3) + ' '  + c
-            lcd_cmd_s(tmp)
+            lcd_cmd_s('widget_add vol dig' + str(i) + ' num')
+            lcd_cmd_s('widget_set vol dig' + str(i) + ' ' + str(i*3) + ' '  + c)
         elif c == ".":
-            tmp = 'widget_add vol dot     string'
-            lcd_cmd_s(tmp)
-            tmp = 'widget_set vol dot  ' + str(i*3) + ' 4 "#"'
-            lcd_cmd_s(tmp)
+            lcd_cmd_s('widget_add vol dot     string')
+            lcd_cmd_s('widget_set vol dot  ' + str(i*3) + ' 4 "#"')
         elif c == "-":
             draw_minus()
         elif c == "+":
