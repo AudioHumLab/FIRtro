@@ -42,6 +42,7 @@ def lcd_cmd(lcdproc_cmd):
     return(lcdproc_out)
 
 def lcd_cmd_s(lcdproc_cmd):
+    # solo envía el comando es más rápido
     lcdproc_socket.send(lcdproc_cmd + '\n')
 
 def lcd_open(client_name):
@@ -225,9 +226,9 @@ def show_status(data):
     data = json.loads(data)
     #ver_tipos_json(data) # debug
 
-    # Visualizamos cada uno de los datos recibidos
-    # NOTA: se deben enviar strings a los widgets.
-    #       Los widgets DEBEN ESTAR DECLARADOS en lcd_configure_main_screen()
+    # Visualizamos de los datos recibidos los que deseemos presentar en el LCD
+    # NOTA: Los widgets a visualizar DEBEN ESTAR DECLARADOS 'widget_add'
+    #       en lcd_configure_main_screen(), de tipo 'string'.
     show_widget('preset',      data['preset'])
     show_widget('ftype',       data['filter_type'])
     show_widget('input',       data['input_name'])
@@ -245,7 +246,7 @@ def show_status(data):
         show_widget('peq',         data['peq'])
     else:
         show_widget('peq',         "off")
-    # Loudness:
+    # caso especial loudness_level_info manipulado si loudness_track=False
     if data['loudness_track']:
         show_widget('loudinfo',    str(data['loudness_level_info']))
     else:
