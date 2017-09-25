@@ -52,20 +52,34 @@ def lcd_check():
         lcd_size = lcd.init('FIRtro')
         if lcd_size == -1:
             # No se ha podido conectar con lcdproc. Deshabilitamos su uso
-            print "(server) Warning: Can not connect to lcdproc. LCD is disabled"
+            print "(server) Warning: Can not connect to lcdproc. LCD_STATUS is disabled"
             return False
         else:
-            # Añadimos el cliente LCD en numeros gordos
-            lcd_big.crea_cliente()
-            print '(server) LCD enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
+            print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
             return True
     else:
+        print '(server) LCD_STATUS disabled'
+        return False
+
+def lcd_big_check():
+    # Intentamos inicializar el lcd
+    if getconfig.enable_lcd_big:
+        lcd_size = lcd_big.crea_cliente("BIGLEVEL")
+        if lcd_size:
+            print '(server) LCD_BIG enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
+            return True
+        else:
+            print "(server) Warning: Can not connect to lcdproc. LCD_BIG is disabled"
+            return False
+    else:
+        print '(server) LCD_BIG disabled'
         return False
 
 if __name__ == "__main__":
 
     # Uso del LCD
-    use_lcd = lcd_check()
+    use_lcd =     lcd_check()
+    use_lcd_big = lcd_big_check()
 
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
@@ -113,6 +127,7 @@ if __name__ == "__main__":
                     print "(server) Closing connection..."
                 if use_lcd:
                     lcd.lcd_close()
+                if use_lcd_big:
                     lcd_big.lcd_close()
                 sc.close()
                 fsocket.close()
@@ -129,13 +144,18 @@ if __name__ == "__main__":
                 if use_lcd:
                     # pantalla general del lcd
                     lcd.show_status(status)
+
+                if use_lcd_big:
                     # nuevo cliene lcd que muestra el level con numeros grandes:
-                    tmp = status[status.index('"level":'):]
-                    tmp = tmp.split(",")[0].split()[-1]
-                    lcd_big.show_level(tmp)
+                    lev = status[status.index('"level":'):]
+                    lev = lev.split(",")[0].split()[-1]
+                    mut = status[status.index('"muted":'):]
+                    mut = mut.split(",")[0].split()[-1]
+                    if mut == "false":  mut = False
+                    else:               mut = True
+                    lcd_big.show_level(lev, mut)
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
 
         sleep(0.05)
-
