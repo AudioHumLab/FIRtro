@@ -1,6 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+    Letras grandes en el LCD.
+    Pruebas en línea de comandos:
+        server_lcd_big.py   -l level_a_mostrar
+                            -m mensaje
+    (el cliente expira en 10 seg)
+"""
+
 # v1.0a
 # - se añade MUTE si mute=True en show_level()
 
@@ -21,6 +29,9 @@ import json
 lcdproc_host = 'localhost'
 lcdproc_port = 13666
 lcdproc_socket = None
+
+# custom module
+import lcdbig
 
 def split_by_n( seq, n ):
     # A generator to divide a sequence into chunks of n units
@@ -69,8 +80,11 @@ def lcd_close():
     lcdproc_socket.close()
 
 def _draw_level(cad):
-    # recorre la cadena y pinta +/-, dígitos y punto decimal
-    
+    """ recorre la cadena y pinta +/-, dígitos y punto decimal """
+    _delete_screen("mute")
+    _delete_screen("level")
+    _create_screen("level")
+
     # añade un '+' en las cadenas de valores positivos
     if cad and not "-" in cad:
         cad = "+" + cad
@@ -89,9 +103,12 @@ def _draw_level(cad):
 def _delete_screen(sname):
     lcd_cmd_s('screen_del ' + sname)
 
-def _create_screen(sname):
+def _create_screen(sname, timeout=3):
+    # NOTA el timeout es el tiempo visible luego se borrara la screen
+    #      PEEEEERO no se borra ¿!?
+    timeout = str(timeout * 8) # el comando se debe dar al server en 1/8 sec
     lcd_cmd_s('screen_add ' + sname)
-    lcd_cmd_s('screen_set -name ' + sname + '  -priority foreground')
+    lcd_cmd_s('screen_set -name ' + sname + '  -priority foreground -timeout ' + timeout)
 
 def _draw_big_digits(digit, pos):
     lcd_cmd_s('widget_add level dig' + str(pos) + ' num')
@@ -121,11 +138,17 @@ def _draw_mute():
     l1 = " _   _      ___  __"
     l2 = "| | / | | |  |  |  "
     l3 = "|  V  | | |  |  |- "
-    l4 = "|     |  V   |  |__"
+    l4 = "|     | L_|  |  |__"
     lineas = l1, l2, l3, l4
+
+    _delete_screen("level")
+    _delete_screen("mute")
+    _create_screen("mute")
     _draw_lineas(lineas, screen="mute")
 
-def _draw_lineas(lineas, screen):
+def _draw_lineas(lineas, screen, coloffset=1):
+    """toma 4 lineas de texto y la pinta en estático, admite un offset de columnas
+    """
     # como widget_set no admite strings con espacios en blanco,
     # troceamos las lineas en string de 1 caracter para poder
     # visualizar una composición manual a base de 4 líneas
@@ -133,30 +156,79 @@ def _draw_lineas(lineas, screen):
     for fila in range(1, 5):
         lin = lineas[i]
         troceador = split_by_n(lin, 1)
-        for col in range(1, 21):
-            lcd_cmd_s('widget_add ' + screen + ' mute_' + str(col) + '_' + str(fila) + '  string')
+        for col in range(coloffset, 21):
+            wID = 'w_' + str(col) + '_' + str(fila)
+            lcd_cmd_s('widget_add ' + screen + ' ' + wID + ' string')
             try:
                 c = troceador.next()
-                lcd_cmd_s('widget_set ' + screen + ' mute_' + str(col) + '_' + str(fila) \
-                          + ' ' + str(col) + ' ' + str(fila) + ' ' + c)
+                lcd_cmd_s('widget_set ' + screen + ' ' + wID + ' ' \
+                          + str(col) + ' ' + str(fila) + ' ' + c)
             # se ha agotado el generator de troceo:
             except:
                 pass
         i += 1
 
+def _draw_lineas_scroller(lineas, screen, coloffset=1, speed="1"):
+    """toma 4 lineas de texto y la pinta en scroll
+    """
+    for i in range(1,5):
+        wID = 'w_' + str(i)
+        lcd_cmd_s('widget_add ' + screen + ' ' + wID + ' scroller')
+
+    i = 1
+    for linea in lineas:
+        linea = linea.replace(" ", "\ ")
+        wID = 'w_' + str(i)
+        lcd_cmd_s('widget_set ' + screen + ' ' + wID + ' ' + \
+                  '1 ' + str(i) + ' 20 ' + str(i) + ' m ' + str(speed) + ' ' + linea)
+        i += 1
+
+def show_big_scroller(cad="test string toooo long" , speed="1", timeout=5):
+    for s in "mute", "level":
+        _delete_screen(s)
+    sname = "bigscroller"
+    _delete_screen(sname)
+    _create_screen(sname, timeout=timeout)
+    acum = ["", "", "", ""]
+    for c in cad + " ":
+        c1,c2,c3,c4 = lcdbig.wbig3(c)
+        acum[0] += c1
+        acum[1] += c2
+        acum[2] += c3
+        acum[3] += c4
+    _draw_lineas_scroller( acum, sname, speed=speed)
+
+def _pba_big(cad="hola", screen="prueba"):
+    # PRUEBA para usar los BigWidgets
+    for s in "mute", "level":
+        _delete_screen(s)
+    _delete_screen(screen)
+    _create_screen(screen)
+    i = 1
+    for c in cad:
+        _draw_lineas( lcdbig.wbig3(c), screen, coloffset=i)
+        i += 3
+
+def _pba_ver_chars(screen="prueba"):
+    # CUTRE prueba para imprimir  80 posibles caracteres empezando por chr(i)
+    for s in "mute", "level":
+        _delete_screen(s)
+    _delete_screen(screen)
+    _create_screen(screen)
+    i = 32
+    for fila in range(1, 5):
+        for col in range(1, 21):
+            lcd_cmd_s('widget_add ' + screen + ' p_' + str(col) + '_' + str(fila) + '  string')
+            c = chr(i)
+            lcd_cmd_s('widget_set ' + screen + ' p_' + str(col) + '_' + str(fila) \
+                          + ' ' + str(col) + ' ' + str(fila) + ' ' + c)
+            i += 1
+
 def show_level(level, muted=False):
     # Funcion principal a usar una vez creado el cliente con crea_cliente()
-    # MUTED
     if muted:
-        _delete_screen("level")
-        _delete_screen("mute")
-        _create_screen("mute")
         _draw_mute()
-    # NORMAL
     else:
-        _delete_screen("mute")
-        _delete_screen("level")
-        _create_screen("level")
         _draw_level( str(level) )
 
 def crea_cliente(cname="biglevel"):
@@ -167,8 +239,16 @@ def crea_cliente(cname="biglevel"):
         return False
 
 if __name__ == "__main__":
-    crea_cliente("tmp")
-    vol = ""
-    if len(sys_argv) > 1:
-        vol = float(sys_argv[1])
-        show_level(vol)
+
+    if len(sys_argv) == 3:
+        modo = sys_argv[1]
+        mens = sys_argv[2]
+        crea_cliente("tmp")
+        if modo == "-l":
+            vol = float(mens)
+            show_level(vol)
+        elif modo == "-m":
+            show_big_scroller(mens)
+        sleep(10)
+    else:
+        print __doc__
