@@ -993,6 +993,8 @@ def do (order):
     # A efectos de control, devolvemos un diccionario 
     # conteniendo el estado del FIRtro
     return firtroData(locals(), globals(), inputs.sections())
+# ^^^^^^^^ FIN DEL do() PRINCIPAL ^^^^^^^^
+
 
 # V2.0c reescritura del diccionario de estado en una función separada
 def firtroData(locales, globales, entradas):
