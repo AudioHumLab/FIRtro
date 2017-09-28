@@ -15,9 +15,11 @@
 #   como se indica en audio/config. Es codigo hardwired pero algo es algo...
 
 # v2.0a
-# - Si audio/config lcd_info_timeout=0 no se presenta la pantalla efímera del comando ejecutado
+# - Si audio/config lcd_info_timeout=0 no se presenta 
+#   la pantalla efímera del comando ejecutado
+# - Permite ajustar la prioridad de la pantalla principal de estado scr_1 
 
-# acceso a variables de FIRtro para configurar el LCD
+# Acceso a variables de FIRtro para configurar el LCD
 import getconfig
 from sys import argv as sys_argv
 
@@ -224,10 +226,13 @@ def show_screenInfo(value):
         if line == 5:
             break
 
-def show_status(data):
+def show_status(data, priority="info"):
     # Descofificamos los datos entregados que son json
     data = json.loads(data)
     #ver_tipos_json(data) # debug
+    
+    # permite redefinir la prioridad 'info' con la que se creó la pantalla principal de este módulo
+    lcd_cmd_s('screen_set scr_1 priority '+ priority)
 
     # Visualizamos de los datos recibidos los que deseemos presentar en el LCD
     # NOTA: Los widgets a visualizar DEBEN ESTAR DECLARADOS 'widget_add'
