@@ -19,8 +19,15 @@ enable_lcd = True
 lcd_info_timeout = 1
 ; opcion de layout de pantalla de status (consultar con bin/server_lcdproc.py -h)
 lcd_layout = 2
-; -- Pantalla de volumen grande en el LCD externo (requiere servicio LCDd funcionando)
+
+; -- Pantalla de caracteres grandes en el LCD externo (requiere servicio LCDd funcionando)
 enable_lcd_big = True
+bigscroll_items = preset mono balance syseq peq drc
+; Prioridad del pantallazo MUTE 
+;   hidden:     no visible
+;   info:       normal, la pantalla rota con el resto
+;   alert:      prevalece y enmascara cualquier otra pantalla
+lcd_show_mute_prio = alert
 
 ; -- Tope de ganancia (dB) admitada en Brutefir.
 gmax = 0
