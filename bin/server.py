@@ -75,6 +75,36 @@ def lcd_big_check():
         print '(server) LCD_BIG disabled'
         return False
 
+def _extrae_statusJson(param):
+    # auxiliar
+    tmp = status[status.index('"' + param + '":'):]
+    tmp = tmp.split(",")[0].split()[-1]
+    if tmp == "false":  tmp = False
+    elif tmp == "true": tmp = True
+    return tmp
+
+def _show_big_scroller(orden):
+    # auxiliar
+
+    # OjO algunos parámetros tienen nombre de orden distinto
+    if "drc" in orden:
+        param = "drc_eq"
+    elif "syseq" in orden:
+        param = system_eq
+    elif "peq" in orden:
+        param = "peq"
+    elif "loudness" in orden:
+        param = "loudness_track"
+    else:
+        param = orden
+
+    estado = _extrae_statusJson(param)
+    msgLCD = orden + ": " + estado
+    lcd_big.show_big_scroller(msgLCD, \
+                              priority="foreground", \
+                              timeout=9)
+
+
 if __name__ == "__main__":
 
     # Uso del LCD
@@ -141,21 +171,26 @@ if __name__ == "__main__":
                 # DEVOLVEMOS el estado de FIRtro
                 sc.send(status)
 
-                if use_lcd:
-                    # pantalla general del lcd
-                    lcd.show_status(status)
-
+                # LCD. NUEVAS pantallas que muestran caracteres GRANDES:
                 if use_lcd_big:
-                    # nuevo cliene lcd que muestra el level con numeros grandes:
-                    lev = status[status.index('"level":'):]
-                    lev = lev.split(",")[0].split()[-1]
-                    mut = status[status.index('"muted":'):]
-                    mut = mut.split(",")[0].split()[-1]
-                    if mut == "false":  mut = False
-                    else:               mut = True
-                    lcd_big.show_level(lev, mut)
+                    orden = data.split()[0].split("_")[0]
+
+                    # SCROLL. Si alguno de los items configurados en audio/bigscroll_items
+                    # matchea en la orden, presentamos la orden en el scroller grande:
+                    if [item for item in getconfig.bigscroll_items if item in orden]:
+                        _show_big_scroller(orden)
+
+                    # LEVEL. Además también rotamos el nivel en grande:
+                    lev = _extrae_statusJson("level")
+                    mut = _extrae_statusJson("muted")
+                    lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio)
+
+                # LCD. Pantalla general del ESTADO de FIRtro
+                if use_lcd:
+                    lcd.show_status(status, priority="info")
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
 
         sleep(0.05)
+
