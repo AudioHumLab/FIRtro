@@ -10,7 +10,7 @@
 #     Se separa el código de creación del socket
 # - también se separa el código de inicialización del LCD
 
-# v2.0a beta
+# v2.0a candidate
 # - se añade el lcd_big
 
 import socket
@@ -47,7 +47,7 @@ def getsocket(host, port):
     return s
 
 def lcd_check():
-    # Intentamos inicializar el lcd
+    # Intentamos inicializar el cliente lcd original en el server LDCproc
     if getconfig.enable_lcd:
         lcd_size = lcd.init('FIRtro')
         if lcd_size == -1:
@@ -62,7 +62,7 @@ def lcd_check():
         return False
 
 def lcd_big_check():
-    # Intentamos inicializar el lcd
+    # Intentamos inicializar el nuevo cliente lcd de caractreres grandes en el server LDCproc
     if getconfig.enable_lcd_big:
         lcd_size = lcd_big.crea_cliente("BIGLEVEL")
         if lcd_size:
@@ -75,31 +75,47 @@ def lcd_big_check():
         print '(server) LCD_BIG disabled'
         return False
 
-def _extrae_statusJson(param):
-    # auxiliar
-    tmp = status[status.index('"' + param + '":'):]
+def _extrae_statusJson(svar):
+    # auxiliar para leer el estado de una variable en el chorizo Json 'status'
+    tmp = status[ status.index('"' + svar + '":'): ]
     tmp = tmp.split(",")[0].split()[-1]
     if tmp == "false":  tmp = False
     elif tmp == "true": tmp = True
     return tmp
 
-def _show_big_scroller(orden):
-    # auxiliar
+def _show_big_scroller(comando, statusJson):
+    # func auxiliar para presentar el estado de un item de interés en el scroller lcd_big
 
-    # OjO algunos parámetros tienen nombre de orden distinto
-    if "drc" in orden:
-        param = "drc_eq"
-    elif "syseq" in orden:
-        param = system_eq
-    elif "peq" in orden:
-        param = "peq"
-    elif "loudness" in orden:
-        param = "loudness_track"
+    # Buscamos en la cadena json 'statusJson' que recibimos desde server_process.do(orden)
+    # el nuevo estado que ha adquirido la 'svar' correspondiente al 'comando'
+    # Notas:
+    #  - Algunas variables de estado 'svar' tienen
+    #    nombre distinto al propio comando que la modifica.
+    #  - Además alguna función como syseq está implementada con dos comandos diferentes.
+    #  - 'item' el lo que se mostrará en el scroll 'item: estado'
+    item =      comando
+    if "drc" in comando:
+        svar =      "drc_eq"
+    elif "syseq" in comando:
+        item =      "syseq"
+        svar =      "system_eq"
+    elif "peq_reload" in comando:
+        svar =      "peq"
+    elif "peq_defeat" in comando:
+        svar =      "peqdefeat"
+    elif "loudness" in comando:
+        item =      "ludness"
+        svar =      "loudness_track"
     else:
-        param = orden
+        svar =      comando
 
-    estado = _extrae_statusJson(param)
-    msgLCD = orden + ": " + estado
+    estado = _extrae_statusJson(svar)
+    # adecuamos los boolean
+    if      estado == True:  estado = "ON"
+    elif    estado == False: estado = "OFF"
+    else:                    estado = str(estado)
+
+    msgLCD = item + ": " + estado
     lcd_big.show_big_scroller(msgLCD, \
                               priority="foreground", \
                               timeout=9)
@@ -139,18 +155,23 @@ if __name__ == "__main__":
         while True:
             # RECEPCION
             data = sc.recv(4096)
+
+            # Si no hay nada en el buffer, es que el cliente se ha desconectado antes de tiempo
             if not data:
-                # Si no hay nada en el buffer, es que el cliente se ha desconectado antes de tiempo
                 if getconfig.control_output > 1:
                     print "(server) Client disconnected. Closing connection..."
                 sc.close()
                 break
+
+            # Se pide cerrar la conexión con el script de control client.py (modo interactivo)
             elif data.rstrip('\r\n') == "close":
                 sc.send("OK")
                 if getconfig.control_output > 1:
                     print "(server) Closing connection..."
                 sc.close()
                 break
+
+            # Se pide salir de este script y cerrar todo (modo interactivo)
             elif data.rstrip('\r\n') == "quit":
                 sc.send("OK")
                 if getconfig.control_output > 1:
@@ -162,30 +183,32 @@ if __name__ == "__main__":
                 sc.close()
                 fsocket.close()
                 sys.exit(1)
+
+            # Modo tranparente hacia FIRtro: 'data' es una ORDEN  (comando parámetros...)
             else:
-                # SE HA RECIBIDO UNA ORDEN en 'data',
-                # ENVIAMOS la orden al gestor de FIRtro (server_process.py)
-                # que nos responde con el estado)
-                status = server_process.do(data)
+                # 1. ENVIAMOS la orden al gestor de FIRtro (server_process.py)
+                # que nos responderá con el estado general en formato json
+                orden = data
+                status = server_process.do(orden)
 
                 # DEVOLVEMOS el estado de FIRtro
                 sc.send(status)
 
-                # LCD. NUEVAS pantallas que muestran caracteres GRANDES:
+                # 2. LCD. NUEVAS pantallas que muestran caracteres GRANDES:
                 if use_lcd_big:
-                    orden = data.split()[0].split("_")[0]
 
                     # SCROLL. Si alguno de los items configurados en audio/bigscroll_items
-                    # matchea en la orden, presentamos la orden en el scroller grande:
-                    if [item for item in getconfig.bigscroll_items if item in orden]:
-                        _show_big_scroller(orden)
+                    # matchea en el comando, presentamos la orden en el scroller grande:
+                    comando = orden.split()[0]
+                    if [item for item in getconfig.bigscroll_items if item in comando]:
+                        _show_big_scroller(comando, statusJson=status)
 
                     # LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
                     lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio)
 
-                # LCD. Pantalla general del ESTADO de FIRtro
+                # 3. LCD. Pantalla general resumen del ESTADO de FIRtro:
                 if use_lcd:
                     lcd.show_status(status, priority="info")
 
