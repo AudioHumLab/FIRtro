@@ -246,11 +246,12 @@ def show_big_scroller(cad="ejemplo de texto largo" , speed="1", \
     _create_screen(screen, priority=priority, duration=duration , timeout=timeout)
     acum = ["", "", "", ""]
     for c in cad + " ":
-        c1,c2,c3,c4 = lcdbig.wbig3(c)
-        acum[0] += c1
-        acum[1] += c2
-        acum[2] += c3
-        acum[3] += c4
+        #c1,c2,c3,c4 = lcdbig.wbig3(c)
+        #acum[0] += c1
+        #acum[1] += c2
+        #acum[2] += c3
+        #acum[3] += c4
+        acum = [ "".join(x) for x in zip( acum, lcdbig.wbig3(c) ) ]
     _draw_lineas_scroller( acum, screen, speed=speed)
 
 # 0. CREACIÓN del cliente conectado al servidor LCDc
