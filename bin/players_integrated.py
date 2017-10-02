@@ -8,6 +8,10 @@
 # - En algunos sistemas con escritorio, puede que mpd no arranque con FIRtro, aunque 
 #   si arrancará si FIRtro se reinicia durante la sesión de escritorio (under investigation).
 #   Para salvar este inconveniente se relanza MPD si resume_players=True.
+# v1.0c
+# - revisión: se llama a mpd según el path indicado audio/config
+# - se evalua que mpc indique que MPD está "paused" para poder reanudar la reproducción.
+
 
 # NOTAS para mplayer:
 #   Si ordenamos "stop", mplayer desaparecerá de jack (noconnect en .mplayer/config),
@@ -51,12 +55,14 @@ def manage_pauses(input_name):
             except:
                 Popen(mpd_path + " > /dev/null 2>&1", shell=True)
                 wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
-            print "(players) Reanudando MPD."
-            Popen("mpc play > /dev/null 2>&1", shell=True)
+            if "paused" in check_output("mpc", shell=True):
+                print "(players) Reanudando MPD."
+                Popen("mpc play > /dev/null 2>&1", shell=True)
 
         if 'mopidy' in input_name.lower() and load_mopidy:
-            print "(players) Reanudando MOPIDY."
-            Popen("mpc -p 7700 play > /dev/null 2>&1", shell=True)
+            if "paused" in check_output("mpc -p 7700", shell=True):
+                print "(players) Reanudando MOPIDY."
+                Popen("mpc -p 7700 play > /dev/null 2>&1", shell=True)
 
         if 'tdt'    in input_name.lower() and load_mplayer_tdt:
             if wait4result("jack_lsp", "mplayer_tdt", tmax=2, quiet=True):
