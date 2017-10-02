@@ -206,7 +206,8 @@ if __name__ == "__main__":
                     # LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
-                    lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio)
+                    lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
+                                       duration=2)
 
                 # 3. LCD. Pantalla general resumen del ESTADO de FIRtro:
                 if use_lcd:
@@ -216,4 +217,3 @@ if __name__ == "__main__":
                     print "(server) Conected to client", addr[0]
 
         sleep(0.05)
-
