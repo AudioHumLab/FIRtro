@@ -131,11 +131,11 @@ def _draw_plus():
     lcd_cmd_s('widget_set level plus4   3 2 "#"')
     lcd_cmd_s('widget_set level plus5   2 3 "#"')
 
-def _draw_level(cad, screen="level", priority="info"):
+def _draw_level(cad, screen="level", priority="info", duration=3):
     # recorre la cadena y pinta +/-, dígitos y punto decimal
     _delete_screen("mute")
     _delete_screen(screen)
-    _create_screen(screen, priority=priority)
+    _create_screen(screen, priority=priority, duration=duration)
 
     # añade un '+' para pintarlo en caso de valor positivo
     if cad and not "-" in cad:
@@ -230,11 +230,11 @@ def _pba_ver_chars(screen="prueba"):
 # 1. Funcion principal que muestra un LEVEL con los números grandes nativos de LCDproc.
 #    También mostrará MUTE según la prioridad especificada.
 def show_level(level="-12.34", muted=False, screen="level",  \
-               level_priority="info", mute_priority="info"):
+               level_priority="info", mute_priority="info", duration=3):
     # Muestra un float de level usando el widget grande 'num' nativo de lcdproc
     # excepto en estado mute, que se pintará la pantalla estática MUTE.
     if not muted:
-        _draw_level( level, screen, level_priority )
+        _draw_level( level, screen, level_priority, duration=duration )
     else:
         _draw_mute(priority=mute_priority)
 
@@ -274,4 +274,3 @@ if __name__ == "__main__":
         sleep(10)
     else:
         print __doc__
-
