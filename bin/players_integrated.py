@@ -49,7 +49,7 @@ def manage_pauses(input_name):
             try:
                 check_output("pgrep mpd", shell=True)
             except:
-                Popen("mpd > /dev/null 2>&1", shell=True)
+                Popen(mpd_path + " > /dev/null 2>&1", shell=True)
                 wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
             print "(players) Reanudando MPD."
             Popen("mpc play > /dev/null 2>&1", shell=True)
