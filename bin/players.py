@@ -63,8 +63,11 @@ def manage_pauses(input_name):
 
         # Spotify de escritorio (carga no gestionada en audio/config))
         if 'spotify' not in input_name.lower() and spotifyRunning:
-            print "(players) Pausando  SPOTIFY."
-            spotify_ctl.pause()
+            try:
+                spotify_ctl.pause()
+                print "(players) Pausando  SPOTIFY."
+            except:
+                print "(players) No es posible pausar  SPOTIFY."
 
     if pause_players and resume_players:
 
@@ -98,8 +101,11 @@ def manage_pauses(input_name):
 
         # Spotify de escritorio (carga no gestionada en audio/config))
         if 'spotify' in input_name.lower() and spotifyRunning:
-            print "(players) Reanudando  SPOTIFY."
-            spotify_ctl.play()
+            try:
+                print "(players) Reanudando  SPOTIFY."
+                spotify_ctl.play()
+            except:
+                print "(players) No es posible reanudar  SPOTIFY."
 
 if __name__ == "__main__":
     print __doc__
