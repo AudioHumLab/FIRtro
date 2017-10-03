@@ -184,6 +184,11 @@ load_mpdlcd = False
 mpdlcd_path = /usr/local/bin/mpdlcd
 mpdlcd_options =
 
+; - DISPLAY de SPOTIFY en LCD -- Opcional 
+load_spotify2lcd = False
+spotify2lcd_path = /home/firtro/bin_custom/spotify2lcd.py
+spotify2lcd_options = 
+
 [net]
 ;-- dirección IP del FIRtro
 ip_address = 192.168.1.94
