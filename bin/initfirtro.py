@@ -63,6 +63,9 @@
 #   para levantar los puertos dummy en jack que serán usados por MPD.
 # - Se deja de gestionar aquí el pausado de los players integrados.
 # - Nueva opción de volumen predefinido al arranque
+#
+# v2.2g
+# - se añade spotify2lcd
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -331,6 +334,11 @@ def main(run_level):
                 # mpdlcd (MPD client for lcdproc)
                 if load_mpdlcd:
                     mpdlcd = Popen([mpdlcd_path] + mpdlcd_options.split(), stdout=None, stderr=None)
+                    sleep(command_delay)
+
+                # v2.2f spotify2lcd (SPOTIFY client for lcdproc)
+                if load_spotify2lcd:
+                    mpdlcd = Popen([spotify2lcd_path] + spotify2lcd_options.split(), stdout=None, stderr=None)
                     sleep(command_delay)
 
         # NOTA: arriba hemos comprobado que el server esté en ejecucion.
