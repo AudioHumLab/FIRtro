@@ -3,11 +3,15 @@
 """
     Script que atiende eventos GLib de Spotify y los comunica al server LCDd
 """
+# spotify2lcd.py
+# v1.0
+# - vemos arriba que gi es una libreria oficial, ¡uff! qué susto.
 
 # Este código está basado en 'example.py' de https://github.com/acrisci/playerctl
 # Más info sobre como interactuar con un cliente Spotify en Linux:
 # https://wiki.archlinux.org/index.php/spotify
 
+# Dependencia: python-gi
 # gi.repository is the Python module for PyGObject (which stands for Python GObject introspection)
 # which holds Python bindings and support for the GTK+ 3 toolkit and for the GNOME apps.
 # See https://wiki.gnome.org/Projects/PyGObject
@@ -16,14 +20,10 @@
 # > aptitude search python-gi
 # i A python-gi                                 - Python 2.x bindings for gobject-introspection libra
 
-# spotify2lcd.py
-# v1.0
-# - vemos arriba que gi es una libreria oficial, ¡uff! qué susto.
-
-# MUY IMPORTANTE:
-# Este código solo funcinará si es invocado desde una sesión nativa en un escritorio local que corra Spotify.
+# IMPORTANTE:
+# Este código solo funcinará si es invocado desde una sesión en un escritorio local que corra Spotify.
 # NO funcionará desde una sesión remota ssh a una máquina en cuyo escritorio corra Spotify,
-# debido a que no disponemos de la sesión DBus del escritorio:
+# debido a que no disponemos de acceso a la sesión DBus del escritorio:
 #   > playerctl --list-all
 #   No players were found
 #   > dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
@@ -40,7 +40,7 @@ from os import path as os_path
 sys_path.append("/home/firtro/bin")
 import server_lcd_big as lcd
 
-def pintaLCD(artistAlbumTitle, speed=3):
+def spotify_LCD(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
     #print artistAlbumTitle  # debug
     artist, album, title = artistAlbumTitle
@@ -78,7 +78,7 @@ def on_metadata(player, e):
         album  = e['xesam:album']
         title =  e['xesam:title']
         artistAlbumTitle = [artist, album, title]
-        pintaLCD(artistAlbumTitle, speed=2)
+        spotify_LCD(artistAlbumTitle, speed=2)
 
 def on_play(player):
     # handler para cuando se inicia la reproducción en Spotify
