@@ -103,8 +103,8 @@ def manage_pauses(input_name):
         # Spotify de escritorio (carga no gestionada en audio/config))
         if 'spotify' in input_name.lower() and spotifyRunning:
             try:
-                print "(players) Reanudando  SPOTIFY."
                 spotify_ctl.play()
+                print "(players) Reanudando  SPOTIFY."
             except:
                 print "(players) No es posible reanudar  SPOTIFY."
 
