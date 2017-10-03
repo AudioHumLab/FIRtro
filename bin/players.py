@@ -32,7 +32,8 @@ import gi
 gi.require_version('Playerctl', '1.0')
 from gi.repository import Playerctl
 
-# crea una instancia de Playerctl, que es una interfaz dbus mpris para hablar con los player de un escritorio.
+# Crea una instancia de Playerctl, que es una interfaz dbus mpris para hablar con los player de un escritorio.
+# IMPORTANTE: solo funcinará si es invocado desde una sesión en un escritorio local que corra Spotify.
 try:
     spotify_ctl = Playerctl.Player(player_name='spotify')
     spotifyRunning = True
