@@ -21,6 +21,9 @@
 # - Se reordena el código para legibilidad
 # - Se deja de intervenir aquí en los players integrados (radio, mpd, etc),
 #   se recurre al nuevo módulo players_integrated
+#
+# v2.1f
+# - players_integrated.py renombrado players.py
 
 # módulos genéricos
 from os import path as os_path, remove as os_remove
@@ -40,7 +43,7 @@ int_monitor_ports = jack_internal_monitors.split()
 # FIRtro2: gestiona sound cards adicionales resampleadas en jack
 import soundcards as sc
 # FIRtro2: gestiona los players integrados en un módulo separado
-import players_integrated as players
+import players
 
 # LOGGING para el DEBUG de excepciones
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
