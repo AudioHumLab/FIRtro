@@ -103,6 +103,10 @@ load_mpdlcd =               config.getboolean('path', 'load_mpdlcd')
 mpdlcd_path =               config.get('path', 'mpdlcd_path')
 mpdlcd_options =            config.get('path', 'mpdlcd_options')
 
+load_spotify2lcd =          config.getboolean('path', 'load_spotify2lcd')
+spotify2lcd_path =          config.get('path', 'spotify2lcd_path')
+spotify2lcd_options =       config.get('path', 'spotify2lcd_options')
+
 load_irexec =               config.getboolean('path', 'load_irexec')
 irexec_path =               config.get('path', 'irexec_path')
 irexec_options =            config.get('path', 'irexec_options')
