@@ -5,7 +5,7 @@
 """
 # spotify2lcd.py
 # v1.0
-# - vemos arriba que gi es una libreria oficial, ¡uff! qué susto.
+# - comprobamos que gi es un repositorio Python oficial.
 
 # Este código está basado en 'example.py' de https://github.com/acrisci/playerctl
 # Más info sobre como interactuar con un cliente Spotify en Linux:
@@ -44,19 +44,20 @@ def spotify_LCD(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
     #print artistAlbumTitle  # debug
     artist, album, title = artistAlbumTitle
-
     speed = str(speed)
+    # creamos la pantalla
     lcd._create_screen("spotify_scr1", duration=10)
+    # comandos para la linea 1: widget de título
     w1_add = "widget_add spotify_scr1 w1 title"
     w1_set = "widget_set spotify_scr1 w1 \ \ \ Spotify\ \ \ \ "
-
+    # comandos para las lineass 2-4: widgets del artista, album y pista
     w2_add = "widget_add spotify_scr1 w2 scroller"
     w3_add = "widget_add spotify_scr1 w3 scroller"
     w4_add = "widget_add spotify_scr1 w4 scroller"
     w2_set = "widget_set spotify_scr1 w2 1 2 20 2 m " + speed + " " + artist.replace(" ", "\ ")
     w3_set = "widget_set spotify_scr1 w3 1 3 20 3 m " + speed + " " + album.replace(" ", "\ ")
     w4_set = "widget_set spotify_scr1 w4 1 4 20 4 m " + speed + " " + title.replace(" ", "\ ")
-
+    # lanzamiento de comandos al server LCDd
     lcd.lcd_cmd_s(w1_add)
     lcd.lcd_cmd_s(w2_add)
     lcd.lcd_cmd_s(w3_add)
@@ -68,7 +69,7 @@ def spotify_LCD(artistAlbumTitle, speed=3):
 
 
 def on_metadata(player, e):
-    # handler para cuando hay un nuevo metadata en Spotify
+    # handler para cuando hay un cambio de metadata en Spotify
     if 'xesam:artist' in e.keys() and 'xesam:title' in e.keys():
         print 'Now playing:'
         artist_title = '{artist} - {title}'.format(artist=e['xesam:artist'][0], title=e['xesam:title'])
