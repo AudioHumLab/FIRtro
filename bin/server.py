@@ -50,13 +50,13 @@ def lcd_check():
     # Intentamos inicializar el cliente lcd original en el server LDCproc
     if getconfig.enable_lcd:
         lcd_size = lcd.init('FIRtro')
-        if lcd_size == -1:
+        if lcd_size:
+            print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
+            return True
+        else:
             # No se ha podido conectar con lcdproc. Deshabilitamos su uso
             print "(server) Warning: Can not connect to lcdproc. LCD_STATUS is disabled"
             return False
-        else:
-            print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
-            return True
     else:
         print '(server) LCD_STATUS disabled'
         return False
@@ -84,15 +84,14 @@ def _extrae_statusJson(svar):
     return tmp
 
 def _show_big_scroller(comando, statusJson):
-    # func auxiliar para presentar el estado de un item de interés en el scroller lcd_big
+    # Func auxiliar para presentar el estado de un 'item' de interés en el scroller lcd_big.
 
-    # Buscamos en la cadena json 'statusJson' que recibimos desde server_process.do(orden)
-    # el nuevo estado que ha adquirido la 'svar' correspondiente al 'comando'
-    # Notas:
-    #  - Algunas variables de estado 'svar' tienen
-    #    nombre distinto al propio comando que la modifica.
+    # La cadena json 'statusJson' es recibida desde server_process.do(orden)
+    
+    # Adecuaciones:
+    #  - Algunas variables de estado 'svar' tienen un nombre
+    #    distinto al propio comando que las modifica.
     #  - Además alguna función como syseq está implementada con dos comandos diferentes.
-    #  - 'item' el lo que se mostrará en el scroll 'item: estado'
     item =      comando
     if "drc" in comando:
         svar =      "drc_eq"
@@ -109,12 +108,15 @@ def _show_big_scroller(comando, statusJson):
     else:
         svar =      comando
 
+    # Buscamos el estado de la variable de interés
     estado = _extrae_statusJson(svar)
-    # adecuamos los boolean
+
+    # Lo adecuamos para presentarlo en pantalla
     if      estado == True:  estado = "ON"
     elif    estado == False: estado = "OFF"
     else:                    estado = str(estado)
 
+    # Y finalmente lo presentamos
     msgLCD = item + ": " + estado
     lcd_big.show_big_scroller(msgLCD, \
                               priority="foreground", \
