@@ -338,8 +338,11 @@ def main(run_level):
 
                 # v2.2f spotify2lcd (SPOTIFY client for lcdproc)
                 if load_spotify2lcd:
-                    mpdlcd = Popen([spotify2lcd_path] + spotify2lcd_options.split(), stdout=None, stderr=None)
-                    sleep(command_delay)
+                    for server in spotify2lcd_servers:
+                        print "(initfirtro) Arrancando SPOTIFY2LCD " + server + " ..."
+                        Popen([spotify2lcd_path] + spotify2lcd_options.split() + [server], \
+                              stdout=None, stderr=None)
+                        sleep(command_delay)
 
         # NOTA: arriba hemos comprobado que el server esté en ejecucion.
 
