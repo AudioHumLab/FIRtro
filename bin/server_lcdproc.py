@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# from __future__ import with_statement # This isn't required in Python 2.6
 
 # v2.0
 # - Se revisa el codigo y se renombran funciones para legibilidad
@@ -16,8 +15,9 @@
 
 # v2.0a
 # - Si audio/config lcd_info_timeout=0 no se presenta
-#   la pantalla efímera del comando ejecutado
+#   la pantalla efímera informativa del comando solicitado
 # - Permite ajustar la prioridad de la pantalla principal de estado scr_1
+
 # v2.0b
 # - Se separan las funciones básicas de interacción con el server LCDproc
 #   en un módulo comun 'client_lcd.py', que se importa aquí.
@@ -131,7 +131,7 @@ def show_widget(type, value):
         # nota: este esquema no requiere transformaciones
 
     # Lanzamiento de los comandos para mostrar los widgets.
-    # Recordatorio: los widgets DEBEN ESTAR DECLARADOS en lcd_configure_main_screen()
+    # Recordatorio: los widgets DEBEN ESTAR DECLARADOS en configure_main_screen()
     if type == 'level':
         lcd.cmd_s('widget_set scr_1 level       ' + posi(Cvol) + ' "' + Lvol + value + '"')
     elif type == 'headroom':
@@ -166,12 +166,12 @@ def show_widget(type, value):
         lcd.cmd_s('widget_set scr_1 ftype       ' + posi(Cfty) + ' "' + Lfty + value + '"')
 
     elif type == 'info' and info_timeout > 0:
-        show_screenInfo(value)
+        show_screen_Info(value)
 
     elif type == 'test':
         lcd.cmd_s('widget_set scr_1 volume 1 1 "   Test LCD FIRtro"')
 
-def show_screenInfo(value):
+def show_screen_Info(value):
     # Creamos una SCREEN ADICIONAL con informacion efímera (timeout)
     string = lcd.cmd('screen_add scr_info')
     lcd.cmd_s('screen_set scr_info -cursor no -priority foreground -timeout ' + str(info_timeout))
@@ -195,11 +195,11 @@ def show_status(data, priority="info"):
     #ver_tipos_json(data) # debug
 
     # permite redefinir la prioridad 'info' con la que se creó la pantalla principal de este módulo
-    lcd.cmd_s('screen_set scr_1 -cursor no -priority '+ priority)
+    configure_main_screen()
 
     # Visualizamos de los datos recibidos los que deseemos presentar en el LCD
     # NOTA: Los widgets a visualizar DEBEN ESTAR DECLARADOS 'widget_add'
-    #       en lcd_configure_main_screen(), de tipo 'string'.
+    #       en configure_main_screen(), de tipo 'string'.
     show_widget('preset',      data['preset'])
     show_widget('ftype',       data['filter_type'])
     show_widget('input',       data['input_name'])
@@ -229,7 +229,7 @@ def show_status(data, priority="info"):
     elif data['order'] != 'status':
         show_widget('info', data['order'])
 
-def lcd_configure_main_screen():
+def configure_main_screen():
     # definimos la SCREEN principal de este módulo
     lcd.cmd_s('screen_add scr_1')
     # WIDGETS utilizables en la screen principal de este modulo
@@ -267,7 +267,6 @@ def ver_tipos_json(data): # solo para debug
 
 def init(client_name, server="localhost:13666"):
     if lcd.open(client_name, server):
-        lcd_configure_main_screen()
         return lcd.get_size()
     else:
         return False
