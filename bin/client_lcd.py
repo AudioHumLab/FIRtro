@@ -6,8 +6,8 @@
 
 # v1.0
 # - Desgajado de server_lcdproc.py
-# - Se escribe este modulo para ser usado por cualquiera que 
-#   quiera acceder al servidor LCDproc
+# - Se escribe este modulo para ser usado por otros módulos 
+#   que acceden a un servidor LCDproc
 
 import re
 import socket
