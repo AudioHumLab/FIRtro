@@ -13,8 +13,8 @@ command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
 
-; --- Servidores de pantallas LCD:
-LCD_servers = localhost:13666 localhost:13667
+; --- Servidores de pantallas LCD (beta: solo se soporta 1 server)
+LCD_servers = localhost:13666
 
 ; -- Pantalla de status en el LCD externo (requiere servicio LCDd funcionando)
 enable_lcd = True
@@ -23,7 +23,7 @@ lcd_info_timeout = 1
 ; opcion de layout de pantalla de status (consultar con bin/server_lcdproc.py -h)
 lcd_layout = 2
 
-; -- Pantalla de caracteres grandes en el LCD externo (requiere servicio LCDd funcionando)
+; -- Pantallas de level y eventos con caracteres grandes (server_lcd_big.py)
 enable_lcd_big = True
 ; - Eventos mostrados usando el scroll de caracteres grandes:
 bigscroll_items = preset mono balance syseq peq drc
