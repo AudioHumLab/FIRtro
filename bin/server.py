@@ -10,8 +10,8 @@
 #     Se separa el código de creación del socket
 # - también se separa el código de inicialización del LCD
 
-# v2.0a candidate
-# - se añade el lcd_big
+# v2.0a
+# - se añade el server_lcd_big
 
 import socket
 import sys
@@ -19,8 +19,8 @@ from time import sleep
 import os
 import server_process
 import getconfig
-import server_lcdproc as lcd
-import server_lcd_big as lcd_big
+import server_lcdproc as srv_lcd
+import server_lcd_big as srv_lcd_big
 
 def getsocket(host, port):
     try:
@@ -49,14 +49,14 @@ def getsocket(host, port):
 def lcd_check():
     # Intentamos inicializar el cliente lcd original en el server LDCproc
     if getconfig.enable_lcd:
-        lcd_size = lcd.init('FIRtro')
-        if lcd_size == -1:
+        lcd_size = srv_lcd.init('FIRtro', server=getconfig.LCD_server)
+        if lcd_size:
+            print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
+            return True
+        else:
             # No se ha podido conectar con lcdproc. Deshabilitamos su uso
             print "(server) Warning: Can not connect to lcdproc. LCD_STATUS is disabled"
             return False
-        else:
-            print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
-            return True
     else:
         print '(server) LCD_STATUS disabled'
         return False
@@ -64,7 +64,7 @@ def lcd_check():
 def lcd_big_check():
     # Intentamos inicializar el nuevo cliente lcd de caractreres grandes en el server LDCproc
     if getconfig.enable_lcd_big:
-        lcd_size = lcd_big.crea_cliente("BIGLEVEL")
+        lcd_size = srv_lcd_big.crea_cliente("BIGLEVEL", server=getconfig.LCD_server)
         if lcd_size:
             print '(server) LCD_BIG enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
             return True
@@ -84,15 +84,14 @@ def _extrae_statusJson(svar):
     return tmp
 
 def _show_big_scroller(comando, statusJson):
-    # func auxiliar para presentar el estado de un item de interés en el scroller lcd_big
+    # Func auxiliar para presentar el estado de un 'item' de interés en el scroller lcd_big.
 
-    # Buscamos en la cadena json 'statusJson' que recibimos desde server_process.do(orden)
-    # el nuevo estado que ha adquirido la 'svar' correspondiente al 'comando'
-    # Notas:
-    #  - Algunas variables de estado 'svar' tienen
-    #    nombre distinto al propio comando que la modifica.
+    # La cadena json 'statusJson' es recibida desde server_process.do(orden)
+    
+    # Adecuaciones:
+    #  - Algunas variables de estado 'svar' tienen un nombre
+    #    distinto al propio comando que las modifica.
     #  - Además alguna función como syseq está implementada con dos comandos diferentes.
-    #  - 'item' el lo que se mostrará en el scroll 'item: estado'
     item =      comando
     if "drc" in comando:
         svar =      "drc_eq"
@@ -109,17 +108,19 @@ def _show_big_scroller(comando, statusJson):
     else:
         svar =      comando
 
+    # Buscamos el estado de la variable de interés
     estado = _extrae_statusJson(svar)
-    # adecuamos los boolean
+
+    # Lo adecuamos para presentarlo en pantalla
     if      estado == True:  estado = "ON"
     elif    estado == False: estado = "OFF"
     else:                    estado = str(estado)
 
+    # Y finalmente lo presentamos
     msgLCD = item + ": " + estado
-    lcd_big.show_big_scroller(msgLCD, \
+    srv_lcd_big.show_big_scroller(msgLCD, \
                               priority="foreground", \
                               timeout=9)
-
 
 if __name__ == "__main__":
 
@@ -177,9 +178,9 @@ if __name__ == "__main__":
                 if getconfig.control_output > 1:
                     print "(server) Closing connection..."
                 if use_lcd:
-                    lcd.lcd_close()
+                    srv_lcd.lcd.close()
                 if use_lcd_big:
-                    lcd_big.lcd_close()
+                    srv_lcd_big.lcd.close()
                 sc.close()
                 fsocket.close()
                 sys.exit(1)
@@ -206,12 +207,12 @@ if __name__ == "__main__":
                     # LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
-                    lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
+                    srv_lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
                                        duration=2)
 
                 # 3. LCD. Pantalla general resumen del ESTADO de FIRtro:
                 if use_lcd:
-                    lcd.show_status(status, priority="info")
+                    srv_lcd.show_status(status, priority="info")
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]

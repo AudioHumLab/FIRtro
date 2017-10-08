@@ -13,6 +13,9 @@ command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
 
+; --- Servidor de pantalla LCD (actualemente solo se soporta 1 server)
+LCD_server = localhost:13666
+
 ; -- Pantalla de status en el LCD externo (requiere servicio LCDd funcionando)
 enable_lcd = True
 ; tiempo de presentacion de informaciones temporales (con 0 no se presentarán)
@@ -20,7 +23,7 @@ lcd_info_timeout = 1
 ; opcion de layout de pantalla de status (consultar con bin/server_lcdproc.py -h)
 lcd_layout = 2
 
-; -- Pantalla de caracteres grandes en el LCD externo (requiere servicio LCDd funcionando)
+; -- Pantallas de level y eventos con caracteres grandes (server_lcd_big.py)
 enable_lcd_big = True
 ; - Eventos mostrados usando el scroll de caracteres grandes:
 bigscroll_items = preset mono balance syseq peq drc
@@ -183,6 +186,13 @@ client175_options = >/dev/null 2>&1
 load_mpdlcd = False
 mpdlcd_path = /usr/local/bin/mpdlcd
 mpdlcd_options =
+
+; - DISPLAY de SPOTIFY en LCD -- Opcional 
+load_spotify2lcd = False
+spotify2lcd_path = /home/firtro/bin/spotify2lcd.py
+spotify2lcd_options = 
+; Indicar los servidores LCD a usar en formato host:port separados por espacios
+spotify2lcd_servers = localhost:13666 
 
 [net]
 ;-- dirección IP del FIRtro

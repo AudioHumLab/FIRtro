@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# from __future__ import with_statement # This isn't required in Python 2.6
 
 # v2.0
 # - Se revisa el codigo y se renombran funciones para legibilidad
@@ -15,65 +14,29 @@
 #   como se indica en audio/config. Es codigo hardwired pero algo es algo...
 
 # v2.0a
-# - Si audio/config lcd_info_timeout=0 no se presenta 
-#   la pantalla efímera del comando ejecutado
-# - Permite ajustar la prioridad de la pantalla principal de estado scr_1 
+# - Si audio/config lcd_info_timeout=0 no se presenta
+#   la pantalla efímera informativa del comando solicitado
+# - Permite ajustar la prioridad de la pantalla principal de estado scr_1
 
+# v2.0b
+# - Se separan las funciones básicas de interacción con el server LCDproc
+#   en un módulo comun 'client_lcd.py', que se importa aquí.
+
+from sys import argv as sys_argv
+import json
+
+# Módulo base para interactuar con un servidor LCDproc:
+import client_lcd as lcd
 # Acceso a variables de FIRtro para configurar el LCD
 import getconfig
-from sys import argv as sys_argv
-
-# http://lcdproc.sourceforge.net/docs/current-dev.html
-import socket
-import re
-import time
-import json
-lcdproc_host = 'localhost'
-lcdproc_port = 13666
 # eights of a second
 info_timeout = 8 * getconfig.lcd_info_timeout
-lcdproc_socket = None
 
 def split_by_n( seq, n ):
     # A generator to divide a sequence into chunks of n units
     while seq:
         yield seq[:n]
         seq = seq[n:]
-
-def lcd_cmd(lcdproc_cmd):
-    lcdproc_socket.send(lcdproc_cmd + '\n')
-    lcdproc_out = lcdproc_socket.recv(1024).strip('\n')
-    #lcdproc_out = lcdproc_out.strip('\n')
-    return(lcdproc_out)
-
-def lcd_cmd_s(lcdproc_cmd):
-    # solo envía el comando es más rápido
-    lcdproc_socket.send(lcdproc_cmd + '\n')
-
-def lcd_open(client_name):
-    global lcdproc_socket
-    # Abrimos un socket al server
-    try:
-        lcdproc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Nos conectamos
-        lcdproc_socket.connect((lcdproc_host, lcdproc_port))
-    except:
-        # print 'Error conectandose a lcdproc'
-        lcdproc_socket.close()
-        return -1
-    # Devuelve un chorizo
-    lcdproc_version = lcd_cmd('hello')
-    # Se extrae el alto y ancho del display
-    lcd_hgt = int(re.sub(' .*', '', re.sub('.* hgt ', '', lcdproc_version)))
-    lcd_wid = int(re.sub(' .*', '', re.sub('.* wid ', '', lcdproc_version)))
-    # Registramos el nombre del cliente
-    lcd_cmd_s('client_set name ' + client_name)
-    # Devolvemos el tamaño del display
-    return lcd_hgt, lcd_wid
-
-def lcd_close():
-    #lcd_cmd('screen_del ' + screen_id)
-    lcdproc_socket.close()
 
 def posi(coord):
     # auxiliar para colocar los widgets, usada por show_widgets
@@ -94,12 +57,12 @@ def printa_layouts():
     print "    12345678901234567890"
     print " 1  V -32.0 H 34.0  B -2"
     print " 2  B -2 T -3 sEQ DRC PQ"
-    print " 3  input         Lns ST"
-    print " 4  preset            mp"
+    print " 3  input_name    Lns ST"
+    print " 4  preset_name       mp"
     print
 
 def show_widget(type, value):
-    
+
     # Usamos nombres de tres letras para identificar los widgets aquí
     # al objeto de ayudar en las lineas de lanzamiento de widgets de más abajo
     #
@@ -164,64 +127,64 @@ def show_widget(type, value):
         Lbas="Bass: ";   Ltre="Treb: ";
         Linp="Input: ";
         Llni="Loud: "
-        
+
         # nota: este esquema no requiere transformaciones
 
     # Lanzamiento de los comandos para mostrar los widgets.
-    # Recordatorio: los widgets DEBEN ESTAR DECLARADOS en lcd_configure_main_screen()
+    # Recordatorio: los widgets DEBEN ESTAR DECLARADOS en configure_main_screen()
     if type == 'level':
-        lcd_cmd_s('widget_set scr_1 level       ' + posi(Cvol) + ' "' + Lvol + value + '"')
+        lcd.cmd_s('widget_set scr_1 level       ' + posi(Cvol) + ' "' + Lvol + value + '"')
     elif type == 'headroom':
-        lcd_cmd_s('widget_set scr_1 headroom    ' + posi(Chea) + ' "' + Lhea + value + '"')
+        lcd.cmd_s('widget_set scr_1 headroom    ' + posi(Chea) + ' "' + Lhea + value + '"')
     elif type == 'balance':
-        lcd_cmd_s('widget_set scr_1 balance     ' + posi(Cbal) + ' "' + Lbal + value + '"')
+        lcd.cmd_s('widget_set scr_1 balance     ' + posi(Cbal) + ' "' + Lbal + value + '"')
 
     elif type == 'bass':
-        lcd_cmd_s('widget_set scr_1 bass        ' + posi(Cbas) + ' "' + Lbas + value + '"')
+        lcd.cmd_s('widget_set scr_1 bass        ' + posi(Cbas) + ' "' + Lbas + value + '"')
     elif type == 'treble':
-        lcd_cmd_s('widget_set scr_1 treble      ' + posi(Ctre) + ' "' + Ltre + value + '"')
+        lcd.cmd_s('widget_set scr_1 treble      ' + posi(Ctre) + ' "' + Ltre + value + '"')
     elif type == 'syseq':
-        lcd_cmd_s('widget_set scr_1 syseq       ' + posi(Cseq) + ' "' + Lseq + value + '"')
+        lcd.cmd_s('widget_set scr_1 syseq       ' + posi(Cseq) + ' "' + Lseq + value + '"')
     elif type == 'drc':
-        lcd_cmd_s('widget_set scr_1 drc         ' + posi(Cdrc) + ' "' + Ldrc + value + '"')
+        lcd.cmd_s('widget_set scr_1 drc         ' + posi(Cdrc) + ' "' + Ldrc + value + '"')
     elif type == 'peq':
-        lcd_cmd_s('widget_set scr_1 peq         ' + posi(Cpeq) + ' "' + Lpeq + value + '"')
+        lcd.cmd_s('widget_set scr_1 peq         ' + posi(Cpeq) + ' "' + Lpeq + value + '"')
 
     elif type == 'input':
-        lcd_cmd_s('widget_set scr_1 input       ' + posi(Cinp) + ' "' + Linp + value + '"')
+        lcd.cmd_s('widget_set scr_1 input       ' + posi(Cinp) + ' "' + Linp + value + '"')
     elif type == 'loud':
-        lcd_cmd_s('widget_set scr_1 loud        ' + posi(Clns) + ' "' + Llns + value + '"')
+        lcd.cmd_s('widget_set scr_1 loud        ' + posi(Clns) + ' "' + Llns + value + '"')
     elif type == 'mono':
-        lcd_cmd_s('widget_set scr_1 mono        ' + posi(Cmon) + ' "' + Lmon + value + '"')
+        lcd.cmd_s('widget_set scr_1 mono        ' + posi(Cmon) + ' "' + Lmon + value + '"')
 
     elif type == 'loudinfo':
-        lcd_cmd_s('widget_set scr_1 loudinfo    ' + posi(Clni) + ' "' + Llni + value + '"')
+        lcd.cmd_s('widget_set scr_1 loudinfo    ' + posi(Clni) + ' "' + Llni + value + '"')
 
     elif type == 'preset':
-        lcd_cmd_s('widget_set scr_1 preset      ' + posi(Cpre) + ' "' + Lpre + value + '"')
+        lcd.cmd_s('widget_set scr_1 preset      ' + posi(Cpre) + ' "' + Lpre + value + '"')
     elif type == 'ftype':
-        lcd_cmd_s('widget_set scr_1 ftype       ' + posi(Cfty) + ' "' + Lfty + value + '"')
+        lcd.cmd_s('widget_set scr_1 ftype       ' + posi(Cfty) + ' "' + Lfty + value + '"')
 
     elif type == 'info' and info_timeout > 0:
-        show_screenInfo(value)
+        show_screen_Info(value)
 
     elif type == 'test':
-        lcd_cmd_s('widget_set scr_1 volume 1 1 "   Test LCD FIRtro"')
+        lcd.cmd_s('widget_set scr_1 volume 1 1 "   Test LCD FIRtro"')
 
-def show_screenInfo(value):
+def show_screen_Info(value):
     # Creamos una SCREEN ADICIONAL con informacion efímera (timeout)
-    string = lcd_cmd('screen_add scr_info')
-    lcd_cmd_s('screen_set scr_info priority foreground timeout ' + str(info_timeout))
+    string = lcd.cmd('screen_add scr_info')
+    lcd.cmd_s('screen_set scr_info -cursor no -priority foreground -timeout ' + str(info_timeout))
     if string[:4] <> 'huh?': # huh? en el lenguaje lcdproc significa ¿comooooor?
         # La pantalla no existe, creamos los widgets
-        lcd_cmd_s('widget_add scr_info info_tit title')
-        lcd_cmd_s('widget_add scr_info info_txt2 string')
-        lcd_cmd_s('widget_add scr_info info_txt3 string')
-        lcd_cmd_s('widget_add scr_info info_txt4 string')
-    lcd_cmd_s('widget_set scr_info info_tit "FIRtro info"')
+        lcd.cmd_s('widget_add scr_info info_tit title')
+        lcd.cmd_s('widget_add scr_info info_txt2 string')
+        lcd.cmd_s('widget_add scr_info info_txt3 string')
+        lcd.cmd_s('widget_add scr_info info_txt4 string')
+    lcd.cmd_s('widget_set scr_info info_tit "FIRtro info"')
     line = 2
     for data in split_by_n(value,20):
-        lcd_cmd_s('widget_set scr_info info_txt' + str(line) + ' 1 ' + str(line) + ' "' + data + '"')
+        lcd.cmd_s('widget_set scr_info info_txt' + str(line) + ' 1 ' + str(line) + ' "' + data + '"')
         line = line + 1
         if line == 5:
             break
@@ -230,13 +193,13 @@ def show_status(data, priority="info"):
     # Descofificamos los datos entregados que son json
     data = json.loads(data)
     #ver_tipos_json(data) # debug
-    
+
     # permite redefinir la prioridad 'info' con la que se creó la pantalla principal de este módulo
-    lcd_cmd_s('screen_set scr_1 priority '+ priority)
+    configure_main_screen()
 
     # Visualizamos de los datos recibidos los que deseemos presentar en el LCD
     # NOTA: Los widgets a visualizar DEBEN ESTAR DECLARADOS 'widget_add'
-    #       en lcd_configure_main_screen(), de tipo 'string'.
+    #       en configure_main_screen(), de tipo 'string'.
     show_widget('preset',      data['preset'])
     show_widget('ftype',       data['filter_type'])
     show_widget('input',       data['input_name'])
@@ -266,24 +229,24 @@ def show_status(data, priority="info"):
     elif data['order'] != 'status':
         show_widget('info', data['order'])
 
-def lcd_configure_main_screen():
+def configure_main_screen():
     # definimos la SCREEN principal de este módulo
-    lcd_cmd_s('screen_add scr_1')
+    lcd.cmd_s('screen_add scr_1')
     # WIDGETS utilizables en la screen principal de este modulo
-    lcd_cmd_s('widget_add scr_1 level       string')
-    lcd_cmd_s('widget_add scr_1 headroom    string')
-    lcd_cmd_s('widget_add scr_1 balance     string')
-    lcd_cmd_s('widget_add scr_1 bass        string')
-    lcd_cmd_s('widget_add scr_1 treble      string')
-    lcd_cmd_s('widget_add scr_1 loud        string')
-    lcd_cmd_s('widget_add scr_1 loudinfo    string')
-    lcd_cmd_s('widget_add scr_1 input       string')
-    lcd_cmd_s('widget_add scr_1 preset      string')
-    lcd_cmd_s('widget_add scr_1 mono        string')
-    lcd_cmd_s('widget_add scr_1 ftype       string')
-    lcd_cmd_s('widget_add scr_1 syseq       string')
-    lcd_cmd_s('widget_add scr_1 drc         string')
-    lcd_cmd_s('widget_add scr_1 peq         string')
+    lcd.cmd_s('widget_add scr_1 level       string')
+    lcd.cmd_s('widget_add scr_1 headroom    string')
+    lcd.cmd_s('widget_add scr_1 balance     string')
+    lcd.cmd_s('widget_add scr_1 bass        string')
+    lcd.cmd_s('widget_add scr_1 treble      string')
+    lcd.cmd_s('widget_add scr_1 loud        string')
+    lcd.cmd_s('widget_add scr_1 loudinfo    string')
+    lcd.cmd_s('widget_add scr_1 input       string')
+    lcd.cmd_s('widget_add scr_1 preset      string')
+    lcd.cmd_s('widget_add scr_1 mono        string')
+    lcd.cmd_s('widget_add scr_1 ftype       string')
+    lcd.cmd_s('widget_add scr_1 syseq       string')
+    lcd.cmd_s('widget_add scr_1 drc         string')
+    lcd.cmd_s('widget_add scr_1 peq         string')
 
 def test():
     lcd_size = init('FIRtro')
@@ -296,21 +259,23 @@ def test():
         if string == 'quit':
             break
         show_widget ('info', string)
-    lcd_close()
+    lcd.close()
 
 def ver_tipos_json(data): # solo para debug
     for cosa in data:
         print ">"*5, cosa.ljust(12), type(data[cosa]), data[cosa]
 
-def init(client_name):
-    lcd_size = lcd_open(client_name)
-    if lcd_size == -1:
-        return -1
-    lcd_configure_main_screen()
-    return lcd_size
-
+def init(client_name, server="localhost:13666"):
+    if lcd.open(client_name, server):
+        return lcd.get_size()
+    else:
+        return False
+        
 if __name__ == "__main__":
+
     if len(sys_argv) > 1:
         printa_layouts()
     else:
+        # sobreescribimos el posible info_timeout = 0 de audio/config
+        info_timeout = 2
         test()

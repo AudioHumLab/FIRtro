@@ -5,13 +5,16 @@
     al objeto de poder ahorrar %CPU en máquinas pequeñas.
 """
 # v1.0b
-# - En algunos sistemas con escritorio, puede que mpd no arranque con FIRtro, aunque 
+# - En algunos sistemas con escritorio, puede que mpd no arranque con FIRtro, aunque
 #   si arrancará si FIRtro se reinicia durante la sesión de escritorio (under investigation).
 #   Para salvar este inconveniente se relanza MPD si resume_players=True.
 # v1.0c
 # - revisión: se llama a mpd según el path indicado audio/config
 # - se evalua que mpc indique que MPD está "paused" para poder reanudar la reproducción.
-
+#
+# v1.0d
+# - Se gestiona Spotify de escritorio si existiera.
+#   Dependencia: python-gi
 
 # NOTAS para mplayer:
 #   Si ordenamos "stop", mplayer desaparecerá de jack (noconnect en .mplayer/config),
@@ -24,6 +27,18 @@ from subprocess import Popen, check_output
 from getconfig import *
 from getstatus import *
 from wait4 import wait4result
+
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import Playerctl
+
+# Crea una instancia de Playerctl, que es una interfaz dbus mpris para hablar con los player de un escritorio.
+# IMPORTANTE: solo funcinará si es invocado desde una sesión en un escritorio local que corra Spotify.
+try:
+    spotify_ctl = Playerctl.Player(player_name='spotify')
+    spotifyRunning = True
+except:
+    spotifyRunning = False
 
 def manage_pauses(input_name):
     """ Gestiona pausas opcionales de players integrados,
@@ -46,6 +61,14 @@ def manage_pauses(input_name):
         if 'tdt'    not in input_name.lower() and load_mplayer_cdda:
             print "(players) Pausando  MPLAYER_CDDA."
             Popen("echo pausing pause > " + HOME + "/cdda_fifo", shell=True)
+
+        # Spotify de escritorio (carga no gestionada en audio/config))
+        if 'spotify' not in input_name.lower() and spotifyRunning:
+            try:
+                spotify_ctl.pause()
+                print "(players) Pausando  SPOTIFY."
+            except:
+                print "(players) No es posible pausar  SPOTIFY."
 
     if pause_players and resume_players:
 
@@ -77,6 +100,13 @@ def manage_pauses(input_name):
             print "(players) Reanudando  MPLAYER_CDDA."
             Popen("echo pausing_toggle pause > " + HOME + "/cdda_fifo", shell=True)
 
+        # Spotify de escritorio (carga no gestionada en audio/config))
+        if 'spotify' in input_name.lower() and spotifyRunning:
+            try:
+                spotify_ctl.play()
+                print "(players) Reanudando  SPOTIFY."
+            except:
+                print "(players) No es posible reanudar  SPOTIFY."
 
 if __name__ == "__main__":
     print __doc__

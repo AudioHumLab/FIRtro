@@ -50,6 +50,9 @@ def main(run_level):
             # mpdlcd (MPD client for lcdproc)
             if load_mpdlcd:
                 Popen (["pkill", "-9", "-f", mpdlcd_path], stdout=fnull, stderr=fnull)
+            # spotify2lcd (Spotify client for lcdproc)
+            if load_spotify2lcd:
+                Popen (["pkill", "-9", "-f", spotify2lcd_path], stdout=fnull, stderr=fnull)
             # mpd
             if load_mpd:
                 Popen ("killall mpd", shell=True)
