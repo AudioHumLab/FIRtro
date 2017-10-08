@@ -1,12 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-    Script que atiende eventos GLib de Spotify y los comunica al server LCDd
+    Script daemon que atiende eventos GLib de Spotify y los comunica al server LCDd
+    Uso:
+        spotify2lcd.py host:port
 """
 
 # spotify2lcd.py
 # v1.0
-# - comprobamos que gi es un repositorio Python oficial.
+# - Comprobamos que gi es un repositorio Python oficial.
+# - Bucle inicial de espera hasta conectar con el server LCDproc
 
 # Este código está basado en 'example.py' de https://github.com/acrisci/playerctl
 # Más info sobre como interactuar con un cliente Spotify en Linux:
@@ -35,11 +38,21 @@ gi.require_version('Playerctl', '1.0')
 from gi.repository import Playerctl, GLib
 
 from sys import argv as sys_argv, path as sys_path
+from time import sleep
+from subprocess import check_output
 
 # cliente comun para interactuar con un servidor LCDproc
 import client_lcd as lcd
 
-def spotify_LCD(artistAlbumTitle, speed=3):
+def input_name():
+    # función auxiliar para conocer el nombre de la entrada actual
+    try:
+        tmp = check_output('grep "input =" /home/firtro/audio/status', shell=True)
+        return tmp.split()[-1]
+    except:
+        return ""
+
+def do_spotify_screen(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
     #print artistAlbumTitle  # debug
     artist, album, title = artistAlbumTitle
@@ -76,18 +89,27 @@ def on_metadata(player, e):
         album  = e['xesam:album']
         title =  e['xesam:title']
         artistAlbumTitle = [artist, album, title]
-        spotify_LCD(artistAlbumTitle, speed=2)
+        do_spotify_screen(artistAlbumTitle, speed=2)
 
 def on_play(player):
-    # handler para cuando se inicia la reproducción en Spotify
+    # Handler para cuando se inicia la reproducción en Spotify
     #print 'Spotify playing at volume {}'.format(player.props.volume)
-    pass
-    
+    # restaura el título de la screen de Spotify quitando el indicador PAUSED
+    lcd.cmd_s("widget_set spotify_scr1 w1 \ \ \ Spotify\ \ \ \ ")
+    if "spotify" in input_name().lower():
+        # recupera la prioridad normal de la screen de Spotify
+        lcd.cmd_s("screen_set spotify_scr1 -priority info")
+
 def on_pause(player):
-    # handler para cuando se pausa Spotify
+    # Handler para cuando se pausa Spotify
     #print 'Paused the song: {}'.format(player.get_title())
-    # borra del LDC la pantalla de Spotify si se pausa
-    lcd.delete_screen("spotify_scr1")
+    # modifica el título de la screen de Spotify añadendo el indicador PAUSED
+    lcd.cmd_s("widget_set spotify_scr1 w1 Spotify\ PAUSED")
+    if not "spotify" in input_name().lower():
+        # opc.A borra la screen de Spotify
+        #lcd.delete_screen("spotify_scr1")
+        # opc.B deja la screen de Spotify en background
+        lcd.cmd_s("screen_set spotify_scr1 -priority background")
 
 if __name__ == "__main__":
 
@@ -97,8 +119,12 @@ if __name__ == "__main__":
         print __doc__
         exit()
 
-    # crea cliente conectado al server LCDd del sistema
-    lcd.crea_cliente("spotify_client", server)
+    # Intenta conectar al server LCDd
+    while True:
+        if lcd.crea_cliente("spotify_client", server):
+            print "(spotify2lcd.py) se ha conectado con el server " + server
+            break
+        sleep(5)
 
     # crea una instancia de Playerctl, que es una interfaz dbus mpris para hablar con los player de un escritorio.
     player = Playerctl.Player(player_name='spotify')
