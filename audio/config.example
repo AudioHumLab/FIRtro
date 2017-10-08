@@ -13,8 +13,8 @@ command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
 
-; --- Servidores de pantallas LCD (beta: solo se soporta 1 server)
-LCD_servers = localhost:13666
+; --- Servidor de pantalla LCD (actualemente solo se soporta 1 server)
+LCD_server = localhost:13666
 
 ; -- Pantalla de status en el LCD externo (requiere servicio LCDd funcionando)
 enable_lcd = True
