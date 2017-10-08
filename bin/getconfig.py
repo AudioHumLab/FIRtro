@@ -28,7 +28,7 @@ lcd_layout =                config.get('misc', 'lcd_layout')
 enable_lcd_big =            config.getboolean('misc', 'enable_lcd_big')
 bigscroll_items =           config.get('misc', 'bigscroll_items').split()
 lcd_show_mute_prio =        config.get('misc', 'lcd_show_mute_prio')
-LCD_servers =               config.get('misc', 'LCD_servers').split()
+LCD_server =                config.get('misc', 'LCD_server')
 
 dummy_ports =               config.get('misc', 'dummy_ports')
 pause_players =             config.getboolean('misc', 'pause_players')
