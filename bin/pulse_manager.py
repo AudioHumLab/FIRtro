@@ -65,8 +65,11 @@ def pulse2jack():
     """
     tmp = "pactl load-module module-jack-sink channels=2 client_name=pulse_sink connect=False"
     sp.call(tmp, shell = True)
-    # y lo establecemos como salida por defecto de PA
+    # Lo establecemos como salida por defecto de PA
     tmp = "pacmd set-default-sink jack_out"
+    sp.call(tmp, shell = True)
+    # Aseguramos volumen 100%
+    tmp = "pactl set-sink-volume jack_out 100%"
     sp.call(tmp, shell = True)
 
 if __name__ == '__main__':
