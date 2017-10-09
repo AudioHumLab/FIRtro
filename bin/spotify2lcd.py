@@ -25,7 +25,7 @@
 # i A python-gi                                 - Python 2.x bindings for gobject-introspection libra
 
 # IMPORTANTE:
-# Este código solo funcinará si es invocado desde una sesión en un escritorio local que corra Spotify.
+# Este código solo funcionará si es invocado desde una sesión en un escritorio local que corra Spotify.
 # NO funcionará desde una sesión remota ssh a una máquina en cuyo escritorio corra Spotify,
 # debido a que no disponemos de acceso a la sesión DBus del escritorio:
 #   > playerctl --list-all
@@ -42,7 +42,7 @@ from time import sleep
 from subprocess import check_output
 
 # cliente comun para interactuar con un servidor LCDproc
-import client_lcd as lcd
+import client_lcd as cLCD
 
 def input_name():
     # función auxiliar para conocer el nombre de la entrada actual
@@ -58,7 +58,7 @@ def do_spotify_screen(artistAlbumTitle, speed=3):
     artist, album, title = artistAlbumTitle
     speed = str(speed)
     # creamos la pantalla
-    lcd.create_screen("spotify_scr1", duration=10)
+    cLCD.create_screen("spotify_scr1", duration=10)
     # comandos para la linea 1: widget de título
     w1_add = "widget_add spotify_scr1 w1 title"
     w1_set = "widget_set spotify_scr1 w1 \ \ \ Spotify\ \ \ \ "
@@ -70,14 +70,24 @@ def do_spotify_screen(artistAlbumTitle, speed=3):
     w3_set = "widget_set spotify_scr1 w3 1 3 20 3 m " + speed + " " + album.replace(" ", "\ ")
     w4_set = "widget_set spotify_scr1 w4 1 4 20 4 m " + speed + " " + title.replace(" ", "\ ")
     # lanzamiento de comandos al server LCDd
-    lcd.cmd_s(w1_add)
-    lcd.cmd_s(w2_add)
-    lcd.cmd_s(w3_add)
-    lcd.cmd_s(w4_add)
-    lcd.cmd_s(w1_set)
-    lcd.cmd_s(w2_set)
-    lcd.cmd_s(w3_set)
-    lcd.cmd_s(w4_set)
+    cLCD.cmd_s(w1_add)
+    cLCD.cmd_s(w2_add)
+    cLCD.cmd_s(w3_add)
+    cLCD.cmd_s(w4_add)
+    cLCD.cmd_s(w1_set)
+    cLCD.cmd_s(w2_set)
+    cLCD.cmd_s(w3_set)
+    cLCD.cmd_s(w4_set)
+
+def do_static_screen():
+    # aux para printar una pantalla estática indicando que 
+    # la sesion no disppne de conexión DBUS con Spotify
+
+    # creamos la pantalla
+    cLCD.create_screen("static", duration=0)
+    # comandos para la linea 1: widget de título
+    w1_add = "widget_add static w1 title"
+    w1_set = "widget_set static w1 Spotify\ (not\ connected)"
 
 def on_metadata(player, e):
     # handler para cuando hay un cambio de metadata en Spotify
@@ -95,21 +105,21 @@ def on_play(player):
     # Handler para cuando se inicia la reproducción en Spotify
     #print 'Spotify playing at volume {}'.format(player.props.volume)
     # restaura el título de la screen de Spotify quitando el indicador PAUSED
-    lcd.cmd_s("widget_set spotify_scr1 w1 \ \ \ Spotify\ \ \ \ ")
+    cLCD.cmd_s("widget_set spotify_scr1 w1 \ \ \ Spotify\ \ \ \ ")
     if "spotify" in input_name().lower():
         # recupera la prioridad normal de la screen de Spotify
-        lcd.cmd_s("screen_set spotify_scr1 -priority info")
+        cLCD.cmd_s("screen_set spotify_scr1 -priority info")
 
 def on_pause(player):
     # Handler para cuando se pausa Spotify
     #print 'Paused the song: {}'.format(player.get_title())
     # modifica el título de la screen de Spotify añadendo el indicador PAUSED
-    lcd.cmd_s("widget_set spotify_scr1 w1 Spotify\ PAUSED")
+    cLCD.cmd_s("widget_set spotify_scr1 w1 Spotify\ PAUSED")
     if not "spotify" in input_name().lower():
         # opc.A borra la screen de Spotify
-        #lcd.delete_screen("spotify_scr1")
+        #cLCD.delete_screen("spotify_scr1")
         # opc.B deja la screen de Spotify en background
-        lcd.cmd_s("screen_set spotify_scr1 -priority background")
+        cLCD.cmd_s("screen_set spotify_scr1 -priority background")
 
 if __name__ == "__main__":
 
@@ -121,7 +131,7 @@ if __name__ == "__main__":
 
     # Intenta conectar al server LCDd
     while True:
-        if lcd.crea_cliente("spotify_client", server):
+        if cLCD.open("spotify_client", server):
             print "(spotify2lcd.py) se ha conectado con el server " + server
             break
         sleep(5)
