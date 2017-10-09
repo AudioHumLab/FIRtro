@@ -77,13 +77,6 @@ def create_screen(sname, priority="info", duration=3, timeout=0):
         tmp = 'screen_set ' + sname + ' timeout ' + tou
         cmd_s(tmp); #print "(server_lcd_big)  tmp" # para debug
 
-# 0. CREACIÓN del cliente conectado al servidor LCDc
-def crea_cliente(cname="biglevel", server="localhost:13666"):
-    if open(cname, server):
-        return get_size()
-    else:
-        return False
-
 if __name__ == "__main__":
 
     print __doc__
