@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+    Información de FIRtro en el LCD.
+    Pruebas en línea de comandos:
+        server_lcdproc.py   --test          Inicia un modo interactivo para 
+                                            escribir mensajes en la pantalla LCD.
+
+                            --level xx.xx   Se muestra el valor en números grandes.
+
+                            --msg cadena    Se muestra la cadena en scroll con caracteres grandes.
+
+                            --layouts       Se muestran las layouts predefinidas para
+                                            presentar la pantalla resumen del estado de FIRtro.
+
+    (Los mensajes de estas pruebas expiran en 10 seg)
+"""
 
 # v2.0
 # - Se revisa el codigo y se renombran funciones para legibilidad
@@ -12,15 +27,29 @@
 #   que se pueden seleccionar en audio/config. De momento  hay dos ...
 #   Se pueden consultar los esquemas con "server_lcdproc.py -h"
 #   como se indica en audio/config. Es codigo hardwired pero algo es algo...
-
+#
 # v2.0a
 # - Si audio/config lcd_info_timeout=0 no se presenta
 #   la pantalla efímera informativa del comando solicitado
 # - Permite ajustar la prioridad de la pantalla principal de estado scr_1
-
+#
 # v2.0b
 # - Se separan las funciones básicas de interacción con el server LCDproc
 #   en un módulo comun 'client_lcd.py', que se importa aquí.
+#
+# v3.0
+#   - Se incorporan las facilidades de presentación del nivel en números grandes y 
+#     de scroll de mensajes en caracteres grandes.
+# v3.0a
+# - Se añade MUTE si mute=True en show_level()
+# v3.0b
+# - Disponible un scroll a pantalla completa que muestra una cadena de texto usando
+#   las rutinas de lcdbig.py que escalan los caracteres mediante un artificio a base de
+#   4 lineas de caracteres ascii básicos, ya que LCDproc no admite ascii extendido.
+# v3.0c
+# - Se separan las funiones básicas de interacción con el server LCDproc
+#   en un módulo comun 'client_lcd.py', que se importa aquí.
+
 
 from sys import argv as sys_argv
 import json
@@ -248,7 +277,7 @@ def configure_main_screen():
     lcd.cmd_s('widget_add scr_1 drc         string')
     lcd.cmd_s('widget_add scr_1 peq         string')
 
-def test():
+def interactive_test_lcd():
     lcd_size = init('FIRtro')
     if lcd_size == -1:
         return -1
@@ -274,8 +303,25 @@ def init(client_name, server="localhost:13666"):
 if __name__ == "__main__":
 
     if len(sys_argv) > 1:
-        printa_layouts()
+        # posibles opciones --test | --level cadena | -msg cadena | --layouts
+        opc = sys_argv[1]
+        if len(sys_argv) > 2:
+            cadena = sys_argv[2]
+
+        crea_cliente("tmp")
+
+        if "-t" in opc:
+            # sobreescribimos el posible info_timeout = 0 de audio/config
+            info_timeout = 2
+            interactive_test_lcd()
+        elif opc == "--level":
+            lcdbig.show_level(cadena, screen="tmp", priority="foreground")
+            sleep(10)
+        elif opc == "--msg":
+            lcdbig.show_scroller(cadena, screen="tmp", priority="foreground")
+            sleep(10)
+        elif opc == "--layouts":
+            printa_layouts()
+
     else:
-        # sobreescribimos el posible info_timeout = 0 de audio/config
-        info_timeout = 2
-        test()
+        print __doc__
