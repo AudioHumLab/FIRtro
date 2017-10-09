@@ -9,7 +9,8 @@
 # NOTA: el backslash NO es printable por parte del server, 
 #       ni siquiera escapado.
 
-# !!! OJO array **NO USADO** de ancho 4, ocupa demasiado !!!
+# !!! OJO array **NO USADO** de ancho 4, ocupa demasiado en 20x4!!!
+#     NOTA podría ser de interés con un display de 40x4 ... ...
 #       1234 1234 1234 1234 1234 1234 1234 1234 1234 1234
 l01 =  " __   __   __   __   __   __   __               _"
 l02 =  "|__| |__/ |    |  \ |_   |_   | _  |__|  |      |"
