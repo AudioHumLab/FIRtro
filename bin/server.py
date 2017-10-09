@@ -11,7 +11,7 @@
 # - también se separa el código de inicialización del LCD
 
 # v2.0a
-# - se añade el server_lcd_big
+# - Se usan las nuevas las pantallas de LCD con caracteres grandes.
 
 import socket
 import sys
@@ -19,8 +19,7 @@ from time import sleep
 import os
 import server_process
 import getconfig
-import server_lcdproc as srv_lcd
-import server_lcd_big as srv_lcd_big
+import server_lcdproc as srvLCD
 
 def getsocket(host, port):
     try:
@@ -47,9 +46,9 @@ def getsocket(host, port):
     return s
 
 def lcd_check():
-    # Intentamos inicializar el cliente lcd original en el server LDCproc
+    # Intentamos inicializar el cliente LCD
     if getconfig.enable_lcd:
-        lcd_size = srv_lcd.init('FIRtro', server=getconfig.LCD_server)
+        lcd_size = srvLCD.init('FIRtro', server=getconfig.LCD_server)
         if lcd_size:
             print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
             return True
@@ -61,20 +60,6 @@ def lcd_check():
         print '(server) LCD_STATUS disabled'
         return False
 
-def lcd_big_check():
-    # Intentamos inicializar el nuevo cliente lcd de caractreres grandes en el server LDCproc
-    if getconfig.enable_lcd_big:
-        lcd_size = srv_lcd_big.crea_cliente("BIGLEVEL", server=getconfig.LCD_server)
-        if lcd_size:
-            print '(server) LCD_BIG enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
-            return True
-        else:
-            print "(server) Warning: Can not connect to lcdproc. LCD_BIG is disabled"
-            return False
-    else:
-        print '(server) LCD_BIG disabled'
-        return False
-
 def _extrae_statusJson(svar):
     # auxiliar para leer el estado de una variable en el chorizo Json 'status'
     tmp = status[ status.index('"' + svar + '":'): ]
@@ -84,7 +69,8 @@ def _extrae_statusJson(svar):
     return tmp
 
 def _show_big_scroller(comando, statusJson):
-    # Func auxiliar para presentar el estado de un 'item' de interés en el scroller lcd_big.
+    # Func auxiliar intermedia para presentar el estado 
+    # de un 'item' de interés en el scroller lcd_big.
 
     # La cadena json 'statusJson' es recibida desde server_process.do(orden)
     
@@ -118,15 +104,14 @@ def _show_big_scroller(comando, statusJson):
 
     # Y finalmente lo presentamos
     msgLCD = item + ": " + estado
-    srv_lcd_big.show_big_scroller(msgLCD, \
+    srvLCD.lcdbig.show_scroller(msgLCD, \
                               priority="foreground", \
                               timeout=9)
 
 if __name__ == "__main__":
 
     # Uso del LCD
-    use_lcd =     lcd_check()
-    use_lcd_big = lcd_big_check()
+    use_lcd = lcd_check()
 
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
@@ -185,34 +170,35 @@ if __name__ == "__main__":
                 fsocket.close()
                 sys.exit(1)
 
-            # Modo tranparente hacia FIRtro: 'data' es una ORDEN  (comando parámetros...)
+            # Modo transparente hacia FIRtro: 'data' es una ORDEN  (comando parámetros...)
             else:
                 # 1. ENVIAMOS la orden al gestor de FIRtro (server_process.py)
                 # que nos responderá con el estado general en formato json
                 orden = data
                 status = server_process.do(orden)
 
-                # DEVOLVEMOS el estado de FIRtro
+                # 2. DEVOLVEMOS el estado de FIRtro
                 sc.send(status)
 
-                # 2. LCD. NUEVAS pantallas que muestran caracteres GRANDES:
-                if use_lcd_big:
+                # 3. Presentamos el estado en el LCD
+                if use_lcd:
 
-                    # SCROLL. Si alguno de los items configurados en audio/bigscroll_items
+                    # 3.1 Pantalla general resumen del ESTADO de FIRtro:
+                    srvLCD.show_status(status, priority="info")
+
+                    # 3.2 NUEVAS pantallas que muestran caracteres GRANDES:
+                    
+                    # 3.2.1 SCROLL. Si alguno de los items configurados en audio/bigscroll_items
                     # matchea en el comando, presentamos la orden en el scroller grande:
                     comando = orden.split()[0]
                     if [item for item in getconfig.bigscroll_items if item in comando]:
                         _show_big_scroller(comando, statusJson=status)
 
-                    # LEVEL. Además también rotamos el nivel en grande:
+                    # 3.2.2 LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
-                    srv_lcd_big.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
+                    srvLCD.lcdbig.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
                                        duration=2)
-
-                # 3. LCD. Pantalla general resumen del ESTADO de FIRtro:
-                if use_lcd:
-                    srv_lcd.show_status(status, priority="info")
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
