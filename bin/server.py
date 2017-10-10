@@ -163,9 +163,7 @@ if __name__ == "__main__":
                 if getconfig.control_output > 1:
                     print "(server) Closing connection..."
                 if use_lcd:
-                    srv_lcd.lcd.close()
-                if use_lcd_big:
-                    srv_lcd_big.lcd.close()
+                    srvLCD.cLCD.close()
                 sc.close()
                 fsocket.close()
                 sys.exit(1)
