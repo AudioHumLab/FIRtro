@@ -331,8 +331,8 @@ def show_level(level="-12.34", muted=False, screen="level",  \
 
 # 2. Función principal que muestra una cadena de texto
 #    en un scroller a pantalla completa.
-def show_scroller(cad="ejemplo de texto largo" , speed="1", \
-                      priority="info", duration=10, timeout=0, screen="bigscroller"):
+def show_scroller(cad="ejemplo de texto largo", screen="bigscroller", speed="1", \
+                      priority="info", duration=10, timeout=0):
     cLCD.delete_screen(screen)
     cLCD.create_screen(screen, priority=priority, duration=duration , timeout=timeout)
     acum = ["", "", "", ""]
