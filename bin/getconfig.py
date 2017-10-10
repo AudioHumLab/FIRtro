@@ -26,7 +26,7 @@ enable_lcd =                config.getboolean('misc', 'enable_lcd')
 lcd_info_timeout =          config.getfloat('misc', 'lcd_info_timeout')
 lcd_layout =                config.get('misc', 'lcd_layout')
 enable_lcd_big =            config.getboolean('misc', 'enable_lcd_big')
-bigscroll_items =           config.get('misc', 'bigscroll_items').split()
+lcd_bigscroll_items =       config.get('misc', 'lcd_bigscroll_items').split()
 lcd_show_mute_prio =        config.get('misc', 'lcd_show_mute_prio')
 LCD_server =                config.get('misc', 'LCD_server')
 
