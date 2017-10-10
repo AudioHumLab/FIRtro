@@ -188,10 +188,10 @@ if __name__ == "__main__":
 
                     # 3.2 NUEVAS pantallas que muestran caracteres GRANDES:
                     
-                    # 3.2.1 SCROLL. Si alguno de los items configurados en audio/bigscroll_items
+                    # 3.2.1 SCROLL. Si alguno de los items configurados en audio/config:lcd_bigscroll_items
                     # matchea en el comando, presentamos la orden en el scroller grande:
                     comando = orden.split()[0]
-                    if [item for item in getconfig.bigscroll_items if item in comando]:
+                    if [item for item in getconfig.lcd_bigscroll_items if item in comando]:
                         _show_big_scroller(comando, statusJson=status)
 
                     # 3.2.2 LEVEL. Además también rotamos el nivel en grande:
