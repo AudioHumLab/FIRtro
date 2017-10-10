@@ -5,7 +5,7 @@
     
     Para hacer pruebas en línea de comandos:
 
-        server_lcdproc.py   --test          Inicia un modo interactivo para 
+        server_lcdproc.py   --test          Inicia un modo interactivo para
                                             escribir mensajes en la pantalla LCD.
 
                             --level xx.xx   Se muestra el valor en números grandes.
@@ -40,7 +40,7 @@
 #   en un módulo comun 'client_lcd.py', que se importa aquí.
 #
 # v3.0
-#   - Se incorporan las facilidades de presentación del nivel en números grandes y 
+#   - Se incorporan las facilidades de presentación del nivel en números grandes y
 #     de scroll de mensajes en caracteres grandes.
 # v3.0a
 # - Se añade MUTE si mute=True en lcdbig.show_level()
@@ -324,11 +324,11 @@ if __name__ == "__main__":
             interactive_test_lcd()
 
         elif opc == "--level":
-            lcdbig.show_level(cadena, screen="tmp", level_priority="foreground")
+            lcdbig.show_level(cadena, level_priority="foreground")
             sleep(10)
 
         elif opc == "--msg":
-            lcdbig.show_scroller(cadena, screen="tmp", priority="foreground")
+            lcdbig.show_scroller(cadena, priority="foreground")
             sleep(10)
 
         elif opc == "--layouts":
