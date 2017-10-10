@@ -225,7 +225,7 @@ lcd_layout = 2
 ; --- FIRtro en LCD: pantallas de level/MUTE y de eventos con caracteres grandes
 enable_lcd_big = True
 ; - Eventos mostrados usando el scroll de caracteres grandes:
-bigscroll_items = preset mono balance syseq peq drc loudness
+lcd_bigscroll_items = preset mono balance syseq peq drc loudness
 ; - Prioridad del pantallazo MUTE
 ;   hidden:     no visible
 ;   info:       normal, la pantalla rota con el resto
