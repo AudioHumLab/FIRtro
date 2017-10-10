@@ -22,14 +22,6 @@ tone_defeat_on_startup =    config.getboolean('misc', 'tone_defeat_on_startup')
 command_delay =             config.getfloat('misc', 'command_delay')
 beep_options =              config.get('misc', 'beep_options')
 
-enable_lcd =                config.getboolean('misc', 'enable_lcd')
-lcd_info_timeout =          config.getfloat('misc', 'lcd_info_timeout')
-lcd_layout =                config.get('misc', 'lcd_layout')
-enable_lcd_big =            config.getboolean('misc', 'enable_lcd_big')
-lcd_bigscroll_items =       config.get('misc', 'lcd_bigscroll_items').split()
-lcd_show_mute_prio =        config.get('misc', 'lcd_show_mute_prio')
-LCD_server =                config.get('misc', 'LCD_server')
-
 dummy_ports =               config.get('misc', 'dummy_ports')
 pause_players =             config.getboolean('misc', 'pause_players')
 resume_players =            config.getboolean('misc', 'resume_players')
@@ -100,15 +92,6 @@ load_client175 =            config.getboolean('path', 'load_client175')
 client175_path =            config.get('path', 'client175_path')
 client175_options =         config.get('path', 'client175_options')
 
-load_mpdlcd =               config.getboolean('path', 'load_mpdlcd')
-mpdlcd_path =               config.get('path', 'mpdlcd_path')
-mpdlcd_options =            config.get('path', 'mpdlcd_options')
-
-load_spotify2lcd =          config.getboolean('path', 'load_spotify2lcd')
-spotify2lcd_path =          config.get('path', 'spotify2lcd_path')
-spotify2lcd_options =       config.get('path', 'spotify2lcd_options')
-spotify2lcd_servers =       config.get('path', 'spotify2lcd_servers').split()
-
 load_irexec =               config.getboolean('path', 'load_irexec')
 irexec_path =               config.get('path', 'irexec_path')
 irexec_options =            config.get('path', 'irexec_options')
@@ -153,3 +136,21 @@ treble_pha_path =           config_folder + treble_pha_filename
 bass_mag_path =             config_folder + bass_mag_filename
 bass_pha_path =             config_folder + bass_pha_filename
 freq_path =                 config_folder + freq_filename
+
+#[lcd]
+enable_lcd =                config.getboolean('lcd', 'enable_lcd')
+lcd_info_timeout =          config.getfloat('lcd', 'lcd_info_timeout')
+lcd_layout =                config.get('lcd', 'lcd_layout')
+enable_lcd_big =            config.getboolean('lcd', 'enable_lcd_big')
+bigscroll_items =           config.get('lcd', 'bigscroll_items').split()
+lcd_show_mute_prio =        config.get('lcd', 'lcd_show_mute_prio')
+LCD_server =                config.get('lcd', 'LCD_server')
+
+load_mpdlcd =               config.getboolean('lcd', 'load_mpdlcd')
+mpdlcd_path =               config.get('lcd', 'mpdlcd_path')
+mpdlcd_options =            config.get('lcd', 'mpdlcd_options')
+
+load_spotify2lcd =          config.getboolean('lcd', 'load_spotify2lcd')
+spotify2lcd_path =          config.get('lcd', 'spotify2lcd_path')
+spotify2lcd_options =       config.get('lcd', 'spotify2lcd_options')
+spotify2lcd_servers =       config.get('lcd', 'spotify2lcd_servers').split()
