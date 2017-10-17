@@ -8,7 +8,7 @@
     core:  + Mpd y otros players, Netjack.
     all:   + Server, Lirc.
 """
-# v2.0 
+# v2.0
 # reordenación del run_level
 # reordenación del código evitando líneas multisentencia
 
@@ -21,14 +21,14 @@ from subprocess import *
 
 fnull = open(os.devnull, 'w')
 
-# DEBUG: redirigimos la salida a null, por si falla la llamada client.firtro_socket 
+# DEBUG: redirigimos la salida a null, por si falla la llamada client.firtro_socket
 # (descomentar para debug)
-# sys.stdout = open(fnull, "w") 
+# sys.stdout = open(fnull, "w")
 
 def main(run_level):
-    
+
     if run_level in ["audio", "core", "all"]:
-        
+
         if run_level in ["all"]:
             # lirc
             if load_irexec:
@@ -42,17 +42,29 @@ def main(run_level):
                 time.sleep(.5)
             # client_mpd
                 Popen (["pkill", "-9", "-f", "client_mpd.py"], stdout=fnull, stderr=fnull)
-        
+
         if run_level in ["core", "all"]:
+            # LCD_server
+            if load_LCD_server:
+                Popen (["pkill", "-9", "-f", LCD_server_path], stdout=fnull, stderr=fnull)
+            # INFOFIFO_server
+            if load_INFOFIFO_server:
+                Popen (["pkill", "-9", "-f", INFOFIFO_server_path], stdout=fnull, stderr=fnull)
+            # spotifymonitor
+            if load_spotifymonitor:
+                Popen (["pkill", "-9", "-f", spotifymonitor_path], stdout=fnull, stderr=fnull)
+            # mpdmonitor
+            if load_mpdmonitor:
+                Popen (["pkill", "-9", "-f", mpdmonitor_path], stdout=fnull, stderr=fnull)
             # client175
             if load_client175:
                 Popen (["pkill", "-9", "-f", client175_path], stdout=fnull, stderr=fnull)
             # mpdlcd (MPD client for lcdproc)
             if load_mpdlcd:
                 Popen (["pkill", "-9", "-f", mpdlcd_path], stdout=fnull, stderr=fnull)
-            # spotify2lcd (Spotify client for lcdproc)
-            if load_spotify2lcd:
-                Popen (["pkill", "-9", "-f", spotify2lcd_path], stdout=fnull, stderr=fnull)
+            # spotifymonitor
+            if load_spotifymonitor:
+                Popen (["pkill", "-9", "-f", spotifymonitor_path], stdout=fnull, stderr=fnull)
             # mpd
             if load_mpd:
                 Popen ("killall mpd", shell=True)
@@ -66,20 +78,20 @@ def main(run_level):
             if load_shairport:
                 Popen (["killall", shairport_path], stdout=fnull, stderr=fnull)
             # jacktrip
-            if load_jacktrip: 
+            if load_jacktrip:
                 Popen (["killall", jacktrip_path], stdout=fnull, stderr=fnull)
             # netjack
-            if load_netjack: 
+            if load_netjack:
                 Popen (["killall", netjack_path], stdout=fnull, stderr=fnull)
             # mplayer
-            if load_mplayer_cdda or load_mplayer_tdt: 
+            if load_mplayer_cdda or load_mplayer_tdt:
                 Popen (["killall", mplayer_path], stdout=fnull, stderr=fnull)
 
         # ecasound
         if load_ecasound:
             Popen (["killall", "-KILL", "ecasound"], stdout=fnull, stderr=fnull)
         # brutefir
-        Popen (["killall", brutefir_path], stdout=fnull, stderr=fnull)        
+        Popen (["killall", brutefir_path], stdout=fnull, stderr=fnull)
         # jack
         Popen (["killall", "jackd"], stdout=fnull, stderr=fnull)
 
@@ -91,7 +103,7 @@ def main(run_level):
 if __name__ == "__main__":
     if sys.argv[1:]:
         run_level = sys.argv[1].lower()
-    else: 
+    else:
         run_level = "all"
     print "(stopfirtro) deteniendo: " + run_level
     main(run_level)
