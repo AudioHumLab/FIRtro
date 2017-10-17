@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     Información de FIRtro en el LCD
-    
+
     Para hacer pruebas en línea de comandos:
 
         server_lcdproc.py   --test          Inicia un modo interactivo para
@@ -287,7 +287,7 @@ def _configure_main_screen():
     cLCD.cmd_s('widget_add scr_1 peq         string')
 
 def interactive_test_lcd():
-    lcd_size = init('FIRtro')
+    lcd_size = open('FIRtro')
     if lcd_size == -1:
         return -1
     print '=> LCD ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
@@ -303,12 +303,12 @@ def ver_tipos_json(data): # solo para debug
     for cosa in data:
         print ">"*5, cosa.ljust(12), type(data[cosa]), data[cosa]
 
-def init(client_name, server="localhost:13666"):
+def open(client_name, server="localhost:13666"):
     if cLCD.open(client_name, server):
         return cLCD.get_size()
     else:
         return False
-        
+
 if __name__ == "__main__":
 
     # posibles opciones para pruebas desde la línea de comandos:
@@ -318,7 +318,7 @@ if __name__ == "__main__":
         if len(sys_argv) > 2:
             cadena = sys_argv[2]
 
-        init("tmp", server=getconfig.LCD_server)
+        open("tmp", server=getconfig.LCD_server_addr)
 
         if "-t" in opc:
             interactive_test_lcd()
@@ -333,7 +333,7 @@ if __name__ == "__main__":
 
         elif opc == "--layouts":
             printa_layouts()
-            
+
         else:
             print __doc__
 
