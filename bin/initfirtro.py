@@ -65,7 +65,9 @@
 # - Nueva opción de volumen predefinido al arranque
 #
 # v2.2g
-# - se añade spotify2lcd
+# - Se añade spotifymonitor y mpdmonitor para informar a los servidores de display
+# - OJO los servidores de display arrancan justo después de stopfirtro para 
+#   que estén disponibles para el server.py
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -137,6 +139,16 @@ def main(run_level):
         print "(initfirtro) Deteniendo procesos..."
         stopfirtro.main(run_level)
         sleep(command_delay)
+
+        # -- DISPLAY Servers:
+        # v2.2g LCD_server (normalmente el daemon LCDd no se carga aquí por ser un servicio del sistema)
+        if load_LCD_server:
+            print "(initfirtro) Arrancando LCD_server ..."
+            Popen([LCD_server_path, LCD_server_options] , stdout=None, stderr=None)
+        # v2.2g INFOFIFO_server (vuelca a fifo el estado de FIRtro y del PLAYER de la entrada)
+        if load_INFOFIFO_server:
+            print "(initfirtro) Arrancando INFOFIFO_server ..."
+            Popen([INFOFIFO_server_path,INFOFIFO_server_options] , stdout=None, stderr=None)
 
         # Digamos a PULSEAUDIO que deje de usar cualquier tarjeta:
         if pulse.pulse_detected():
@@ -322,27 +334,26 @@ def main(run_level):
             # RESTO DE FUNCIONES
             if run_level in ["all"]:
 
+                # -- CONTROLADORES:                
                 # Lirc
                 if load_irexec:
                     irexec = Popen([irexec_path] + irexec_options.split(), stdout=None, stderr=None)
-
                 # client175
                 if load_client175:
                     client175 = Popen(["python", client175_path] + client175_options.split(), stdout=fnull, stderr=fnull)
-                    sleep(command_delay)
 
+                # -- DISPLAY Clients:
                 # mpdlcd (MPD client for lcdproc)
                 if load_mpdlcd:
                     mpdlcd = Popen([mpdlcd_path] + mpdlcd_options.split(), stdout=None, stderr=None)
-                    sleep(command_delay)
-
-                # v2.2f spotify2lcd (SPOTIFY client for lcdproc)
-                if load_spotify2lcd:
-                    for server in spotify2lcd_servers:
-                        print "(initfirtro) Arrancando SPOTIFY2LCD " + server + " ..."
-                        Popen([spotify2lcd_path] + spotify2lcd_options.split() + [server], \
-                              stdout=None, stderr=None)
-                        sleep(command_delay)
+                # v2.2g spotifymonitor (monitor SPOTIFY para los displays de FIRtro)
+                if load_spotifymonitor:
+                    print "(initfirtro) Arrancando SPOTIFYMONITOR ..."
+                    Popen([spotifymonitor_path] + spotifymonitor_options.split(), stdout=None, stderr=None)
+                # v2.2g mpdmonitor (monitor MPD para los displays de FIRtro)
+                if load_mpdmonitor:
+                    print "(initfirtro) Arrancando MPDMONITOR ..."
+                    Popen([mpdmonitor_path] + mpdmonitor_options.split(), stdout=None, stderr=None)
 
         # NOTA: arriba hemos comprobado que el server esté en ejecucion.
 
@@ -411,6 +422,7 @@ def main(run_level):
 
 
 if __name__ == "__main__":
+
     if sys.argv[1:]:
         run_level = sys.argv[1].lower()
     else:
