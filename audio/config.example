@@ -5,7 +5,7 @@
 ; - Uso de Ecasound opcional para el módulo de EQ paramétrico.
 ; 2.0b
 ; - Nuevas opciones, resaltado de las subsecciones en path
-; - Se separa una sección con todo lo relativo a la configuración del LCD
+; - Se separa una sección con todo lo relativo a la configuración de displays (lcd, etc)
 
 [misc]
 
@@ -39,11 +39,8 @@ jack_internal_monitors =
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
 jack_external_monitors = 
 
-
 [speakers]
-
 loudspeaker = ejemplo2vias
-
 
 [presets]
 
@@ -209,16 +206,25 @@ loudness_variation = 10
 balance_variation = 6
 no_phase_xo = lp
 
-[lcd]
-; --- Configuraciones para el display LCD:
+[displays]
+; --- Configuraciones para displays (LCD, INFOFIFO, etc)
 
-; --- Dirección del servidor de pantalla LCD (actualemente solo se soporta 1 server)
-LCD_server = localhost:13666
+; --- Servidor de pantalla LCD (normalmente False: iniciado como system daemon)
+load_LCD_server = False
+LCD_server_path = /usr/sbin/LCDd
+LCD_server_options = 
+LCD_server_addr = localhost:13666
+
+; --- Servidor de pantalla INFOFIFO
+load_INFOFIFO_server = False
+INFOFIFO_server_path = /home/firtro/bin/server_infofifo.py
+INFOFIFO_server_options = 
+INFOFIFO_server_addr = localhost:9995
 
 ; --- FIRtro en LCD: pantallas de estado e informaciones_temporales
-enable_lcd = True
-; tiempo de presentacion de la pantalla de informaciones temporales (con 0 no se presentarán)
-lcd_info_timeout = 0
+enable_lcd = False
+; tiempo de presentacion de informaciones temporales (con 0 no se presentarán)
+lcd_info_timeout = 2
 ; opcion de layout de pantalla de status (consultar con bin/server_lcdproc.py -h)
 lcd_layout = 2
 
@@ -226,7 +232,7 @@ lcd_layout = 2
 enable_lcd_big = True
 ; - Eventos mostrados usando el scroll de caracteres grandes:
 lcd_bigscroll_items = preset mono balance syseq peq drc loudness
-; - Prioridad del pantallazo MUTE
+; - Prioridad del pantallazo MUTE 
 ;   hidden:     no visible
 ;   info:       normal, la pantalla rota con el resto
 ;   alert:      prevalece y enmascara cualquier otra pantalla
@@ -238,10 +244,14 @@ load_mpdlcd = False
 mpdlcd_path = /usr/local/bin/mpdlcd
 mpdlcd_options =
 
-; -- SPOTIFY en LCD -- Opcional
-load_spotify2lcd = False
-spotify2lcd_path = /home/firtro/bin/spotify2lcd.py
-spotify2lcd_options =
-; Indicar uno o más servidores LCD a usar en formato host:port separados por espacios
-spotify2lcd_servers = localhost:13666
+; -- SPOTIFY en displays -- Opcional 
+load_spotifymonitor = False
+spotifymonitor_path = /home/firtro/bin/spotifymonitor.py
+spotifymonitor_options =
+
+; -- MPD en displays -- Opcional 
+load_mpdmonitor = False
+mpdmonitor_path = /home/firtro/bin/mpdmonitor.py
+mpdmonitor_options =
+
 
