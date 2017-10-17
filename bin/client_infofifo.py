@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-    Módulo auxiliar para comunicar con el servidor de INFOFIFO (server_infofifo.py)
+    Módulo auxiliar para comunicar con el servidor INFOFIFO (server_infofifo.py)
 """
 
 from time import sleep
