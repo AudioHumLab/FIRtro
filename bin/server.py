@@ -4,14 +4,17 @@
 # v1.0b:
 # - se printa un separador en caso de control_clear=False en audio/config
 # - algunos cambios en la sintaxis (espacios, paréntesis, comentarios)
-
+#
 # v2.0 beta
 # - Incorporación del socket con MPD, para control de volumen enlazado:
 #     Se separa el código de creación del socket
-# - también se separa el código de inicialización del LCD
-
+# - También se separa el código de inicialización del LCD
+#
 # v2.0a
 # - Se usan las nuevas las pantallas de LCD con caracteres grandes.
+#
+# v2.0b
+# - Se añade la comunicación de eventos hacia el server_infofifo.py
 
 import socket
 import sys
@@ -20,6 +23,7 @@ import os
 import server_process
 import getconfig
 import server_lcdproc as srvLCD
+import client_infofifo as cFIFO
 
 def getsocket(host, port):
     try:
@@ -48,7 +52,7 @@ def getsocket(host, port):
 def lcd_check():
     # Intentamos inicializar el cliente LCD
     if getconfig.enable_lcd:
-        lcd_size = srvLCD.init('FIRtro', server=getconfig.LCD_server)
+        lcd_size = srvLCD.open('FIRtro', server=getconfig.LCD_server_addr)
         if lcd_size:
             print '(server) LCD_STATUS enabled: ' + str(lcd_size[0])+' x ' +str(lcd_size[1])
             return True
@@ -58,6 +62,15 @@ def lcd_check():
             return False
     else:
         print '(server) LCD_STATUS disabled'
+        return False
+
+def infofifo_check():
+    # Intentamos inicializar el cliente FIFO
+    try:
+        cFIFO.open()
+        cFIFO.close()
+        return True
+    except:
         return False
 
 def _extrae_statusJson(svar):
@@ -73,7 +86,7 @@ def _show_big_scroller(comando, statusJson):
     # de un 'item' de interés en el scroller lcd_big.
 
     # La cadena json 'statusJson' es recibida desde server_process.do(orden)
-    
+
     # Adecuaciones:
     #  - Algunas variables de estado 'svar' tienen un nombre
     #    distinto al propio comando que las modifica.
@@ -112,6 +125,8 @@ if __name__ == "__main__":
 
     # Uso del LCD
     use_lcd = lcd_check()
+    # Uso de INFOFIFO
+    use_infofifo = infofifo_check()
 
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
@@ -139,6 +154,7 @@ if __name__ == "__main__":
 
         # Bucle buffer para procesar la orden recibida en la conexión
         while True:
+
             # RECEPCION
             data = sc.recv(4096)
 
@@ -185,18 +201,29 @@ if __name__ == "__main__":
                     srvLCD.show_status(status, priority="info")
 
                     # 3.2 NUEVAS pantallas que muestran caracteres GRANDES:
-                    
+
                     # 3.2.1 SCROLL. Si alguno de los items configurados en audio/config:lcd_bigscroll_items
                     # matchea en el comando, presentamos la orden en el scroller grande:
                     comando = orden.split()[0]
                     if [item for item in getconfig.lcd_bigscroll_items if item in comando]:
-                        _show_big_scroller(comando, statusJson=status)
-
+                        try:    # esto es por si el comando es erróneo (Wrong sintax)
+                            _show_big_scroller(comando, statusJson=status)
+                        except:
+                            pass
+ 
                     # 3.2.2 LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
                     srvLCD.lcdbig.show_level(lev, mut, mute_priority=getconfig.lcd_show_mute_prio, \
                                        duration=2)
+
+                # 4. Refrescamos la INFOFIFO
+                if use_infofifo:
+                    cFIFO.open()
+                    # enviamos el diccionario json del estado de FIRtro,
+                    # precedido por una etiqueta identificativa:
+                    cFIFO.cmd_s("statusFIRtro" + status)
+                    cFIFO.close()
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
