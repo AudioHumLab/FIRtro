@@ -181,10 +181,11 @@ fi
 #########################################################
 # restaurando FIFOS
 #########################################################
-echo "(i) Creando fifos para mplayer"
+echo "(i) Creando fifos para mplayer e información del sistema"
 rm -f *fifo
-mkfifo tdt_fifo
-mkfifo cdda_fifo
+mkfifo tdt_fifo   # fifo para escribir órdenes a mplayer_tdt
+mkfifo cdda_fifo  # fifo para escribir órdenes a mplayer_cdda
+mkfifo info_fifo  # fifo para mostrar información del estado del audio y del player en curso
 
 #########################################################
 # restaurando brutefir_convolver
