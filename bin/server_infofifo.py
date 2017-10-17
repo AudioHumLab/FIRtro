@@ -74,9 +74,9 @@ def _infoPlayer(input_name):
     d = {   "analog":   info_Analog,
             "spotify":  info_Spotify,
             "mpd":      info_MPD,
-            "tdt":      info_TDT
+            "tdt":      info_TDT,
             "tdt_mpa":  info_TDT,
-            "tdt_a52":  info_TDT,
+            "tdt_a52":  info_TDT
         }
     if input_name in d:
          return d[input_name]
