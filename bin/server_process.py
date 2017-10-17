@@ -41,6 +41,9 @@
 # - Levanta puertos dummy en jack para ser usados por ej por MPD
 # - Se pone write_status=False en la orden 'input restore'
 #
+# v.2.0e
+# - Se añade comando radio_channel para pasar a gestionar aquí la radio tdt, 
+#   de manera que server.py conozca los cambios de canal.
 #----------------------------------------------------------------------
 
 import time
@@ -50,6 +53,8 @@ import sys
 import json
 import server_input
 import soundcards
+import radio_channel
+import wait4
 from basepaths import *
 from getconfig import *
 from getstatus import *
@@ -212,6 +217,7 @@ def do (order):
     exec_path = '/home/firtro/bin/'
     change_clock = False        ## v2.0a <CLOCK> recuperado de Testing3
     change_fs = False
+    change_radio = False
 
     # Al poner este proceso en una función, las variables que estén definidas
     # en los modulos importados hay que ponerlas como globales.
@@ -266,6 +272,7 @@ def do (order):
         firtro_ports = brutefir_ports
         
     global last_level_change_timestamp      ## <MPD> ##
+    global radio, radio_prev                # v2.0e se centraliza la gestión de la radio tdt aquí
     
     # Borramos los warnings
     warnings = []
@@ -295,6 +302,8 @@ def do (order):
     input_name_old = input_name
     filter_type_old = filter_type
     mono_old = mono                         ## <MONO> ##
+    radio_old = radio
+    radio_prev_old = radio_prev
 
     # Quitamos los caracteres finales
     order = order.rstrip('\r\n')
@@ -330,7 +339,7 @@ def do (order):
                     change_gain = True
                     change_xovers = True
                     change_eq = True
-                    muted = False
+                    #muted = False
                     write_status = False
                 elif name == input_name.lower():
                     # Si la entrada ya es la activa, y no estoy restaurandolas, no hago nada
@@ -533,6 +542,17 @@ def do (order):
             invert = False
             write_status = False
 
+        elif command == "radio_channel":
+            if len(line) > 1:
+                new_radiopreset = arg1
+                change_radio = True
+                # Debido a que Mplayer desactiva momentaneamente sus puertos en jack al resintonizar,
+                # activamos los indicadores usados en 'input restore':
+                change_input = True
+                change_gain = True
+                change_xovers = True
+                change_eq = True
+            else: raise
         # Si no se reconoce el comando
         else:
             raise
@@ -543,6 +563,20 @@ def do (order):
     #                                                 #
     # Si no hubo excepciones, se pasa a la ejecución: #
     ###################################################
+
+    if change_radio:
+        # OjO al resintonizar la TDT los puertos de Mplayer se desactivan momentaneamente,
+        # por tanto esta sección se coloca al principio de la ejecución para que tengan efecto
+        # los indicadores como cuando se pide un 'input restore'
+        if radio_channel.select_preset(new_radiopreset):
+            radio_prev = radio
+            radio = new_radiopreset
+            write_status = True
+            # Esperamos a que Mplayer se desactive y vuelva a estar disponible en Jack
+            time.sleep (1) # OjO importante esperar un poco a que se desactiven.
+            wait4.wait4result("jack_lsp", "mplayer_tdt", tmax=8, quiet=True)
+        else:
+            warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
 
     ## <PRESETS> ##
     ## OjO (1/2) estos dos IF estaban justo antes del IF CHANGE_DRC (en Resto de comandos),
@@ -927,6 +961,8 @@ def do (order):
         status.set('general', 'filter_type', filter_type)
         status.set('general', 'muted', muted)
         status.set('inputs', 'input', input_name)
+        status.set('inputs', 'radio', radio)
+        status.set('inputs', 'radio_prev', radio_prev)
         status.set('general', 'clock', clock)           ## <CLOCK> recuperado de Testing3 ##
         status.set('general', 'fs', fs)
         status.set('inputs', 'resampled', resampled)    ## <v2.0> Entrada a través de tarjeta resampleada ##
