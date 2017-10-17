@@ -137,20 +137,32 @@ bass_mag_path =             config_folder + bass_mag_filename
 bass_pha_path =             config_folder + bass_pha_filename
 freq_path =                 config_folder + freq_filename
 
-#[lcd]
-enable_lcd =                config.getboolean('lcd', 'enable_lcd')
-lcd_info_timeout =          config.getfloat('lcd', 'lcd_info_timeout')
-lcd_layout =                config.get('lcd', 'lcd_layout')
-enable_lcd_big =            config.getboolean('lcd', 'enable_lcd_big')
-lcd_bigscroll_items =       config.get('lcd', 'lcd_bigscroll_items').split()
-lcd_show_mute_prio =        config.get('lcd', 'lcd_show_mute_prio')
-LCD_server =                config.get('lcd', 'LCD_server')
+#[displays]
+load_LCD_server =           config.getboolean('displays', 'load_LCD_server')
+LCD_server_path =           config.get('displays', 'LCD_server_path')
+LCD_server_options =        config.get('displays', 'LCD_server_options')
+LCD_server_addr =           config.get('displays', 'LCD_server_addr')
 
-load_mpdlcd =               config.getboolean('lcd', 'load_mpdlcd')
-mpdlcd_path =               config.get('lcd', 'mpdlcd_path')
-mpdlcd_options =            config.get('lcd', 'mpdlcd_options')
+load_INFOFIFO_server =      config.getboolean('displays', 'load_INFOFIFO_server')
+INFOFIFO_server_path =      config.get('displays', 'INFOFIFO_server_path')
+INFOFIFO_server_options =   config.get('displays', 'INFOFIFO_server_options')
+INFOFIFO_server_addr =      config.get('displays', 'INFOFIFO_server_addr')
 
-load_spotify2lcd =          config.getboolean('lcd', 'load_spotify2lcd')
-spotify2lcd_path =          config.get('lcd', 'spotify2lcd_path')
-spotify2lcd_options =       config.get('lcd', 'spotify2lcd_options')
-spotify2lcd_servers =       config.get('lcd', 'spotify2lcd_servers').split()
+enable_lcd =                config.getboolean('displays', 'enable_lcd')
+lcd_info_timeout =          config.getfloat('displays', 'lcd_info_timeout')
+lcd_layout =                config.get('displays', 'lcd_layout')
+enable_lcd_big =            config.getboolean('displays', 'enable_lcd_big')
+lcd_bigscroll_items =       config.get('displays', 'lcd_bigscroll_items').split()
+lcd_show_mute_prio =        config.get('displays', 'lcd_show_mute_prio')
+
+load_mpdlcd =               config.getboolean('displays', 'load_mpdlcd')
+mpdlcd_path =               config.get('displays', 'mpdlcd_path')
+mpdlcd_options =            config.get('displays', 'mpdlcd_options')
+
+load_spotifymonitor =       config.getboolean('displays', 'load_spotifymonitor')
+spotifymonitor_path =       config.get('displays', 'spotifymonitor_path')
+spotifymonitor_options =    config.get('displays', 'spotifymonitor_options')
+
+load_mpdmonitor =           config.getboolean('displays', 'load_mpdmonitor')
+mpdmonitor_path =           config.get('displays', 'mpdmonitor_path')
+mpdmonitor_options =        config.get('displays', 'mpdmonitor_options')
