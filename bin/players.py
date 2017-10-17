@@ -15,6 +15,9 @@
 # v1.0d
 # - Se gestiona Spotify de escritorio si existiera.
 #   Dependencia: python-gi
+#
+# v1.0e
+# - Se gestiona mpdmonitor.py junto con mpd
 
 # NOTAS para mplayer:
 #   Si ordenamos "stop", mplayer desaparecerá de jack (noconnect en .mplayer/config),
@@ -70,14 +73,11 @@ def manage_pauses(input_name):
             except:
                 print "(players) No es posible pausar  SPOTIFY."
 
+    # Se hace resume_players SII también se quiere pause_players
     if pause_players and resume_players:
 
         if 'mpd'    in input_name.lower() and load_mpd:
-            try:
-                check_output("pgrep mpd", shell=True)
-            except:
-                Popen(mpd_path + " > /dev/null 2>&1", shell=True)
-                wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
+            check_mpd() # si mpd no estuviera running lo arrancamos
             if "paused" in check_output("mpc", shell=True):
                 print "(players) Reanudando MPD."
                 Popen("mpc play > /dev/null 2>&1", shell=True)
@@ -107,6 +107,20 @@ def manage_pauses(input_name):
                 print "(players) Reanudando  SPOTIFY."
             except:
                 print "(players) No es posible reanudar  SPOTIFY."
+
+def check_mpd():
+    # si mpd no estuviera running lo arrancamos:
+    try:
+        check_output("pgrep mpd", shell=True)
+    except:
+        print "(players) recuperando MPD ..."
+        Popen(mpd_path + " > /dev/null 2>&1", shell=True)
+        wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
+    # y tb recuperamos el monitormpd.py para los displays
+    if load_mpdmonitor:
+        print "(players) recuperando MPDMONITOR ..."
+        Popen([mpdmonitor_path] + mpdmonitor_options.split(), stdout=None, stderr=None)
+
 
 if __name__ == "__main__":
     print __doc__
