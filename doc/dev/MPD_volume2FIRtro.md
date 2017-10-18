@@ -51,6 +51,12 @@ Por tanto no hay bucle.
 
 Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propagado a MPD y será acusado de vuelta en el daemon `client_mpd.py` que generará un nuevo ajuste `gain` en el sistema. Se puede visualizar en la 'consola de FIRtro' (en los printados del terminal que corre `server_process.py`). Este ajuste repetido es inocuo, pero se ha incluido un temporizador en `server_process.py` para evitarlo.
 
+### Efectos colaterales
+
+Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que automagicamente se linka con MPD y cambia el volumen del `jack_sink` a la vez que se cambia el fake volumen de mpd :-/
+
+WORK IN PROGRESS: anular la carga automágica del módulo mpd de Pulseaudio.
+
 ## Cambios
 
 - `/etc/modules`
