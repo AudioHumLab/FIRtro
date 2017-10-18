@@ -116,10 +116,10 @@ def check_mpd():
         print "(players) recuperando MPD ..."
         Popen(mpd_path + " > /dev/null 2>&1", shell=True)
         wait4result("jack_lsp", "mpd", tmax=10, quiet=True)
-    # y tb recuperamos el monitormpd.py para los displays
-    if load_mpdmonitor:
-        print "(players) recuperando MPDMONITOR ..."
-        Popen([mpdmonitor_path] + mpdmonitor_options.split(), stdout=None, stderr=None)
+        # y tb recuperamos el monitormpd.py para los displays
+        if load_mpdmonitor:
+            print "(players) recuperando MPDMONITOR ..."
+            Popen([mpdmonitor_path] + mpdmonitor_options.split(), stdout=None, stderr=None)
 
 
 if __name__ == "__main__":
