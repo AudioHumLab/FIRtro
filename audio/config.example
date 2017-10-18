@@ -105,7 +105,8 @@ ecasound_ports = ecasound:in_1 ecasound:in_2
 load_mpd = False
 mpd_path = /usr/bin/mpd
 mpd_options = 
-; El volumen de MPD puede gobernar el volumen de FIRtro (OjO en fase BETA):
+; El volumen de MPD puede gobernar el volumen de FIRtro
+; NOTA: no es compatible con Pulseaudio, ver doc/dev/MPD_volume2FIRtro.md
 mpd_volume_linked2firtro = False
 
 ; -- MPLAYER -- Opcional (se carga una instancia por cada servicio cdda y/o tdt)
