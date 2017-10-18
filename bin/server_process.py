@@ -52,9 +52,6 @@ import socket
 import sys
 import json
 import server_input
-import soundcards
-import radio_channel
-import wait4
 from basepaths import *
 from getconfig import *
 from getstatus import *
@@ -68,15 +65,19 @@ from scipy import signal
 ################################################################
 # (i) FIRtro 2.0 EN ADELANTE SE DESTACAN LAS LINEAS AFECTADAS  #
 ################################################################
+import soundcards
+import wait4
 import presets                  ## <PRESETS>
 import monostereo               ## <MONO> Funcionalidad mono/stereo.
 import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado 
                                 ##        en modo server tcp/ip en el arranque (initfirtro.py).
 import peq2fr                   ##        Módulo auxiliar para procesar archivos de EQs paramétricos.
-import client_mpd               ## <MPD>  Control de volumen enlazado con MPD.
-MPD_GAIN_FWD_TIMER = .2         ##        Temporizador que elude la orden 'gain' que llega de MPD
-                                ##        despueś de ejecutar aquí un ajuste de 'level'.
 import jack_dummy_ports         ## Levanta puertos dummy en jack para ser usados por ej MPD. Solo esta línea.
+import radio_channel            ## gestion de radio_channels.py centralizada para que el server conozca los cammbios.
+if mpd_volume_linked2firtro:    ## <MPD>  Control de volumen enlazado con MPD.
+    import client_mpd
+MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain' que llega de MPD
+                                ##        despueś de ejecutar aquí un ajuste de 'level'.
 
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
@@ -852,7 +853,7 @@ def do (order):
                     bf_cli('cfia 0 0 ' + str(-gain_0) + ' ; cfia 1 1 ' + str(-gain_1))
                     # AMR 2º Entrada de brutefir (para analogica con filtros mp):
                     # bf_cli('cfia 2 2 ' + str(-gain_0) + ' ; cfia 3 3 ' + str(-gain_1))
-                if not gain_direct and "level" in order:        ## <MPD> ##
+                if not gain_direct and "level" in order and mpd_volume_linked2firtro:        ## <MPD> ##
                     # actualizamos el "falso volumen" de MPD
                     client_mpd.setvol(100 + gain)
                     last_level_change_timestamp = time.time()
