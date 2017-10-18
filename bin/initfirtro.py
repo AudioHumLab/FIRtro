@@ -386,14 +386,20 @@ def main(run_level):
         limit_level(level_on_startup, max_level_on_startup)
 
         # V2.0 enlace con el control de volumen ficticio de MPD
+        # NOTA: no es compatible con Pulseaudio, ver doc/dev/MPD_volume2FIRtro.md
         if mpd_volume_linked2firtro and load_mpd:
-            print "(initfirtro) Esperando a MPD ..."
-            if wait4result("pgrep -l mpd", "mpd", tmax=10, quiet=True):
-                print "(initfirtro) Ha arrancado MPD."
-                print "(initfirtro) Arrancando CLIENT_MPD ..."
-                control = Popen(["python",  "/home/firtro/bin/client_mpd.py"], stdout=None, stderr=None)
+            if not pulse_detected():
+                print "(initfirtro) Esperando a MPD ..."
+                if wait4result("pgrep -l mpd", "mpd", tmax=10, quiet=True):
+                    print "(initfirtro) Ha arrancado MPD."
+                    Popen(["mpc", "enable", "alsa_dummy"], stdout=None, stderr=None)
+                    print "(initfirtro) Arrancando CLIENT_MPD ..."
+                    Popen(["python",  "/home/firtro/bin/client_mpd.py"], stdout=None, stderr=None)
+                else:
+                    print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
             else:
-                print "(initfirtro) Error detectando MPD, no se inicia CLIENT_MPD"
+                Popen(["mpc", "disable", "alsa_dummy"], stdout=None, stderr=None)
+                print "(initfirtro) 'mpd_volume_linked2firtro' NO es compatible con Pulseaudio"
 
         # Restaura las entradas
         print "(initfirtro) Recuperando INPUT: " + input_name
