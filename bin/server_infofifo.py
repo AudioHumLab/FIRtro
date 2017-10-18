@@ -57,17 +57,25 @@ def getsocket(host, port):
 
 def jsonMetadata2fifo(d):
     m = json.loads(d)
-    try: state = m['state']
-    except: state = ""
-    try: artist = m['artist']
-    except: artist = "unknown artist"
-    try: album = m['album']
-    except: album = "unknown album"
-    try: title = m['title']
-    except: title = "unknown title"
-    if "pause" in state: state="(PAUSED)"
-    else:                state=""
-    return "\n".join( [artist + "    " + state, album, title] )
+
+    try: state =        m['state']
+    except: state =     ""
+    try: artist =       m['artist']
+    except: artist =    "unknown artist"
+    try: album =        m['album']
+    except: album =     "unknown album"
+    try: title =        m['title']
+    except: title =     "unknown title"
+
+    if "pause" in state:
+        state="(PAUSED)"
+    else:
+        state=""
+
+    meta2fifo = "\n".join( [artist + "    " + state, album, title] )
+
+    # para evitar UnicodeEncodeError: 'ascii' codec can't encode character u'\xf3' al escribir en la fifo
+    return meta2fifo.encode('utf-8')
 
 def _infoPlayer(input_name):
     # auxiliar para seleccionar la variable info_XXX correspondiente a una entrada
