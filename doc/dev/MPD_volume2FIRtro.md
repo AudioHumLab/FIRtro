@@ -51,11 +51,35 @@ Por tanto no hay bucle.
 
 Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propagado a MPD y será acusado de vuelta en el daemon `client_mpd.py` que generará un nuevo ajuste `gain` en el sistema. Se puede visualizar en la 'consola de FIRtro' (en los printados del terminal que corre `server_process.py`). Este ajuste repetido es inocuo, pero se ha incluido un temporizador en `server_process.py` para evitarlo.
 
-### Efectos colaterales
+### Efectos colaterales en una instalación con Pulseaudio (Desktop)
 
-Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que éste automágicamente se linka con MPD y cambia el volumen del `jack_sink` a la vez que se produzcan cambios en el fake volumen de mpd :-/
+Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que automágicamente se activa en Pulseaudio el client "ALSA plug-in [mpd]", que es causado por los eventos de volumen retransmitidos por la output `alsa_dummy` de MPD.
 
-WORK IN PROGRESS: anular la carga automágica del módulo mpd de Pulseaudio.
+Esto se traduce en cambios de volumen en la salida por defecto `jack_sink` de Pulseaudio a la vez que se produzcan cambios en el volumen del "fake mixer" `alsa_dummy` de mpd :-/
+
+Es posible matar la función cliente de Pulseadio:
+
+    pacmd kill-client #N
+
+Siendo #N el index del cliente mostrado con el comando `pacmd list-clients`, ejemplo:
+
+    index: 67
+        driver: <protocol-native.c>
+        owner module: 14
+        properties:
+                application.name = "ALSA plug-in [mpd]"
+                native-protocol.peer = "UNIX socket client"
+                native-protocol.version = "30"
+                application.process.id = "20970"
+                application.process.user = "rafax"
+                application.process.host = "salon64"
+                application.process.binary = "mpd"
+
+Pero la consecuencia es que MPD se queda colgado :-(
+
+#### Solución: 
+
+No usar la salida `alsa_dummy` de MPD en sistemas con Pulseaudio, lo que implica renunciar al volumen de MPD ligado a FIRtro.
 
 ## Cambios
 
