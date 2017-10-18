@@ -53,7 +53,7 @@ Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propaga
 
 ### Efectos colaterales
 
-Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que automagicamente se linka con MPD y cambia el volumen del `jack_sink` a la vez que se cambia el fake volumen de mpd :-/
+Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que éste automágicamente se linka con MPD y cambia el volumen del `jack_sink` a la vez que se produzcan cambios en el fake volumen de mpd :-/
 
 WORK IN PROGRESS: anular la carga automágica del módulo mpd de Pulseaudio.
 
