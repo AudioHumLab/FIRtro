@@ -3,7 +3,7 @@
 
 # import curses # no usado
 import os
-from subprocess import check_output
+from subprocess import check_output, Popen
 fifo = "/home/firtro/info_fifo"
 
 # Tomamos nota de las líneas y columnas del terminal:
@@ -31,7 +31,7 @@ def mainLoop():
         # Se completará la lectura de la fifo cada vez
         # que se haya escrito EOF en ella.
         # NOTA: El contenido de la FIFO es el estado de FIRtro enmarcado
-        #       en guiones "--------------------------", 
+        #       en guiones "--------------------------",
         #       seguido del estado del Player en curso.
         f = open(fifo, "r")
         tmp = f.read()
@@ -53,6 +53,26 @@ def mainLoop():
                 for sl in sublineas(linea, lmax=tcols):
                     print sl.center(tcols)
 
+def mataotros():
+    tmp = check_output( "ps -ef | grep python | grep printinfofifo.py", \
+                       shell=True ).split("\n")[:-1]
+    # eliminamos el pid del grep
+    tmp = [ x for x in tmp if not "grep" in x]
+    # nos quedamos solo con el nº de pid que es la segunda columna
+    pids = [x.split()[1] for x in tmp]
+    # lo pasamos a enteros
+    pids = [int(x) for x in pids]
+    if pids:
+        pids.remove(max(pids))  # quitamos el último pid que es el propio
+    for pid in pids:            # y matamos el resto
+        Popen("kill " + str(pid), shell =True)
+
 if __name__ == "__main__":
 
+    # Como la fifo solo puede leerla un proceso, debemos terminar
+    # cualquier instancia previa de este programa:
+    mataotros()
+
+    # Bucle de lectura de la fifo y printado en el terminal
     mainLoop()
+
