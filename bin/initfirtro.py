@@ -388,7 +388,7 @@ def main(run_level):
         # V2.0 enlace con el control de volumen ficticio de MPD
         # NOTA: no es compatible con Pulseaudio, ver doc/dev/MPD_volume2FIRtro.md
         if mpd_volume_linked2firtro and load_mpd:
-            if not pulse_detected():
+            if not pulse.pulse_detected():
                 print "(initfirtro) Esperando a MPD ..."
                 if wait4result("pgrep -l mpd", "mpd", tmax=10, quiet=True):
                     print "(initfirtro) Ha arrancado MPD."
