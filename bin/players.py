@@ -31,9 +31,10 @@ from getconfig import *
 from getstatus import *
 from wait4 import wait4result
 
-import gi
-gi.require_version('Playerctl', '1.0')
-from gi.repository import Playerctl
+if load_spotifymonitor:
+    import gi
+    gi.require_version('Playerctl', '1.0')
+    from gi.repository import Playerctl
 
 # Crea una instancia de Playerctl, que es una interfaz dbus mpris para hablar con los player de un escritorio.
 # IMPORTANTE: solo funcinará si es invocado desde una sesión en un escritorio local que corra Spotify.
