@@ -66,12 +66,11 @@ def lcd_check():
 
 def infofifo_check():
     # Intentamos inicializar el cliente FIFO
-    try:
-        cFIFO.open()
-        cFIFO.close()
-        return True
-    except:
-        return False
+    if getconfig.load_INFOFIFO_server:
+        if cFIFO.open():
+            cFIFO.close()
+            return True
+    return False
 
 def _extrae_statusJson(svar):
     # auxiliar para leer el estado de una variable en el chorizo Json 'status'
