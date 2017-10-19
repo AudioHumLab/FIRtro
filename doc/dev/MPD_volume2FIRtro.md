@@ -53,7 +53,7 @@ Sin embargo, un ajuste ordinario de `level` por parte del usuario, será propaga
 
 ### Efectos colaterales en una instalación con Pulseaudio (Desktop)
 
-Si usamos `client_mpd` se observan efectos colaterales en Pulseaudio debido a que automágicamente se activa en Pulseaudio el client "ALSA plug-in [mpd]", que es causado por los eventos de volumen retransmitidos por la output `alsa_dummy` de MPD.
+Se observan efectos colaterales en Pulseaudio: se activa automágicamente el client `ALSA plug-in [mpd]`, ya que el módulo ALSA de Pulseaudio detecta los eventos de volumen retransmitidos por la output `alsa_dummy` de MPD.
 
 Esto se traduce en cambios de volumen en la salida por defecto `jack_sink` de Pulseaudio a la vez que se produzcan cambios en el volumen del "fake mixer" `alsa_dummy` de mpd :-/
 
