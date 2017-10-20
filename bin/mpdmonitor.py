@@ -3,8 +3,8 @@
 """
     Script daemon que atiende eventos de MPD y los comunica a los server de display
 """
-
-# v1.0
+# v1.0a
+# Parche que concatena posibles metadatos de type list o tuple.
 
 from mpd import MPDClient
 import json
@@ -26,6 +26,10 @@ def input_name():
 
 def do_mpd_LCDscreen(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
+
+    # (!) Se ha detectado que pueden llegar metadatos en forma de lista
+    artistAlbumTitle = [ _concatena(x) for x in artistAlbumTitle]
+
     artist, album, title = artistAlbumTitle
     speed = str(speed)
     # creamos la pantalla
@@ -63,9 +67,13 @@ def do_static_LCDscreen():
 
 def do_mpd_INFOFIFOscreen(artistAlbumTitle, paused=False):
     # aux para printar los 3 elementos de artistAlbumTitle en la INFOFIFO
+
+    # (!) Se ha detectado que pueden llegar metadatos en forma de lista
+    artistAlbumTitle = [ _concatena(x) for x in artistAlbumTitle]
+
     artist, album, title = artistAlbumTitle
     if paused: state = "pause"
-    else:      state = "play" 
+    else:      state = "play"
     d = {'artist':artist, 'album':album, 'title':title, 'state':state}
     jsonMetadata = json.dumps(d)
     # Info al server_infofifo en formato JSON con etiqueta previa:
@@ -145,6 +153,12 @@ def try_LCD_server(server):
     print "(mpdmonitor) ERROR conectando con el server LCDd"
     return False
 
+def _concatena(x):
+        if isinstance(x, list) or isinstance(x, tuple):
+                return " - ".join(x)
+        else:
+                return x
+
 if __name__ == "__main__":
 
     if len(sys_argv) > 1:
@@ -186,10 +200,9 @@ if __name__ == "__main__":
             title =  "--"
 
         artistAlbumTitle = artist, album, title
-        # print artistAlbumTitle # DEBUG
+        #print artistAlbumTitle # DEBUG
 
         state =     mpdcli.status()['state']
 
         do_mpd_INFOFIFOscreen(artistAlbumTitle, paused="pause" in state)
         do_mpd_LCDscreen(artistAlbumTitle)
-
