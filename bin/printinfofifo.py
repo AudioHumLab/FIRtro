@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import curses # no usado
 import os
 from subprocess import check_output, Popen
 fifo = "/home/firtro/info_fifo"
@@ -25,24 +24,35 @@ def sublineas(linea, lmax):
         sls.append(tmp)
     return sls
 
+def leefifo():
+    # Se completará la lectura de la fifo cada vez
+    # que se haya escrito EOF en ella.
+    f = open(fifo, "r")
+    tmp = f.read()
+    f.close()
+    return tmp
+    
 def mainLoop():
+    
+    lineas_prev = []
 
     while True:
-        # Se completará la lectura de la fifo cada vez
-        # que se haya escrito EOF en ella.
         # NOTA: El contenido de la FIFO es el estado de FIRtro enmarcado
         #       en guiones "--------------------------",
         #       seguido del estado del Player en curso.
-        f = open(fifo, "r")
-        tmp = f.read()
-        f.close()
-        lineas = tmp.split("\n")
-
-        os.system("clear")      # borramos el terminal
+        lineas = leefifo().split("\n")
+        
+        if lineas == lineas_prev:
+            #print "es lo mismo de antes"
+            continue
+                
+        lineas_prev = [x for x in lineas] # OjO debemos copiar item a item
+        
+        os.system("clear") # borramos el terminal
 
         c = 0
         while lineas:
-            linea = lineas.pop(0).center(tcols)   # vamos extrayendo lineas
+            linea = lineas.pop(0).center(tcols) # vamos extrayendo lineas
             if "--------" in linea:
                 c += 1
             if c < 2:
@@ -51,7 +61,7 @@ def mainLoop():
                 if not "--------" in linea:
                     print
                 for sl in sublineas(linea, lmax=tcols):
-                    print sl.center(tcols)
+                    print sl.center(tcols)            
 
 def mataotros():
     tmp = check_output( "ps -ef | grep python | grep printinfofifo.py", \
@@ -69,10 +79,10 @@ def mataotros():
 
 if __name__ == "__main__":
 
-    # Como la fifo solo puede leerla un proceso, debemos terminar
-    # cualquier instancia previa de este programa:
+    # Como la fifo es dedicada a un único visualizador, 
+    # debemos terminar cualquier instancia previa de este programa:
     mataotros()
-
+    
     # Bucle de lectura de la fifo y printado en el terminal
     mainLoop()
 
