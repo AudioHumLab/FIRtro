@@ -114,11 +114,7 @@ def _show_big_scroller(comando, statusJson):
     elif    estado == False: estado = "OFF"
     else:                    estado = str(estado)
 
-    # Y finalmente lo presentamos
-    msgLCD = item + ": " + estado
-    srvLCD.lcdbig.show_scroller(msgLCD, \
-                              priority="foreground", \
-                              timeout=9)
+    return item + ": " + estado
 
 if __name__ == "__main__":
 
@@ -206,7 +202,8 @@ if __name__ == "__main__":
                     comando = orden.split()[0]
                     if [item for item in getconfig.lcd_bigscroll_items if item in comando]:
                         try:    # esto es por si el comando es erróneo (Wrong sintax)
-                            _show_big_scroller(comando, statusJson=status)
+                            msgLCD = _show_big_scroller(comando, statusJson=status)
+                            srvLCD.lcdbig.show_scroller(msgLCD, priority="foreground", timeout=9)
                         except:
                             pass
  
