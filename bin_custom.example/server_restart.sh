@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # matamos el server del FIRtro
-pkill -f server.py
+pkill -f "python /home/firtro/bin/server.py"
 
 # OjO hay veces que se queda algún proceso escuchando en 9999/tcp,
 # por ejemplo alsa_in ¿!?, hay que matarlo para liberar el puerto:
