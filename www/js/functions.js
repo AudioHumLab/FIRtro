@@ -161,7 +161,6 @@ function send_command(command, value) {
 // Se vuelve a hacer una petición ajax independiente que la que se usa para actualizar en los cambios de página
 // La razón es que de esta forma el tiempo de espera (window.setTimeout) se puede poner después de recibir los datos y actualizar la página, de forma síncrona
 // Esto evita que se produzcan llamadas simultaneas ajax si éstas tardan mas que el tiempo de espera
-
 function auto_update() {
     $.ajax({
         type: "POST",
@@ -240,12 +239,88 @@ function changeGlobalTheme(theme)
     //setTheme(".ui-btn", "ui-btn-hover", theme);
 };
 
+// Left|right pad. Se usó abajo en case: "info_page", pero actualmente se usan los grid jquery.
+// http://sajjadhossain.com/2008/10/31/javascript-string-trimming-and-padding/
+String.prototype.lpad = function(padString, length) {
+	var str = this;
+    while (str.length < length)
+        str = padString + str;
+    return str;
+}
+String.prototype.rpad = function(padString, length) {
+	var str = this;
+    while (str.length < length)
+        str = str + padString;
+    return str;
+}
+
 // Actualización de los valores de la página
 function update_controls () {
     $("[name='tittle']").text("FIRtro [" + $php_data["loudspeaker"] + "]");
     var $first_item=true;
     // Página activa del documento
     switch ($.mobile.activePage.attr('id')) {
+        
+        case 'info_page':
+        
+            // --- ESTADO de FIRtro ---
+            //     -----------------------------------------
+            //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
+            //  2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
+            //  3  P: preset_name            LOUD   xover:mp
+            //     -----------------------------------------
+            //  4  I: input_name       ::plause::     44100
+            //     -----------------------------------------
+
+            // LINEA 1:
+            if ($php_data['muted'] == false)    $("#info_vol").text("Vol: " + $php_data["level"]);
+            else                                $("#info_vol").text("Vol: MUTE");
+
+            $("#info_hro").text("Hr: " + $php_data["headroom"]);
+
+            $("#info_bal").text("Bal: " + $php_data["balance"]);
+                        
+            // LINEA 2:
+            $("#info_bas").text("Bass: " + $php_data["bass"])
+            $("#info_tre").text("Treb: " + $php_data["treble"])
+
+            if ($php_data["system_eq"] == true)     $("#info_seq").text("SysEQ");
+            else                                    $("#info_seq").text(" --  ");
+
+            if ($php_data["drc_eq"] != "0")         $("#info_drc").text("DRC");
+            else                                    $("#info_drc").text(" - ");
+
+            if ( ($php_data['peq'] != "") && ($php_data['peqdefeat'] != true) ) $("#info_peq").text("PEQ");
+            else                                                                $("#info_peq").text(" - ");
+            
+            // LINEA 3:
+            $("#info_pre").text("Preset: " + $php_data["preset"])
+            if ($php_data['loudness_track']==true)  $("#info_lou").text("LOUD");
+            else                                    $("#info_lou").text("    ");
+            if ($php_data['mono'] == "on")          $("#info_ste").text("  MONO");
+            else                                    $("#info_ste").text("Stereo");
+
+            // LINEA 4:
+            $("#info_inp").text($php_data["input_name"].toUpperCase())
+            $("#info_fs").text($php_data["fs"])
+            $("#info_xov").text("xo: " + $php_data["filter_type"])
+            
+            // --- INFO_PLAYER (metadatos) ---
+            $player = $php_data['input_name'];
+            if ($player.indexOf("tdt") !== -1)    $player = "mplayer"; 
+            $artist = $php_data[$player].artist;
+            $album = $php_data[$player].album;
+            $title = $php_data[$player].title;
+            $state = $php_data[$player].state;
+            if ($artist == "")  $artist = "--";
+            if ($album == "")   $album = "--";
+            if ($title == "")   $title = "--";
+            $("#info_artist").text($artist)
+            $("#info_album").text($album)
+            $("#info_title").text($title)
+            $("#info_sta").text("::" + $state + "::");
+            
+            break;
         
         case 'level_page':
         
@@ -316,6 +391,7 @@ function update_controls () {
                 });    
             }
             else $("#level_display6").text("");
+
             break;
 
         case 'drc_page':
