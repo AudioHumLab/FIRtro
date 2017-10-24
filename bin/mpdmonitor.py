@@ -1,19 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-    Script daemon que atiende eventos de MPD y los comunica a los server de display
+    Script daemon que atiende eventos de MPD y los comunica
+    a los server de display y a la web a través de server.py
 """
 # v1.0a
-# Parche que concatena posibles metadatos de type list o tuple.
+# - Parche que concatena posibles metadatos de type list o tuple
+#   proporcionados por la interfaz MPDClient
 
-from mpd import MPDClient
-import json
 from sys import argv as sys_argv
 from time import sleep
+
+# Interfaz cliente con el server MPD
+from mpd import MPDClient
 
 # clientes para interactuar con los servidores de DISPLAYs de FIRtro
 import client_lcd as cLCD
 import client_infofifo as cFIFO
+# cliente para interactuar con el server.py, que trasladará los metadata a la web de FIRtro
+import client as cFIRtro
+# Usamos json para entregar los metadata a través del socket tcp con server.py
+import json
+# Acceso a la configuracion de FIRtro:
 import getconfig
 
 def input_name():
@@ -24,11 +32,16 @@ def input_name():
     except:
         return ""
 
+def do_mpd_send_metadata(artistAlbumTitle, state="play", address="localhost", port=getconfig.control_port):
+    # aux para enviar metadatas en formato json a un server
+    artist, album, title = artistAlbumTitle
+    metaDict = {"player":"mpd",
+                "metadata":{"artist":artist, "album":album, "title":title, "state":state} }
+    metaJson = json.dumps(metaDict)
+    cFIRtro.firtro_socket(metaJson, quiet=True)
+
 def do_mpd_LCDscreen(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
-
-    # (!) Se ha detectado que pueden llegar metadatos en forma de lista
-    artistAlbumTitle = [ _concatena(x) for x in artistAlbumTitle]
 
     artist, album, title = artistAlbumTitle
     speed = str(speed)
@@ -55,7 +68,7 @@ def do_mpd_LCDscreen(artistAlbumTitle, speed=3):
     cLCD.cmd_s(w4_set)
 
 def do_static_LCDscreen():
-    # aux para printar una pantalla estática indicando que 
+    # aux para printar una pantalla estática indicando que
     # la sesion no disppne de conexión con MPD
     # Creamos la pantalla
     cLCD.create_screen("static", duration=0)
@@ -68,9 +81,6 @@ def do_static_LCDscreen():
 def do_mpd_INFOFIFOscreen(artistAlbumTitle, paused=False):
     # aux para printar los 3 elementos de artistAlbumTitle en la INFOFIFO
 
-    # (!) Se ha detectado que pueden llegar metadatos en forma de lista
-    artistAlbumTitle = [ _concatena(x) for x in artistAlbumTitle]
-
     artist, album, title = artistAlbumTitle
     if paused: state = "pause"
     else:      state = "play"
@@ -82,7 +92,7 @@ def do_mpd_INFOFIFOscreen(artistAlbumTitle, paused=False):
     cFIFO.close()
 
 def do_static_INFOFIFOscreen():
-    # aux para printar una pantalla estática indicando que 
+    # aux para printar una pantalla estática indicando que
     # la sesion no disppne de conexión con MPD
     artist = 'NOT connected to MPD'
     d = {'artist':artist}
@@ -128,14 +138,27 @@ def try_INFOFIFO_server():
     i = 0
     while i < 5:
         if not cFIFO.open():
-            sleep(.2); cFIFO.close()
+            sleep(.2)
+            cFIFO.close()
             print "(mpdmonitor) ERROR conectando con el server FIFO"
         else:
-            sleep(.2); cFIFO.close()
+            sleep(.2)
+            cFIFO.close()
             print "(mpdmonitor) conectado al server FIFO"
             return True
         sleep(1)
         i += 1
+    return False
+
+def try_FIRtro():
+    i = 0
+    while i < 5:
+        if cFIRtro.firtro_socket("close", quiet=True)[:2] == "OK":
+            print "(mpdmonitor) conectado a FIRtro (server.py)"
+            return True
+        sleep(1)
+        i += 1
+    print "(mpdmonitor) ERROR conectando a FIRtro (server.py)"
     return False
 
 def try_LCD_server(server):
@@ -167,6 +190,7 @@ if __name__ == "__main__":
 
     use_infofifo = try_INFOFIFO_server()
     use_lcd =      try_LCD_server(getconfig.LCD_server_addr)
+    use_firtro =   try_FIRtro()
 
     # Intenta conexión con MPD
     mpdcli = MPDClient()
@@ -174,8 +198,12 @@ if __name__ == "__main__":
         mpdcli.connect("localhost", 6600)
         print "(mpdmonitor) conectado con MPD"
     except:
-        if use_lcd:      do_static_LCDscreen()
-        if use_infofifo: do_static_INFOFIFOscreen()
+        if use_lcd:
+            do_static_LCDscreen()
+        if use_infofifo:
+            do_static_INFOFIFOscreen()
+        if use_firtro:
+            do_mpd_send_metadata(["not connected to mpd", "", ""])
         print "(mpdmonitor) ERROR conectando con MPD"
         raise SystemExit, 0
 
@@ -187,13 +215,13 @@ if __name__ == "__main__":
         try:
             mpdcli.idle('player', 'message', 'playlist')
         except:
-            print "(mpdmonitor) Terminado. se ha perdido la conexión con MPD."
+            print "(mpdmonitor) Terminado. se ha perdido la conexión."
             raise SystemExit, 0
 
         try:
-            artist =    mpdcli.currentsong()['artist']
-            album =     mpdcli.currentsong()['album']
-            title =     mpdcli.currentsong()['title']
+            artist = mpdcli.currentsong()['artist']
+            album =  mpdcli.currentsong()['album']
+            title =  mpdcli.currentsong()['title']
         except: # posiblemente la playlist está vacía
             artist = "--"
             album =  "--"
@@ -202,7 +230,18 @@ if __name__ == "__main__":
         artistAlbumTitle = artist, album, title
         #print artistAlbumTitle # DEBUG
 
-        state =     mpdcli.status()['state']
+        # (!) Se ha detectado que pueden llegar metadatos en forma de lista
+        #     Como no es de interés los concatenamos en una cadena:
+        artistAlbumTitle = [ _concatena(x) for x in artistAlbumTitle]
 
-        do_mpd_INFOFIFOscreen(artistAlbumTitle, paused="pause" in state)
-        do_mpd_LCDscreen(artistAlbumTitle)
+        state = mpdcli.status()['state'] # en MPD puede ser play | pause | stop
+
+        # Servidores a los que enviamos los metadata:
+        if use_infofifo:
+            do_mpd_INFOFIFOscreen(artistAlbumTitle, paused=(state in ("stop","play")))
+
+        if use_lcd:
+            do_mpd_LCDscreen(artistAlbumTitle)
+
+        if use_firtro:
+            do_mpd_send_metadata(artistAlbumTitle, state)
