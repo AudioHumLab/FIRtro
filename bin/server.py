@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+    Socket servidor de FIRtro. 
+    - Se encarga de recibir órdenes y de procesarlas en server_process.do(orden).
+    
+    - También se encarga de recibir metadatos de los player y agregarlas en el 
+      diccionario general de estado.
+    
+    - Funcionalidad adicional: gestiona los pantallados informativos en 
+      los posibles displays (LCD o infofifo para una consola)
+"""
 
 # v1.0b:
 # - se printa un separador en caso de control_clear=False en audio/config
@@ -20,6 +30,10 @@
 # - Se escuchan también posibles metadata de los players, que serán añadidos
 #   a mayores en el Json del estado del audio que llega de server_process.do(orden)
 #   y que se envía a la web de FIRtro que se conecta como cliente de este server.
+#
+# TODO:
+# - que los metadata se actualicen en la web sin esperar a que la web ordene
+#   'status' para actulizarse.
 
 import json
 import socket
@@ -91,7 +105,7 @@ def _extrae_statusJson(svar):
     return tmp
 
 def _prepare_big_scroller(comando, statusJson):
-    # Func auxiliar intermedia para presentar el estado
+    # Func auxiliar intermedia para presentar el estado 
     # de un 'item' de interés en el scroller lcd_big.
 
     # La cadena json 'statusJson' es recibida desde server_process.do(orden)
@@ -138,14 +152,16 @@ def _is_metadataJson(data):
 if __name__ == "__main__":
 
     PLAYERS = ["mpd", "spotify", "mplayer"]
-    # Inicialización del diccionario completo (estado_de_FIRtro + metadatas_de_cada_PLAYER)
+    # plantilla para metadatas
+    plantiMeta = {'artist':'', 'album':'', 'title':'', 'state':''}
+
+    # Diccionario completo (estado_de_FIRtro + metadatas_de_cada_PLAYER)
     # que enviaremos a la web.
     # NOTA: las keys de estado_de_FIRtro serán incorporadas en el arranque gracias
     #       a los comandos iniciales que provocan su generación en server_process.do()
-    plantillameta = {'artist':'', 'album':'', 'title':'', 'state':''}
-    dicci_status_players = {"mpd":      plantillameta,
-                            "spotify":  plantillameta,
-                            "mplayer":  plantillameta}
+    dicci_status_players = {"mpd":      plantiMeta,
+                            "spotify":  plantiMeta,
+                            "mplayer":  plantiMeta}
 
     # Uso del LCD
     use_lcd = lcd_check()
@@ -156,40 +172,29 @@ if __name__ == "__main__":
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
     # Bucle PRINCIPAL para procesar las posibles conexiones.
-    backlog = 10    # Numero de conexiones que se mantienen en cola
+    backlog = 10    # Numero de conexiones admitidas
     while True:
 
-        # Escuchamos los puertos
+        # Iniciamos la escucha.
         fsocket.listen(backlog)
         if getconfig.control_output > 1:
             print "(server) Listening on address", getconfig.control_address, "port",str(getconfig.control_port) + "..."
 
-        # En este punto aceptamos la conexión del cliente
+        # En este punto aceptamos la conexión de clientes
         sc, addr = fsocket.accept()
 
-        # informativo si está habilitado el printado
-        if getconfig.control_output > 1:
+        # Información por consola:
+        if getconfig.control_output > 1:    # opción de borrado del terminal
             if getconfig.control_clear:
-                # opción de borrado del terminal
                 os.system('clear')
-            else:
-                # opción de separador
+            else:                           # opción de separador
                  print "=" * 70
             print "(server) Conected to client", addr[0]
 
-
-        # Bucle buffer para procesar la orden recibida en la conexión
-        # OjO este loop se romperá (break) en cada conexión, pasando al loop PRINCIPAL...
         while True:
 
             # RECEPCION
-            data = sc.recv(6000)
-            #data = ""
-            #while True
-            #    buff = sc.recv(1024)
-            #    if buff == "":
-            #        break
-            #    data += buff
+            data = sc.recv(8192) # pot de 2 suficientemente grande para el diccionario json (4096 es escaso)
 
             # Si no hay nada en el buffer, es que el cliente se ha desconectado antes de tiempo
             if not data:
@@ -226,10 +231,10 @@ if __name__ == "__main__":
                 dicci_status_players[dicci_player['player']] = dicci_player['metadata']
                 # Y lo enviamos a la página web
                 json_status_players = json.dumps(dicci_status_players)
-                # print "OOOOOOOO", len(json_status_players), json_status_players # (DEBUG)
                 sc.send(json_status_players)
 
-                sc.close() # (!) IMPORTANTE no olvidar cerrar el cliente
+                # (!) IMPORTANTE no olvidar cerrar el cliente
+                sc.close() 
                 break
 
             # Llega una ORDEN para server_process.do(comando parámetros...)
@@ -239,25 +244,21 @@ if __name__ == "__main__":
                 orden = data
                 json_status = server_process.do(orden)
                 # Actualizamos el diccionario general y le incorporamos los player
-                # xxxxxxxx
                 old = dicci_status_players
                 dicci_status_players = json.loads(json_status)
                 for player in PLAYERS:
                     dicci_status_players[player] = old[player]
-                # xxxxxxxx
 
                 # Incorporamos manualmente el nombre de la EMISORA en los metadatos
                 radio = dicci_status_players["radio"]
-                tmp = "canal: " + radio
-                dicci_status_players["mplayer"]["artist"] = tmp
-                tmp = radiopresets.get("channels", radio).replace("\\","")
-                dicci_status_players["mplayer"]["album"] = tmp
-                dicci_status_players["mplayer"]["state"] = "play"
+                dicci_status_players["mplayer"]["artist"] = "canal: " + radio
+                emisora = radiopresets.get("channels", radio).replace("\\","")
+                dicci_status_players["mplayer"]["album"] = emisora
+                dicci_status_players["mplayer"]["state"] = ""
 
-                # 2. ENVIAMOS a los clientes (la web) el status de FIRtro
-                #             y los metadata de los PLAYERS:
+                # 2. RESPONDEMOS a los clientes (la web) con el json
+                # del status de FIRtro y los metadata de los PLAYERS:
                 json_status_players = json.dumps(dicci_status_players)
-                # print "OOOOOOOO", len(json_status_players), json_status_players # (DEBUG)
                 sc.send(json_status_players)
 
                 # 3. Presentamos el estado en el LCD
