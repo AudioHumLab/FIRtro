@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # from __future__ import with_statement # This isn't required in Python 2.6
+"""
+    cliente para dialogar con FIRtro (server.py)
+"""
 
 # v1.0b
 # se etiquetan los 'print' para identificar la procedencia
@@ -18,7 +21,7 @@ def firtro_socket (data, quiet=False):
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        if not quiet: 
+        if not quiet:
             print "(client.py) Connecting to",server, "port",str(port)+"..."
         s.connect((server,port))
     except socket.gaierror, e:
@@ -27,23 +30,22 @@ def firtro_socket (data, quiet=False):
     except socket.error, e:
         print "(client.py) Connection error: %s" % e
         sys.exit(-1)
-    if not quiet: 
+    if not quiet:
         print "(client.py) Connected"
 
     try:
-
         # Si se pasa un parámetro, se envia al servidor y se cierra la conexión
         if data:
             s.send(data)
-            recibido=s.recv(4096); # print "(client.py) recibido", recibido # DEBUG
+            recibido = s.recv(4096);
             if data not in ("quit","close"):
+                # El server de FIRtro devuelve una cadena json con el estado
+                # incluyendo los posibles warnings después de procesar la orden.
                 recibido = json.loads(recibido)
                 if len(recibido['warnings'])>0:
                     for value in recibido['warnings']:
                         print "(client.py) Warning: " + value
-                #for key, value in recibido.iteritems(): print key, value # DEBUG
-                s.send("close")
-                recibido=s.recv(4096)
+            s.send("close\r\n")
 
         # Si no se pasa parámetro, se abre una conexión interactiva
         else:
@@ -71,6 +73,7 @@ def firtro_socket (data, quiet=False):
         print "(client.py) Closing connection..."
 
     s.close()
+    return recibido
 
 if __name__ == "__main__":
 
