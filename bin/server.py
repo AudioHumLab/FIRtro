@@ -15,7 +15,13 @@
 #
 # v2.0b
 # - Se añade la comunicación de eventos hacia el server_infofifo.py
+#
+# v3.0a
+# - Se escuchan también posibles metadata de los players, que serán añadidos
+#   a mayores en el Json del estado del audio que llega de server_process.do(orden)
+#   y que se envía a la web de FIRtro que se conecta como cliente de este server.
 
+import json
 import socket
 import sys
 from time import sleep
@@ -24,6 +30,10 @@ import server_process
 import getconfig
 import server_lcdproc as srvLCD
 import client_infofifo as cFIFO
+
+from ConfigParser import ConfigParser
+radiopresets = ConfigParser()
+radiopresets.read("/home/firtro/audio/radio")
 
 def getsocket(host, port):
     try:
@@ -74,14 +84,14 @@ def infofifo_check():
 
 def _extrae_statusJson(svar):
     # auxiliar para leer el estado de una variable en el chorizo Json 'status'
-    tmp = status[ status.index('"' + svar + '":'): ]
+    tmp = json_status[ json_status.index('"' + svar + '":'): ]
     tmp = tmp.split(",")[0].split()[-1]
     if tmp == "false":  tmp = False
     elif tmp == "true": tmp = True
     return tmp
 
-def _show_big_scroller(comando, statusJson):
-    # Func auxiliar intermedia para presentar el estado 
+def _prepare_big_scroller(comando, statusJson):
+    # Func auxiliar intermedia para presentar el estado
     # de un 'item' de interés en el scroller lcd_big.
 
     # La cadena json 'statusJson' es recibida desde server_process.do(orden)
@@ -116,13 +126,33 @@ def _show_big_scroller(comando, statusJson):
 
     return item + ": " + estado
 
+def _is_metadataJson(data):
+    try:
+        dicc = json.loads(data)
+        if dicc['player'] in PLAYERS:
+            return True
+    except:
+        pass
+    return False
+
 if __name__ == "__main__":
+
+    PLAYERS = ["mpd", "spotify", "mplayer"]
+    # Inicialización del diccionario completo (estado_de_FIRtro + metadatas_de_cada_PLAYER)
+    # que enviaremos a la web.
+    # NOTA: las keys de estado_de_FIRtro serán incorporadas en el arranque gracias
+    #       a los comandos iniciales que provocan su generación en server_process.do()
+    plantillameta = {'artist':'', 'album':'', 'title':'', 'state':''}
+    dicci_status_players = {"mpd":      plantillameta,
+                            "spotify":  plantillameta,
+                            "mplayer":  plantillameta}
 
     # Uso del LCD
     use_lcd = lcd_check()
     # Uso de INFOFIFO
     use_infofifo = infofifo_check()
 
+    # Iniciamos el socket de este server.py:
     fsocket = getsocket(getconfig.control_address, getconfig.control_port)
 
     # Bucle PRINCIPAL para procesar las posibles conexiones.
@@ -147,11 +177,19 @@ if __name__ == "__main__":
                  print "=" * 70
             print "(server) Conected to client", addr[0]
 
+
         # Bucle buffer para procesar la orden recibida en la conexión
+        # OjO este loop se romperá (break) en cada conexión, pasando al loop PRINCIPAL...
         while True:
 
             # RECEPCION
-            data = sc.recv(4096)
+            data = sc.recv(6000)
+            #data = ""
+            #while True
+            #    buff = sc.recv(1024)
+            #    if buff == "":
+            #        break
+            #    data += buff
 
             # Si no hay nada en el buffer, es que el cliente se ha desconectado antes de tiempo
             if not data:
@@ -161,7 +199,8 @@ if __name__ == "__main__":
                 break
 
             # Se pide cerrar la conexión con el script de control client.py (modo interactivo)
-            elif data.rstrip('\r\n') == "close":
+            #elif data.rstrip('\r\n') == "close":
+            elif data.startswith("close"):
                 sc.send("OK")
                 if getconfig.control_output > 1:
                     print "(server) Closing connection..."
@@ -179,21 +218,53 @@ if __name__ == "__main__":
                 fsocket.close()
                 sys.exit(1)
 
-            # Modo transparente hacia FIRtro: 'data' es una ORDEN  (comando parámetros...)
+            # Llegan metadatos de un PLAYER
+            elif _is_metadataJson(data):
+                # Ejempo: {'player': mpd, 'metadata':{'artist':'Rosendo', 'album':...}}
+                dicci_player = json.loads(data)
+                # Lo incorporamos a mayores en el diccionario general 'dicci_status_players'
+                dicci_status_players[dicci_player['player']] = dicci_player['metadata']
+                # Y lo enviamos a la página web
+                json_status_players = json.dumps(dicci_status_players)
+                # print "OOOOOOOO", len(json_status_players), json_status_players # (DEBUG)
+                sc.send(json_status_players)
+
+                sc.close() # (!) IMPORTANTE no olvidar cerrar el cliente
+                break
+
+            # Llega una ORDEN para server_process.do(comando parámetros...)
             else:
                 # 1. ENVIAMOS la orden al gestor de FIRtro (server_process.py)
                 # que nos responderá con el estado general en formato json
                 orden = data
-                status = server_process.do(orden)
+                json_status = server_process.do(orden)
+                # Actualizamos el diccionario general y le incorporamos los player
+                # xxxxxxxx
+                old = dicci_status_players
+                dicci_status_players = json.loads(json_status)
+                for player in PLAYERS:
+                    dicci_status_players[player] = old[player]
+                # xxxxxxxx
 
-                # 2. DEVOLVEMOS el estado de FIRtro
-                sc.send(status)
+                # Incorporamos manualmente el nombre de la EMISORA en los metadatos
+                radio = dicci_status_players["radio"]
+                tmp = "canal: " + radio
+                dicci_status_players["mplayer"]["artist"] = tmp
+                tmp = radiopresets.get("channels", radio).replace("\\","")
+                dicci_status_players["mplayer"]["album"] = tmp
+                dicci_status_players["mplayer"]["state"] = "play"
+
+                # 2. ENVIAMOS a los clientes (la web) el status de FIRtro
+                #             y los metadata de los PLAYERS:
+                json_status_players = json.dumps(dicci_status_players)
+                # print "OOOOOOOO", len(json_status_players), json_status_players # (DEBUG)
+                sc.send(json_status_players)
 
                 # 3. Presentamos el estado en el LCD
                 if use_lcd:
 
                     # 3.1 Pantalla general resumen del ESTADO de FIRtro:
-                    srvLCD.show_status(status, priority="info")
+                    srvLCD.show_status(json_status, priority="info")
 
                     # 3.2 NUEVAS pantallas que muestran caracteres GRANDES:
 
@@ -202,11 +273,11 @@ if __name__ == "__main__":
                     comando = orden.split()[0]
                     if [item for item in getconfig.lcd_bigscroll_items if item in comando]:
                         try:    # esto es por si el comando es erróneo (Wrong sintax)
-                            msgLCD = _show_big_scroller(comando, statusJson=status)
+                            msgLCD = _prepare_big_scroller(comando, statusJson=json_status)
                             srvLCD.lcdbig.show_scroller(msgLCD, priority="foreground", timeout=9)
                         except:
                             pass
- 
+
                     # 3.2.2 LEVEL. Además también rotamos el nivel en grande:
                     lev = _extrae_statusJson("level")
                     mut = _extrae_statusJson("muted")
@@ -218,7 +289,7 @@ if __name__ == "__main__":
                     cFIFO.open()
                     # enviamos el diccionario json del estado de FIRtro,
                     # precedido por una etiqueta identificativa:
-                    cFIFO.cmd_s("statusFIRtro" + status)
+                    cFIFO.cmd_s("statusFIRtro" + json_status)
                     cFIFO.close()
 
                 if getconfig. control_output > 1 and getconfig.control_clear:
