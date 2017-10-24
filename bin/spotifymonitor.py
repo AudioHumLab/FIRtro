@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-    Script daemon que atiende eventos GLib de Spotify y los comunica a los server de display
+    Script daemon que atiende eventos GLib de Spotify desktop client y 
+    los comunica a los server de display y a la web a través de server.py
 """
 
 # v1.0 (formerly 'spotify2lcd.py')
@@ -9,6 +10,7 @@
 # - Bucle inicial de espera hasta conectar con el server LCDproc
 # v1.1
 # - Se unifica la comunicación con los displays LCD e INFOFIFO
+#   y con el server.py que actualizará la web de control
 
 # Este código está basado en 'example.py' de https://github.com/acrisci/playerctl
 # Más info sobre como interactuar con un cliente Spotify en Linux:
@@ -32,6 +34,7 @@
 #   > dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
 #   Error org.freedesktop.DBus.Error.ServiceUnknown: The name org.mpris.MediaPlayer2.spotify was not provided by any .service files
 
+# Interfaz mpris para interactuar con un player de escritorio
 import gi
 gi.require_version('Playerctl', '1.0')
 from gi.repository import Playerctl, GLib
@@ -39,11 +42,15 @@ from gi.repository import Playerctl, GLib
 from sys import argv as sys_argv, path as sys_path
 from time import sleep
 from subprocess import check_output
-import json
 
 # clientes para interactuar con los servidores de DISPLAYs de FIRtro
 import client_lcd as cLCD
 import client_infofifo as cFIFO
+# cliente para interactuar con el server, que trasladará los metadata a la web de FIRtro
+import client as cFIRtro
+# Usamos json para entregar los metadata a través del socket tcp con server.py
+import json
+# Acceso a la configuracion de FIRtro:
 import getconfig
 
 def input_name():
@@ -53,6 +60,16 @@ def input_name():
         return tmp.split()[-1]
     except:
         return ""
+
+def do_spotify_send_metadata(artistAlbumTitle, paused=False, address="localhost", port=getconfig.control_port):
+    # aux para enviar metadatas en formato json a un server
+    artist, album, title = artistAlbumTitle
+    if paused: state = "pause"
+    else:      state = "play" 
+    metaDict = {"player":"spotify", 
+                "metadata":{"artist":artist, "album":album, "title":title, 'state':state} }
+    metaJson = json.dumps(metaDict)
+    cFIRtro.firtro_socket(metaJson, quiet=True)
 
 def do_spotify_LCDscreen(artistAlbumTitle, speed=3):
     # aux para printar los 3 elementos de artistAlbumTitle en el LCD
@@ -131,6 +148,8 @@ def on_metadata(player, e):
         do_spotify_LCDscreen(get_artistAlbumTitle(e), speed=2)
     if use_infofifo:
         do_spotify_INFOFIFOscreen(get_artistAlbumTitle(e), paused=False)
+    if use_firtro:
+        do_spotify_send_metadata(get_artistAlbumTitle(e), paused=False)
 
 def on_play(player):
     """ Handler para cuando se INICIA la reproducción en Spotify """
@@ -144,6 +163,8 @@ def on_play(player):
         if use_infofifo:
             # printa metadata en INFOFIFO
             do_spotify_INFOFIFOscreen(artistAlbumTitle, paused=False)
+        if use_firtro:
+            do_spotify_send_metadata(artistAlbumTitle, paused=False)
 
 def on_pause(player):
     """ Handler para cuando se PAUSA Spotify """
@@ -157,6 +178,8 @@ def on_pause(player):
             cLCD.cmd_s("screen_set spotify_scr1 -priority background")
     if use_infofifo:
         do_spotify_INFOFIFOscreen(artistAlbumTitle, paused=True)
+    if use_firtro:
+        do_spotify_send_metadata(artistAlbumTitle, paused=True)
 
 def try_INFOFIFO_server():
     i = 0
@@ -164,11 +187,11 @@ def try_INFOFIFO_server():
         if not cFIFO.open():
             sleep(.2)
             cFIFO.close()
-            #print "(spotifymonitor) ERROR conectando con el server FIFO"
+            print "(spotifymonitor) ERROR conectando con el server FIFO"
         else:
             sleep(.2)
             cFIFO.close()
-            #print "(spotifymonitor) conectado al server FIFO"
+            print "(spotifymonitor) conectado al server FIFO"
             return True
         sleep(1)
         i += 1
@@ -181,12 +204,23 @@ def try_LCD_server(server):
     i = 0
     while i < 5:
         if cLCD.open("spotify_client", server):
-            #print "(spotifymonitor) conectado al server LCDd"
+            print "(spotifymonitor) conectado al server LCDd"
             return True
         sleep(1)
         i += 1
     cLCD.close()
-    #print "(spotifymonitor) ERROR conectando con el server LCDd"
+    print "(spotifymonitor) ERROR conectando con el server LCDd"
+    return False
+
+def try_FIRtro():
+    i = 0
+    while i < 5:
+        if cFIRtro.firtro_socket("close", quiet=True)[:2] == "OK":
+            print "(spotifymonitor) conectado a FIRtro (server.py)"
+            return True
+        sleep(1)
+        i += 1
+    print "(spotifymonitor) ERROR conectando a FIRtro (server.py)"
     return False
 
 if __name__ == "__main__":
@@ -197,6 +231,7 @@ if __name__ == "__main__":
 
     use_infofifo = try_INFOFIFO_server()
     use_lcd =      try_LCD_server(getconfig.LCD_server_addr)
+    use_firtro =   try_FIRtro()
 
     # Intenta conexión con SPOTFY usando una instancia Playerctl, que es
     # una interfaz dbus mpris para hablar con un player de un desktop.
@@ -206,6 +241,9 @@ if __name__ == "__main__":
             do_static_LCDscreen()
         if use_infofifo:
             do_static_INFOFIFOscreen()
+        if use_firtro:
+            do_spotify_send_metadata(["not connected to Spotify", "", ""])
+        print "(spotifymonitor) ERROR conectando con MPD"
         raise SystemExit, 0
 
     # EVENTOS atendidos y HANDLERS asociados:
@@ -213,7 +251,7 @@ if __name__ == "__main__":
     player.on('pause', on_pause)
     player.on('metadata', on_metadata)
 
-    # BUCLE PRINCIPAL: wait for GLib events
+    # BUCLE PRINCIPAL: waits for GLib events
     mainGlibLoop = GLib.MainLoop()
     mainGlibLoop.run()
 
