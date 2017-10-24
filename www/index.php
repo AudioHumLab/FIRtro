@@ -1,53 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<!-- For iOS web apps -->
-<!-- http://developer.apple.com/library/ios/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html -->
-<!-- <meta name="viewport" content="width=device-width, initial-scale=1">  -->
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scaleable=no">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="FIRtro Mobile">
+    <meta charset="utf-8">
+    <!-- For iOS web apps -->
+    <!-- http://developer.apple.com/library/ios/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1">  -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scaleable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FIRtro Mobile">
 
-<title>FIRtro Mobile</title>
+    <title>FIRtro Mobile</title>
 
-<!-- Temas de la pagina. Usar solo un tipo, o oficiales o a medida -->
-<!-- Temas a medida incluyen los standard a,b,c,d,e. -->
-<!-- http://jquerymobile.com/themeroller/ -->
-<link rel="stylesheet" href="css/themes/custom/myTheme.min.css" />
-<link rel="stylesheet" href="css/themes/default/jquery.mobile.structure-1.3.2.min.css" />
+    <!-- Temas de la pagina. Usar solo un tipo, o oficiales o a medida -->
+    <!-- Temas a medida incluyen los standard a,b,c,d,e. -->
+    <!-- http://jquerymobile.com/themeroller/ -->
+    <link rel="stylesheet" href="css/themes/custom/myTheme.min.css" />
+    <link rel="stylesheet" href="css/themes/default/jquery.mobile.structure-1.3.2.min.css" />
 
-<!-- Temas oficiales -->
-<!--<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.min.css" /> -->
+    <!-- Temas oficiales -->
+    <!--<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.min.css" /> -->
 
-<!-- Hojas de estilo principales -->
-<link href="css/jqm-docs.css" rel="stylesheet" type="text/css">
-<link href="css/main.css" rel="stylesheet" type="text/css">
+    <!-- Hojas de estilo principales -->
+    <link href="css/jqm-docs.css" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet" type="text/css">
 
-<!-- JQuery -->
-<script src="js/jquery-1.8.3.min.js"></script>
-<script src="js/jquery.mobile-1.3.2.min.js"></script>
+    <!-- JQuery -->
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/jquery.mobile-1.3.2.min.js"></script>
 
-<!-- Jqplot -->
-<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
-<script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.min.js"></script>
-<script type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.min.js"></script>
-<script type="text/javascript" src="jqplot/plugins/jqplot.canvasOverlay.min.js"></script>
-<link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.min.css" />
+    <!-- Jqplot -->
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.logAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.canvasOverlay.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.min.css" />
 
-<!-- Configuracion -->
-<script language="javascript" type="text/javascript">
-    var $config=<?php echo json_encode(parse_ini_file("config/config.ini"))?>;
-    var $config_ws=<?php echo json_encode(parse_ini_file("config/config.ini",True))?>;
-    if ($config == false) alert('Error: Can not read configuration file');
-</script>
+    <!-- Configuracion -->
+    <script language="javascript" type="text/javascript">
+        var $config=<?php echo json_encode(parse_ini_file("config/config.ini"))?>;
+        var $config_ws=<?php echo json_encode(parse_ini_file("config/config.ini",True))?>;
+        if ($config == false) alert('Error: Can not read configuration file');
+    </script>
 
-<!-- Funciones -->
-<script src="js/functions.js"></script>
+    <!-- Funciones -->
+    <script src="js/functions.js"></script>
 </head>
 
 <body>
+
+    <!-- ********************** -->
+    <!-- ** Página INFO      ** -->
+    <!-- ********************** -->
+
+    <div data-role="page" class="type-interior" id="info_page">
+
+        <!-- HEADER -->
+        <div data-role="header" data-theme="d">
+            <h1 name="tittle">FIRtro</h1>
+            <a href="#level_page" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
+        </div>
+            
+        <div style="font-size:48px; > <!--font-family:courier"-->
+            
+            <!-- Esquema para el ESTADO de FIRTRO
+            //     -----------------------------------------
+            //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
+            //  2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
+            //  3  P: preset_name            LOUD   xover:mp
+            //     -----------------------------------------
+            //  4  I: input_name       ::plause::     44100
+            //     -----------------------------------------
+            -->
+            <div style="margin:10px; border-style:solid;">
+                <!-- ui-grid-a/b/c/d son respectivamente 2/3/4/5 columnas -->
+                <!-- LINEA 1-->
+                <div class="ui-grid-c" style="margin:10px;font-weight:bold; width:100%">
+                    <div class="ui-block-a" id="info_vol" style="text-align:left; width:30%">Vol:</div>
+                    <div class="ui-block-b" id="info_hro" style="text-align:left; width:30%">Hr:</div>
+                    <div class="ui-block-c" id="info_bal" style="text-align:center; width:18%">Bal:</div>
+                    <div class="ui-block-d" id="info_ste" style="text-align:center; width:22%">(stereo)</div>
+                </div>
+                <!-- LINEA 2-->
+                <div class="ui-grid-d" style="margin:10px;font-weight:bold; width:100%">
+                    <div class="ui-block-a" id="info_bas" style="text-align:left; width:30%">Bass:</div>
+                    <div class="ui-block-b" id="info_tre" style="text-align:left; width:30%">Tre:</div>
+                    <div class="ui-block-c" id="info_seq" style="text-align:center; width:16%">(seq)</div>
+                    <div class="ui-block-d" id="info_drc" style="text-align:center; width:12%">(drc)</div>
+                    <div class="ui-block-e" id="info_peq" style="text-align:center; width:12%">(peq)</div>
+                </div>
+                <!-- LINEA 3-->
+                <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%">
+                    <div class="ui-block-a" id="info_pre" style="text-align:left; width:62%">P:</div>
+                    <div class="ui-block-b" id="info_lou" style="text-align:left; width:22%">(loud)</div>
+                    <div class="ui-block-c" id="info_xov" style="text-align:center; width:16%">(xo)</div>
+                </div>
+            </div>
+            <div style="margin:10px; border-style:solid;">
+                <!-- LINEA 4-->
+                <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%">
+                    <div class="ui-block-a" id="info_inp" style="text-align:center; width:50%">I:</div>
+                    <div class="ui-block-b" id="info_sta" style="text-align:center; width:25%; font-size:36px;">_____</div>
+                    <div class="ui-block-c" id="info_fs"  style="text-align:center; width:25%">(fs)</div>
+                </div>
+            </div>
+
+            <!-- Metadatdos del PLAYER  en tres lineas enmarcadas-->
+            <div style="margin:10px; font-weight:bold; text-align:center;">
+                <div id="info_artist" style="border-style:solid; text-align:left;">Artist: --</div>
+                <div id="info_album"  style="border-style:solid; text-align:left;">Album: --</div>
+                <div id="info_title"  style="border-style:solid; text-align:left;">Title: --</div>
+            </div>
+
+        </div>
+            
+
+        <div data-role="footer" class="footer-docs" data-theme="d">
+            <div class="ui-grid-a">
+                <div class="ui-block-a" style="width:40%; padding-right:0px"><p>&copy; FIRtro mobile</p></div>
+                <div class="ui-block-b" style="width:60%">
+                    <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-left:0px">
+                        <input name="level_down" type="submit" value="Vol" data-icon="minus" />
+                        <input name="mute" type="submit" value="Mute" />
+                        <input name="level_up" type="submit" value="Vol" data-icon="plus" data-iconpos="right" />
+                    </div>
+                </div>
+            </div>
+        </div><!-- /footer -->
+
+    </div><!-- /Página INFO --> 
+
 
     <!-- ********************** -->
     <!-- ** Página principal ** -->
@@ -57,7 +139,7 @@
 
         <div data-role="header" data-theme="d">
             <h1 name="tittle">FIRtro</h1>
-            <a href="#" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
+            <a href="#info_page"   data-icon="info" data-iconpos="notext" data-direction="reverse">Info</a>
             <a href="#config_page" data-icon="gear" data-iconpos="notext" data-direction="reverse" name="config">Config</a>
         </div><!-- /header -->
                   
