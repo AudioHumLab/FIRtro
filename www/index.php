@@ -63,13 +63,13 @@
             
         <div style="font-size:48px; > <!--font-family:courier"-->
             
-            <!-- Esquema para el ESTADO de FIRTRO
+            <!--   Esquema para el ESTADO de FIRTRO
             //     -----------------------------------------
             //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
             //  2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
             //  3  P: preset_name            LOUD   xover:mp
             //     -----------------------------------------
-            //  4  I: input_name       ::plause::     44100
+            //  4  I: input_name        ::pause::     44100
             //     -----------------------------------------
             -->
             <div style="margin:10px; border-style:solid;">
@@ -105,7 +105,7 @@
                 </div>
             </div>
 
-            <!-- Metadatdos del PLAYER  en tres lineas enmarcadas-->
+            <!--   Metadatos del PLAYER en tres lineas enmarcadas -->
             <div style="margin:10px; font-weight:bold; text-align:center;">
                 <div id="info_artist" style="border-style:solid; text-align:left;">Artist: --</div>
                 <div id="info_album"  style="border-style:solid; text-align:left;">Album: --</div>
