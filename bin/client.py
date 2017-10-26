@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 # from __future__ import with_statement # This isn't required in Python 2.6
 """
-    cliente para dialogar con FIRtro (server.py)
+    Cliente para dialogar con FIRtro (server.py)
+    Uso:
+        client.py [-s servidor] comando [argumentos ...]
 """
 
 # v1.0b
-# se etiquetan los 'print' para identificar la procedencia
+# Se etiquetan los 'print' para identificar la procedencia
+# v1.0c
+# Se admite especificar el nombre del servidor FIRtro destino.
 
 import socket
 import sys
@@ -14,10 +18,8 @@ import os
 import json
 from getconfig import control_port
 
-def firtro_socket (data, quiet=False):
-    server="localhost"
+def firtro_socket (data, quiet=False, server="localhost"):
     port=control_port
-
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -45,7 +47,7 @@ def firtro_socket (data, quiet=False):
                 if len(recibido['warnings'])>0:
                     for value in recibido['warnings']:
                         print "(client.py) Warning: " + value
-            s.send("close\r\n")
+            s.send("close")
 
         # Si no se pasa parámetro, se abre una conexión interactiva
         else:
@@ -77,7 +79,15 @@ def firtro_socket (data, quiet=False):
 
 if __name__ == "__main__":
 
-    if len (sys.argv)>1:
-        firtro_socket (" ".join(sys.argv[1:]))
+    p = sys.argv
+
+    # se puede dar como argumento un server distinto de localhost
+    if "-s" in p:
+        i = sys.argv.index("-s")
+        server = sys.argv[i + 1]
+        p.pop(i) # quitamos -s
+        p.pop(i) # y el nombre del server
     else:
-        firtro_socket (None)
+        server = "localhost"
+
+    firtro_socket (" ".join(p[1:]), server=server)
