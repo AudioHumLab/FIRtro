@@ -113,6 +113,13 @@
         if ($value == "on") $json=firtro_socket ("loudness_track");
         else $json=firtro_socket ("loudness_track_off");
         }
+    elseif($command == 'loudness_toggle') {
+        $fstatusRaw = firtro_socket("status");
+        $firtro_status = json_decode($fstatusRaw);
+        $loudness_track = $firtro_status->{"loudness_track"};
+        if ($loudness_track)         $json=firtro_socket("loudness_track_off");
+        else                         $json=firtro_socket("loudness_track");
+        }
     elseif($command == 'loud_ref_down') {
         $json=firtro_socket ("loudness_add -1");
         }
