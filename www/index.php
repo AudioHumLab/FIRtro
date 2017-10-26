@@ -114,12 +114,14 @@
 
         </div>
             
-
+        <!-- FOOTER -->
         <div data-role="footer" class="footer-docs" data-theme="d">
             <div class="ui-grid-a">
                 <div class="ui-block-a" style="width:40%; padding-right:0px"><p>&copy; FIRtro mobile</p></div>
                 <div class="ui-block-b" style="width:60%">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-left:0px">
+                        <input name="loudness_toggle" type="submit" value="Loud" />
+                        <input name="mono" type="submit" value="Mono" />
                         <input name="level_down" type="submit" value="Vol" data-icon="minus" />
                         <input name="mute" type="submit" value="Mute" />
                         <input name="level_up" type="submit" value="Vol" data-icon="plus" data-iconpos="right" />
