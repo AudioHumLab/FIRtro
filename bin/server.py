@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Socket servidor de FIRtro. 
+    Socket servidor de FIRtro.
     - Se encarga de recibir órdenes y de procesarlas en server_process.do(orden).
-    
-    - También se encarga de recibir metadatos de los player y agregarlas en el 
+
+    - También se encarga de recibir metadatos de los player y agregarlas en el
       diccionario general de estado.
-    
-    - Funcionalidad adicional: gestiona los pantallados informativos en 
+
+    - Funcionalidad adicional: gestiona los pantallados informativos en
       los posibles displays (LCD o infofifo para una consola)
 """
 
@@ -32,8 +32,10 @@
 #   y que se envía a la web de FIRtro que se conecta como cliente de este server.
 #
 # TODO:
-# - que los metadata se actualicen en la web sin esperar a que la web ordene
+# - Que los metadata se actualicen en la web sin esperar a que la web ordene
 #   'status' para actulizarse.
+# - Depurar el posible socket.error durante la lectura del buffer sc.recv() que 
+#   ocurre solamente cuando el cliente se conecta desde una máquina remota.
 
 import json
 import socket
@@ -105,7 +107,7 @@ def _extrae_statusJson(svar):
     return tmp
 
 def _prepare_big_scroller(comando, statusJson):
-    # Func auxiliar intermedia para presentar el estado 
+    # Func auxiliar intermedia para presentar el estado
     # de un 'item' de interés en el scroller lcd_big.
 
     # La cadena json 'statusJson' es recibida desde server_process.do(orden)
@@ -189,12 +191,21 @@ if __name__ == "__main__":
                 os.system('clear')
             else:                           # opción de separador
                  print "=" * 70
-            print "(server) Conected to client", addr[0]
+            print "(server) Client connected from: "  + addr[0] + ":" + str(addr[1])
 
         while True:
 
             # RECEPCION
-            data = sc.recv(8192) # pot de 2 suficientemente grande para el diccionario json (4096 es escaso)
+            # Nota: Con clientes remotos (no localhost) a veces ocurre
+            #       una excepción durante sc.recv(). Con cliente localhost no ocurre.
+            #           socket.error: [Errno 104] Connection reset by peer
+            try:
+                # Tamaño pot de 2 suficientemente grande para el diccionario json
+                # 4096 es escaso, mejor 8192.
+                data = sc.recv(8192)
+            except:
+                sc.close()
+                break
 
             # Si no hay nada en el buffer, es que el cliente se ha desconectado antes de tiempo
             if not data:
@@ -234,7 +245,7 @@ if __name__ == "__main__":
                 sc.send(json_status_players)
 
                 # (!) IMPORTANTE no olvidar cerrar el cliente
-                sc.close() 
+                sc.close()
                 break
 
             # Llega una ORDEN para server_process.do(comando parámetros...)
