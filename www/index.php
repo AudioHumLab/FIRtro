@@ -49,20 +49,115 @@
 
 <body>
 
+
+    <!-- ********************** -->
+    <!-- ** Página principal ** -->
+    <!-- ********************** -->
+
+    <div data-role="page" class="type-interior" id="level_page"> <!--class="type-home"-->
+
+        <div data-role="header" data-theme="d">
+            <h1 name="tittle">FIRtro</h1>
+            <a href="#info_page"   data-icon="info" data-iconpos="notext" data-direction="reverse">Info</a>
+            <a href="#config_page" data-icon="gear" data-iconpos="notext" data-direction="reverse" name="config">Config</a>
+        </div><!-- /header -->
+
+        <div data-role="content">
+
+            <div class="content-primary">
+                <div data-role="content" id="level_display" class="display display2 ui-corner-all">
+                    <div class="ui-grid-solo" id="level_display1">Waiting...</div>
+                    <div class="ui-grid-a">
+                        <div class="ui-block-a" id="level_display53" style="max-width:160px; min-width:130px"></div><!--mono-->
+                        <div class="ui-block-b" id="level_display51"></div><!--input-->
+                        <div class="ui-block-a" id="level_display32" style="max-width:160px; min-width:130px"></div><!--syseq-->
+                        <div class="ui-block-b" id="level_display22"></div><!--loudness-->
+                        <div class="ui-block-a" id="level_display31" style="max-width:160px; min-width:130px"></div><!--drc-->
+                        <div class="ui-block-b" id="level_display55"></div><!--peq-->
+                        <div class="ui-block-a" id="level_display41" style="max-width:160px; min-width:130px"></div><!--bass-->
+                        <div class="ui-block-b" id="level_display42"></div><!--treble-->
+                        <div class="ui-block-a" id="level_display21" style="max-width:160px; min-width:130px"></div><!--fs-->
+                        <div class="ui-block-b" id="level_display52" style="max-width:160px; min-width:130px"></div><!--ftype-->
+                    </div>
+                  <div class="ui-grid-solo" id="level_display54" style="max-width:6400px; min-width:320px"></div><!--preset-->
+
+                  <div class="ui-grid-solo" id="level_display6"></div><!--warnings-->
+
+                </div>
+
+                <p></p>
+                <div style="text-align:left;">Volume</div>
+                <hr></hr>
+                <p></p>
+                <div id="vol_div">
+                <input type="range" name="vol_slider" id="vol_slider" value="-10" min="-30" max="0" data-highlight="true" readonly />
+                </div>
+                <div class="ui-grid-a">
+                    <div class="ui-block-a">
+                      <input name="level_down" type="submit" id="level_down" value="1dB" data-icon="minus" />
+                      <input name="level_down_3" type="submit" id="level_down_3" value="3dB" data-icon="minus" />
+                    </div>
+                    <div class="ui-block-b">
+                      <input name="level_up" type="submit" id="level_up" value="1dB" data-icon="plus" data-iconpos="right" />
+                      <input name="level_up_3" type="submit" id="level_up_3" value="3dB" data-icon="plus" data-iconpos="right" />
+                    </div>
+                </div>
+                <!--
+                <div class="ui-grid-solo">
+                    <input name="mute" type="submit" value="Mute" />
+                </div>
+                -->
+                <div class="ui-grid-a">
+                    <div class="ui-block-a">
+                      <input name="mono" type="submit" id="mono" value="Mono" data-icon="delete" data-iconpos="left" />
+                    </div>
+                    <div class="ui-block-b">
+                      <input name="mute" type="submit" id="mute" value="Mute" data-icon="grid" data-iconpos="right" />
+                    </div>
+                </div>
+
+            </div> <!--/content-primary -->
+
+            <div class="content-secondary">
+                <div data-role="collapsible" data-collapsed="true" data-theme="b" data-content-theme="d">
+                    <h3>More...</h3> <!--Subtitulo para cuando esta contraido-->
+                    <ul data-role="listview" data-theme="c" data-dividertheme="d">
+                        <li data-role="list-divider">Sections</li>
+                        <li class="ui-btn-active"><a href="#">Volume</a></li>
+                        <li><a href="#drc_page">DRC</a></li>
+                        <li><a href="#tone_page">Tone / Balance</a></li>
+                        <li><a href="#loudness_page">Loudness</a></li>
+                        <li><a href="#inputs_page">Inputs</a></li>
+                        <li><a href="#presets_page">Presets</a></li>
+                        <li><a href="#media_page">Media</a></li>
+                        <li><a href="#custom_page">Custom</a></li>
+                    </ul>
+                </div>
+            </div> <!--/content-secondary -->
+
+        </div><!-- /content -->
+
+        <div data-role="footer" class="footer-docs" data-theme="d">
+            <div class="ui-grid-a">
+                <div class="ui-block-a" style="width:40%; padding-right:0px"><p>&copy; FIRtro mobile</p></div>
+                <div class="ui-block-b" style="width:60%; padding-left:0px ; text-align:right">
+                </div>
+            </div>
+        </div><!-- /footer -->
+
+    </div><!-- /Página principal -->
+
     <!-- ********************** -->
     <!-- ** Página INFO      ** -->
     <!-- ********************** -->
 
     <div data-role="page" class="type-interior" id="info_page">
-
         <!-- HEADER -->
         <div data-role="header" data-theme="d">
             <h1 name="tittle">FIRtro</h1>
             <a href="#level_page" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
         </div>
-            
         <div style="font-size:48px; > <!--font-family:courier"-->
-            
             <!--   Esquema para el ESTADO de FIRTRO
             //     -----------------------------------------
             //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
@@ -104,131 +199,67 @@
                     <div class="ui-block-c" id="info_fs"  style="text-align:center; width:25%">(fs)</div>
                 </div>
             </div>
-
             <!--   Metadatos del PLAYER en tres lineas enmarcadas -->
             <div style="margin:10px; font-weight:bold; text-align:center;">
                 <div id="info_artist" style="border-style:solid; text-align:left;">Artist: --</div>
                 <div id="info_album"  style="border-style:solid; text-align:left;">Album: --</div>
                 <div id="info_title"  style="border-style:solid; text-align:left;">Title: --</div>
             </div>
-
         </div>
-            
+
         <!-- FOOTER -->
         <div data-role="footer" class="footer-docs" data-theme="d">
-            <div class="ui-grid-a">
-                <div class="ui-block-a" style="width:40%; padding-right:0px"><p>&copy; FIRtro mobile</p></div>
-                <div class="ui-block-b" style="width:60%">
-                    <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-left:0px">
-                        <input name="loudness_toggle" type="submit" value="Loud" />
-                        <input name="mono" type="submit" value="Mono" />
-                        <input name="level_down" type="submit" value="Vol" data-icon="minus" />
-                        <input name="mute" type="submit" value="Mute" />
-                        <input name="level_up" type="submit" value="Vol" data-icon="plus" data-iconpos="right" />
+            <div class="ui-grid-d">
+
+                <div class="ui-block-a" style="width:15%; padding-right:0px">
+                    <p>&copy; FIRtro mobile</p>
+                </div>
+                <!-- collapsible de PRESETS -->
+                <div class="ui-block-b" style="width:15%; padding-right:10px">
+                    <div data-role="collapsible" data-collapsed="True" data-mini="true">
+                        <h3>Presets</h3>
+                        <div id="presets_radiodiv">
+                        <fieldset data-role="controlgroup" id="info_presets_cg" class="center-controlgroup">
+                        </fieldset>
+                        </div>
                     </div>
                 </div>
+                <!-- collapsible de INPUTS -->
+                <div class="ui-block-c" style="width:15%; padding-left:10px">
+                    <div data-role="collapsible" data-collapsed="True" data-mini="true">
+                        <h3>Inputs</h3>
+                        <div id="inputs_radiodiv">
+                        <fieldset data-role="controlgroup" id="info_select_cg" class="center-controlgroup">
+                        </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <!-- botonera PLAYBACK CONTROL -->
+                <div class="ui-block-d" style="width:20%;">
+                    <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding:0px">
+                        <input name="info_prev"  type="submit" value="|<" />
+                        <input name="info_rew"   type="submit" value="<<" />
+                        <input name="info_pause" type="submit" value="||"/>
+                        <input name="info_play"  type="submit" value=">" />
+                        <input name="info_fwd"   type="submit" value=">>" />
+                        <input name="info_next"  type="submit" value=">|" />
+                    </div>
+                </div>
+                <!-- botonera AUDIO CONTROL -->
+                <div class="ui-block-e" style="width:35%">
+                    <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-right:0px">
+                        <input name="loudness_toggle" type="submit" value="Loud" />
+                        <input name="mono"            type="submit" value="Mono" />
+                        <input name="level_down"      type="submit" value="Vol" data-icon="minus" />
+                        <input name="mute"            type="submit" value="Mute" />
+                        <input name="level_up"        type="submit" value="Vol" data-icon="plus" data-iconpos="right" />
+                    </div>
+                </div>
+
             </div>
         </div><!-- /footer -->
 
     </div><!-- /Página INFO --> 
-
-
-    <!-- ********************** -->
-    <!-- ** Página principal ** -->
-    <!-- ********************** -->
-
-    <div data-role="page" class="type-interior" id="level_page"> <!--class="type-home"-->
-
-        <div data-role="header" data-theme="d">
-            <h1 name="tittle">FIRtro</h1>
-            <a href="#info_page"   data-icon="info" data-iconpos="notext" data-direction="reverse">Info</a>
-            <a href="#config_page" data-icon="gear" data-iconpos="notext" data-direction="reverse" name="config">Config</a>
-        </div><!-- /header -->
-                  
-        <div data-role="content">
-
-            <div class="content-primary">
-                <div data-role="content" id="level_display" class="display display2 ui-corner-all">
-                    <div class="ui-grid-solo" id="level_display1">Waiting...</div>
-                    <div class="ui-grid-a">
-                        <div class="ui-block-a" id="level_display53" style="max-width:160px; min-width:130px"></div><!--mono-->
-                        <div class="ui-block-b" id="level_display51"></div><!--input-->
-                        <div class="ui-block-a" id="level_display32" style="max-width:160px; min-width:130px"></div><!--syseq-->
-                        <div class="ui-block-b" id="level_display22"></div><!--loudness-->
-                        <div class="ui-block-a" id="level_display31" style="max-width:160px; min-width:130px"></div><!--drc-->
-                        <div class="ui-block-b" id="level_display55"></div><!--peq-->
-                        <div class="ui-block-a" id="level_display41" style="max-width:160px; min-width:130px"></div><!--bass-->
-                        <div class="ui-block-b" id="level_display42"></div><!--treble-->
-                        <div class="ui-block-a" id="level_display21" style="max-width:160px; min-width:130px"></div><!--fs-->
-                        <div class="ui-block-b" id="level_display52" style="max-width:160px; min-width:130px"></div><!--ftype-->
-                    </div>
-                  <div class="ui-grid-solo" id="level_display54" style="max-width:6400px; min-width:320px"></div><!--preset-->
-                  
-                  <div class="ui-grid-solo" id="level_display6"></div><!--warnings-->
-                  
-                </div>
-                
-                <p></p>
-                <div style="text-align:left;">Volume</div>
-                <hr></hr>
-                <p></p>
-                <div id="vol_div">
-                <input type="range" name="vol_slider" id="vol_slider" value="-10" min="-30" max="0" data-highlight="true" readonly />
-                </div>
-                <div class="ui-grid-a">
-                    <div class="ui-block-a">
-                      <input name="level_down" type="submit" id="level_down" value="1dB" data-icon="minus" />
-                      <input name="level_down_3" type="submit" id="level_down_3" value="3dB" data-icon="minus" />
-                    </div>
-                    <div class="ui-block-b">
-                      <input name="level_up" type="submit" id="level_up" value="1dB" data-icon="plus" data-iconpos="right" />
-                      <input name="level_up_3" type="submit" id="level_up_3" value="3dB" data-icon="plus" data-iconpos="right" />
-                    </div>
-                </div>
-                <!--
-                <div class="ui-grid-solo">
-                    <input name="mute" type="submit" value="Mute" />
-                </div>
-                -->
-                <div class="ui-grid-a">
-                    <div class="ui-block-a">
-                      <input name="mono" type="submit" id="mono" value="Mono" data-icon="delete" data-iconpos="left" />
-                    </div>
-                    <div class="ui-block-b">
-                      <input name="mute" type="submit" id="mute" value="Mute" data-icon="grid" data-iconpos="right" />
-                    </div>
-                </div>
-                
-            </div> <!--/content-primary -->
-
-            <div class="content-secondary">
-                <div data-role="collapsible" data-collapsed="true" data-theme="b" data-content-theme="d">
-                    <h3>More...</h3> <!--Subtitulo para cuando esta contraido-->
-                    <ul data-role="listview" data-theme="c" data-dividertheme="d">
-                        <li data-role="list-divider">Sections</li>
-                        <li class="ui-btn-active"><a href="#">Volume</a></li>
-                        <li><a href="#drc_page">DRC</a></li>
-                        <li><a href="#tone_page">Tone / Balance</a></li>
-                        <li><a href="#loudness_page">Loudness</a></li>
-                        <li><a href="#inputs_page">Inputs</a></li>
-                        <li><a href="#presets_page">Presets</a></li>
-                        <li><a href="#media_page">Media</a></li>
-                        <li><a href="#custom_page">Custom</a></li>
-                    </ul>
-                </div>
-            </div> <!--/content-secondary -->
-
-        </div><!-- /content -->
-
-        <div data-role="footer" class="footer-docs" data-theme="d">
-            <div class="ui-grid-a">
-                <div class="ui-block-a" style="width:40%; padding-right:0px"><p>&copy; FIRtro mobile</p></div>
-                <div class="ui-block-b" style="width:60%; padding-left:0px ; text-align:right">
-                </div>
-            </div>
-        </div><!-- /footer -->
-                  
-    </div><!-- /Página principal -->
 
     <!-- **************** -->
     <!-- ** Página DRC ** -->
