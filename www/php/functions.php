@@ -8,6 +8,12 @@
     $value = $_REQUEST["value"];
     $json = null;
 
+    // utilidad simple para depurar escribiendo en un archivo /tmp/php.debug
+    function print2tmp( $data ){
+        $cmd = "echo ".$data." >> /tmp/php.debug";
+        shell_exec($cmd);
+    }
+
     function firtro_socket ($data) {
         $service_port = 9999;
         $address = "127.0.0.1";
@@ -30,15 +36,15 @@
         socket_close($socket);
         return $out;
     }
-    
+
     function fifo_write($fifoPath, $data) {
-        $fifo_w = fopen($fifoPath, 'w'); 
+        $fifo_w = fopen($fifoPath, 'w');
         fwrite ($fifo_w, $data . "\n");
         #fclose ($fifo_w);
         fflush ($fifo_w);
         sleep(1);
     }
-    
+
     // Funcion para escribir el fichero de configuracion. Las funciones standard de PHP no lo incluyen
     function write_ini_file($assoc_arr, $path, $has_sections=FALSE) { 
         $content = ""; 
@@ -82,6 +88,75 @@
         return true; 
     }
 
+    function get_current_input() {
+        $fstatusRaw = firtro_socket("status");
+        $firtro_status = json_decode($fstatusRaw);
+        $input_name = $firtro_status->{"input_name"};
+        return $input_name;
+    }
+
+    function get_player_of($cinput) {
+        $player = "";
+        if (strpos($cinput, 'mpd') !== false )      $player = 'mpd';
+        if (strpos($cinput, 'spotify') !== false )  $player = 'spotify';
+        if (strpos($cinput, 'mplayer') !== false )  $player = 'mplayer';
+        if (strpos($cinput, 'tdt') !== false )      $player = 'mplayer';
+        if (strpos($cinput, 'cdda') !== false )     $player = 'mplayer';
+        return $player;
+    }
+
+    function player_manage($player, $action) {
+        if ($player == 'mpd') {
+            mpd_manage($action);
+        }
+        if ($player == 'spotify') {
+            spotify_manage($action);
+        }
+        if ($player == 'mplayer') {
+            mplayer_manage($action);
+        }
+    }
+
+    function mpd_manage($action) {
+        $cmd = "";
+        if ($action == 'play')      $cmd="mpc play";
+        if ($action == 'pause')     $cmd="mpc pause";
+        if ($action == 'stop')      $cmd="mpc stop";
+        if ($action == 'next')      $cmd="mpc next";
+        if ($action == 'prev')      $cmd="mpc prev";
+        if ($action == 'fwd')       $cmd="mpc seek +10";
+        if ($action == 'rew')       $cmd="mpc seek -10";
+        shell_exec($cmd);
+    }
+
+    function spotify_manage($action) {
+        // (i) Los comandos a Spotify solo funcionan si coinciden tanto
+        // el usuario como la sesión que corren FIRtro y Spotify.
+        // Por tanto debemos recurrir al artificio firtro_socket("exec...
+        // como en el caso de los comandos custom de la web de control.
+        $cmd = "";
+        if ($action == 'play')  firtro_socket("exec spotifyctl.sh play");
+        if ($action == 'pause') firtro_socket("exec spotifyctl.sh pause");
+        if ($action == 'next')  firtro_socket("exec spotifyctl.sh next");
+        if ($action == 'prev')  firtro_socket("exec spotifyctl.sh previous");
+        if ($action == 'fwd')   firtro_socket("exec spotifyctl.sh 10 +");
+        if ($action == 'rew')   firtro_socket("exec spotifyctl.sh 10 -");
+        shell_exec($cmd);
+    }
+
+    function mplayer_manage($action) {
+        $cmd = "";
+        // work in progress
+        if ($action == 'play')      $cmd="";
+        if ($action == 'pause')     $cmd="";
+        if ($action == 'stop')      $cmd="";
+        if ($action == 'next')      $cmd="";
+        if ($action == 'prev')      $cmd="";
+        if ($action == 'fwd')       $cmd="";
+        if ($action == 'rew')       $cmd="";
+        shell_exec($cmd);
+    }
+
     if($command == 'level_up') {
         $json=firtro_socket ("level_add 1");
         }
@@ -120,6 +195,30 @@
         if ($loudness_track)         $json=firtro_socket("loudness_track_off");
         else                         $json=firtro_socket("loudness_track");
         }
+    elseif($command == 'info_play') {
+        player_manage(get_player_of(get_current_input()), 'play');
+        $json=firtro_socket("status");
+        }
+    elseif($command == 'info_pause') {
+        player_manage(get_player_of(get_current_input()), 'pause');
+        $json=firtro_socket("status");
+        }
+    elseif($command == 'info_prev') {
+        player_manage(get_player_of(get_current_input()), 'prev');
+        $json=firtro_socket("status");
+        }
+    elseif($command == 'info_next') {
+        player_manage(get_player_of(get_current_input()), 'next');
+        $json=firtro_socket("status");
+        }
+    elseif($command == 'info_fwd') {
+        player_manage(get_player_of(get_current_input()), 'fwd');
+        $json=firtro_socket("status");
+        }
+    elseif($command == 'info_rew') {
+        player_manage(get_player_of(get_current_input()), 'rew');
+        $json=firtro_socket("status");
+        }
     elseif($command == 'loud_ref_down') {
         $json=firtro_socket ("loudness_add -1");
         }
@@ -155,7 +254,7 @@
         }
     elseif($command == 'treble_down') {
         $json=firtro_socket ("treble_add -1");
-        }        
+        }
     elseif($command == 'eq_flat') {
         $json=firtro_socket ("flat");
         }
@@ -360,7 +459,7 @@
     shell_exec("sleep 1 && eject");
     $json=firtro_socket ("status");
     }
-        
+
     elseif(substr($command,0,7) == 'custom_') {
         $config=parse_ini_file($config_file);
         #$tmp1 = 'val_custom_'.substr($command,7);
