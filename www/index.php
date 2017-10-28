@@ -211,11 +211,11 @@
         <div data-role="footer" class="footer-docs" data-theme="d">
             <div class="ui-grid-d">
 
-                <div class="ui-block-a" style="width:15%; padding-right:0px">
+                <div class="ui-block-a" style="width:12%; padding-right:0px">
                     <p>&copy; FIRtro mobile</p>
                 </div>
                 <!-- collapsible de PRESETS -->
-                <div class="ui-block-b" style="width:15%; padding-right:10px">
+                <div class="ui-block-b" style="width:17%; padding-right:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Presets</h3>
                         <div id="presets_radiodiv">
@@ -225,7 +225,7 @@
                     </div>
                 </div>
                 <!-- collapsible de INPUTS -->
-                <div class="ui-block-c" style="width:15%; padding-left:10px">
+                <div class="ui-block-c" style="width:19%; padding-left:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Inputs</h3>
                         <div id="inputs_radiodiv">
@@ -235,7 +235,7 @@
                     </div>
                 </div>
                 <!-- botonera PLAYBACK CONTROL -->
-                <div class="ui-block-d" style="width:20%;">
+                <div class="ui-block-d" style="width:22%;">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding:0px">
                         <input name="info_prev"  type="submit" value="|<" />
                         <input name="info_rew"   type="submit" value="<<" />
@@ -246,7 +246,7 @@
                     </div>
                 </div>
                 <!-- botonera AUDIO CONTROL -->
-                <div class="ui-block-e" style="width:35%">
+                <div class="ui-block-e" style="width:30%">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-right:0px">
                         <input name="loudness_toggle" type="submit" value="Loud" />
                         <input name="mono"            type="submit" value="Mono" />
