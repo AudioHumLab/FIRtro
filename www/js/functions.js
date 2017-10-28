@@ -743,7 +743,51 @@ $(document).on('pageinit', function(){
     //changeGlobalTheme($config['global_theme']);    
 });
 
-// Inicializaciones por página. Se ejecutan la primera vez que se carga la página.
+// Inicializaciones por página. Se ejecutan la primera vez que se carga la página:
+
+$(document).on('pageinit', '#info_page', function(){
+    if ($php_data) {
+        
+        // Recorremos el array de ENTRADAS para añadir el código correspondiente al selector
+        // OjO se usa el nombre de la entrada como id del selector para que luego sea mas sencillo de seleccionar
+        // Por tanto NO puede haber dos entradas con el mismo nombre, lo cual es de esperar.
+        $php_data['inputs'].forEach(function(item) {
+                $('#info_select_cg').append('<input type="radio" name="input_select" id="input_select_' + item + '" value="' + item + '" />'+
+                                   '<label for="input_select_' + item + '">' + item + '</label>');
+        });
+        
+        // Marcamos la entrada que hay actualmente activa como seleccionada. Se escapan los espacios
+        // Tambien se podria buscar por su valor: $('input[value="xxxx"]')
+        //$("input[id='input_select_" + $current_input + "'] ").attr('checked', true);
+        $("#input_select_" + $php_data['input_name'].replace(/( )/g, "\\\ ")).attr('checked', true);
+        
+        // Tenemos que invocar la acción de crear al div que contiene todo el selector
+        // Sino no se muestra con el estilo predefinido
+        $("#inputs_radiodiv").trigger("create");
+        
+        // Capturamos los eventos de cambio para enviar las ordenes correspondientes
+        $("#info_page input[name='input_select']").on('change', function(event, ui) {
+                send_command (event.currentTarget.name, event.currentTarget.value);
+                //event.preventDefault();
+        });
+
+        // Idem para el array de PRESETS
+        $php_data['lista_de_presets'].forEach(function(item) {
+                $('#info_presets_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
+                                   '<label for="preset_select_' + item + '">' + item + '</label>');
+        });
+        
+        $("#preset_select_" + $php_data['preset'].replace(/( )/g, "\\\ ")).attr('checked', true);
+        
+        $("#presets_radiodiv").trigger("create");
+        
+        $("#info_page preset[name='preset_select']").on('change', function(event, ui) {
+                send_command (event.currentTarget.name, event.currentTarget.value);
+        });
+
+    }
+});
+
 $(document).on('pageinit', '#level_page', function(){
 
     // También podemos hacer una única funcion generica pageinit:
