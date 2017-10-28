@@ -44,6 +44,7 @@
 # v.2.0e
 # - Se añade comando radio_channel para pasar a gestionar aquí la radio tdt, 
 #   de manera que server.py conozca los cambios de canal.
+# - 'exec' acepta argumentos del ejecutable
 #----------------------------------------------------------------------
 
 import time
@@ -517,7 +518,9 @@ def do (order):
 
         elif command == "exec":
             if len(line) > 1:
-                exec_arg = arg1.translate(None,'/')
+                # exec_arg = arg1.translate(None,'/')  # v2.0e Aceptamos argumentos del ejecutable:
+                exec_arg = line[1:]
+                exec_arg = " ".join([ x.translate(None,'/') for x in exec_arg])
                 exec_cmd = True
             else: raise
 
