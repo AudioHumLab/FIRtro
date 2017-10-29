@@ -185,15 +185,15 @@
         $json=firtro_socket ("status");
         }
     elseif($command == 'loudness_switch') {
-        if ($value == "on") $json=firtro_socket ("loudness_track");
-        else $json=firtro_socket ("loudness_track_off");
+        if ($value == "on")  $json=firtro_socket ("loudness_track");
+        else                 $json=firtro_socket ("loudness_track_off");
         }
     elseif($command == 'loudness_toggle') {
         $fstatusRaw = firtro_socket("status");
         $firtro_status = json_decode($fstatusRaw);
         $loudness_track = $firtro_status->{"loudness_track"};
-        if ($loudness_track)         $json=firtro_socket("loudness_track_off");
-        else                         $json=firtro_socket("loudness_track");
+        if ($loudness_track) $json=firtro_socket("loudness_track_off");
+        else                 $json=firtro_socket("loudness_track");
         }
     elseif($command == 'info_play') {
         player_manage(get_player_of(get_current_input()), 'play');
@@ -483,5 +483,6 @@
         write_ini_file($config_ws, $config_file, true);
         $json=firtro_socket ("status");
     }
+
  echo $json;
 ?>
