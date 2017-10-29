@@ -158,31 +158,31 @@
             <a href="#level_page" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
         </div>
         <div style="font-size:48px; > <!--font-family:courier"-->
-            <!--   Esquema para el ESTADO de FIRTRO
-            //     -----------------------------------------
-            //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
-            //  2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
-            //  3  P: preset_name            LOUD   xover:mp
-            //     -----------------------------------------
-            //  4  I: input_name        ::pause::     44100
-            //     -----------------------------------------
+            <!--  ESTADO de FIRTRO
+                   -----------------------------------------
+                1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
+                2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
+                3  P: preset_name            LOUD   xover:mp
+                   -----------------------------------------
+                4  I: input_name        ::pause::     44100
+                   -----------------------------------------
             -->
             <div style="margin:10px; border-style:solid;">
                 <!-- ui-grid-a/b/c/d son respectivamente 2/3/4/5 columnas -->
                 <!-- LINEA 1-->
                 <div class="ui-grid-c" style="margin:10px;font-weight:bold; width:100%">
                     <div class="ui-block-a" id="info_vol" style="text-align:left; width:30%">Vol:</div>
-                    <div class="ui-block-b" id="info_hro" style="text-align:left; width:30%">Hr:</div>
-                    <div class="ui-block-c" id="info_bal" style="text-align:center; width:18%">Bal:</div>
+                    <div class="ui-block-b" id="info_hro" style="text-align:left; width:28%">Hr:</div>
+                    <div class="ui-block-c" id="info_bal" style="text-align:left; width:18%">Bal:</div>
                     <div class="ui-block-d" id="info_ste" style="text-align:center; width:22%">(stereo)</div>
                 </div>
                 <!-- LINEA 2-->
                 <div class="ui-grid-d" style="margin:10px;font-weight:bold; width:100%">
                     <div class="ui-block-a" id="info_bas" style="text-align:left; width:30%">Bass:</div>
-                    <div class="ui-block-b" id="info_tre" style="text-align:left; width:30%">Tre:</div>
+                    <div class="ui-block-b" id="info_tre" style="text-align:left; width:28%">Tre:</div>
                     <div class="ui-block-c" id="info_seq" style="text-align:center; width:16%">(seq)</div>
-                    <div class="ui-block-d" id="info_drc" style="text-align:center; width:12%">(drc)</div>
-                    <div class="ui-block-e" id="info_peq" style="text-align:center; width:12%">(peq)</div>
+                    <div class="ui-block-d" id="info_drc" style="text-align:center; width:13%">(drc)</div>
+                    <div class="ui-block-e" id="info_peq" style="text-align:center; width:13%">(peq)</div>
                 </div>
                 <!-- LINEA 3-->
                 <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%">
@@ -207,34 +207,36 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
+        <!-- FOOTER 
+        Se incorpora una BOTONERA para funciones comunes: presets, inputs, playback_control, audio_control
+        -->
         <div data-role="footer" class="footer-docs" data-theme="d">
             <div class="ui-grid-d">
-
+                <!-- Copyright Firtro mobile-->
                 <div class="ui-block-a" style="width:12%; padding-right:0px">
                     <p>&copy; FIRtro mobile</p>
                 </div>
-                <!-- collapsible de PRESETS -->
+                <!-- Collapsible de PRESETS -->
                 <div class="ui-block-b" style="width:17%; padding-right:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Presets</h3>
-                        <div id="presets_radiodiv">
-                        <fieldset data-role="controlgroup" id="info_presets_cg" class="center-controlgroup">
+                        <div id="info_presets_radiodiv">
+                        <fieldset data-role="controlgroup" id="info_presets_select" class="center-controlgroup">
                         </fieldset>
                         </div>
                     </div>
                 </div>
-                <!-- collapsible de INPUTS -->
+                <!-- Collapsible de INPUTS -->
                 <div class="ui-block-c" style="width:19%; padding-left:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Inputs</h3>
-                        <div id="inputs_radiodiv">
-                        <fieldset data-role="controlgroup" id="info_select_cg" class="center-controlgroup">
+                        <div id="info_inputs_radiodiv">
+                        <fieldset data-role="controlgroup" id="info_inputs_select" class="center-controlgroup">
                         </fieldset>
                         </div>
                     </div>
                 </div>
-                <!-- botonera PLAYBACK CONTROL -->
+                <!-- Botonera PLAYBACK CONTROL -->
                 <div class="ui-block-d" style="width:22%;">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding:0px">
                         <input name="info_prev"  type="submit" value="|<" />
@@ -245,7 +247,7 @@
                         <input name="info_next"  type="submit" value=">|" />
                     </div>
                 </div>
-                <!-- botonera AUDIO CONTROL -->
+                <!-- Botonera AUDIO CONTROL -->
                 <div class="ui-block-e" style="width:30%">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-right:0px">
                         <input name="loudness_toggle" type="submit" value="Loud" />
@@ -561,9 +563,9 @@
     </div><!-- /Página Inputs -->
     
     
-    <!-- ************************* -->
-    <!-- ** Página PRESETS Beta ** -->
-    <!-- ************************* -->
+    <!-- ********************* -->
+    <!-- ** Página PRESETS  ** -->
+    <!-- ********************* -->
         
     <div data-role="page" class="type-interior" id="presets_page">
         
