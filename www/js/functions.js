@@ -751,48 +751,44 @@ $(document).on('pageinit', function(){
 
 $(document).on('pageinit', '#info_page', function(){
     if ($php_data) {
-
-        // Creación dinámica de los selectores HTML para entradas y presets en función
-        // de cada lista (array) de items. Es una réplica de lo realizado en la #inputs_page
-        
+        // Creación dinámica de los tag selectores HTML para entradas y presets en función
+        // de cada lista (array) de items. Es una réplica de lo realizado originalemnte en la #inputs_page.
+        //
         // Recorremos el array de ENTRADAS para añadir el código correspondiente al selector
         // OjO se usa el nombre de la entrada como id del selector para que luego sea mas sencillo de seleccionar
         // Por tanto NO puede haber dos entradas con el mismo nombre, lo cual es de esperar.
         $php_data['inputs'].forEach(function(item) {
-            // Añadimos el código HTML para cada elemento '<input ...' necesario para cada entrada
-            $('#info_select_cg').append('<input type="radio" name="input_select" id="input_select_' + item + '" value="' + item + '" />'+
-                                        '<label for="input_select_' + item + '">' + item + '</label>');
+            // Añadimos el código HTML de cada tag '<input ...' necesario para cada entrada
+            $('#info_inputs_select').append('<input type="radio" name="input_select" id="input_select_' + item + '" value="' + item + '" />'+
+                                           '<label for="input_select_' + item + '">' + item + '</label>');
         });
-        
+        //
         // Marcamos la entrada que hay actualmente activa como seleccionada. Se escapan los espacios
         // Tambien se podria buscar por su valor: $('input[value="xxxx"]')
         //$("input[id='input_select_" + $current_input + "'] ").attr('checked', true);
         $("#input_select_" + $php_data['input_name'].replace(/( )/g, "\\\ ")).attr('checked', true);
-        
+        //
         // Tenemos que invocar la acción de crear al div que contiene todo el selector
         // Sino no se muestra con el estilo predefinido
-        $("#inputs_radiodiv").trigger("create");
-        
+        $("#info_inputs_radiodiv").trigger("create");
+        //
         // Capturamos los eventos de cambio para enviar las ordenes correspondientes
+        // Nota: abajo, "input[name=..." se refiere al tag html "<input ... ...", no a la entrada ;-)
         $("#info_page input[name='input_select']").on('change', function(event, ui) {
                 send_command (event.currentTarget.name, event.currentTarget.value);
                 //event.preventDefault();
         });
 
-        // Idem ahora para el array de PRESETS:
+        // Hacemos lo mismo ahora para el array de PRESETS:
         $php_data['lista_de_presets'].forEach(function(item) {
-            $('#info_presets_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
-                                         '<label for="preset_select_' + item + '">' + item + '</label>');
+            $('#info_presets_select').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
+                                             '<label for="preset_select_' + item + '">' + item + '</label>');
         });
-        
         $("#preset_select_" + $php_data['preset'].replace(/( )/g, "\\\ ")).attr('checked', true);
-        
-        $("#presets_radiodiv").trigger("create");
-        
-        $("#info_page preset[name='preset_select']").on('change', function(event, ui) {
+        $("#info_presets_radiodiv").trigger("create");
+        $("#info_page input[name='preset_select']").on('change', function(event, ui) {
                 send_command (event.currentTarget.name, event.currentTarget.value);
         });
-
     }
 });
 
@@ -895,12 +891,11 @@ $(document).on('pageinit', '#presets_page', function(){
     if ($php_data) {
         
         $php_data['lista_de_presets'].forEach(function(item) {
-                $('#preset_select_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
-                                   '<label for="preset_select_' + item + '">'+item+'</label>');
+            $('#preset_select_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
+                                          '<label for="preset_select_' + item + '">' + item + '</label>');
         });
         
         // Marcamos el radio del preset activo como seleccionado. Se escapan los espacios
-        
         $("#preset_select_" + $php_data['preset'].replace(/( )/g, "\\\ ")).attr('checked', true);
 
         // creación de un divisor de botones de entrada radio
