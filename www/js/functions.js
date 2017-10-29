@@ -112,6 +112,7 @@ function restore_settings() {
     $config_changes={};
     console.log("Settings restored!");
 }
+
 // Collapse page navs after use
 $(function(){
     $('body').delegate('.content-secondary .ui-collapsible-content', 'click',  function(){
@@ -123,7 +124,6 @@ $(function(){
 // Triple-licensed: Public Domain, MIT and WTFPL license - share and enjoy!
 // http://stackoverflow.com/questions/3103842/safari-ipad-prevent-zoom-on-double-tap
 // https://gist.github.com/2047491
-
 (function($) {
   var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
   $.fn.nodoubletapzoom = function() {
@@ -211,8 +211,7 @@ function onError (request, status, error) {
 // also pages not yet rendered (enhanced) by jQuery Mobile.
 // http://stackoverflow.com/questions/7667603/change-data-theme-in-jquery-mobile
 //$.mobile.changeGlobalTheme = function(theme)
-function changeGlobalTheme(theme)
-{
+function changeGlobalTheme(theme) {
     // These themes will be cleared, add more
     // swatch letters as needed.
     // Esta variable la paso al config como $config['themes']
@@ -239,7 +238,8 @@ function changeGlobalTheme(theme)
     //setTheme(".ui-btn", "ui-btn-hover", theme);
 };
 
-// Left|right pad. Se usó abajo en case: "info_page", pero actualmente se usan los grid jquery.
+// Left|right pad para strings. Se usó abajo en update_controls() case: "info_page", para
+// espaciar texto monoespaciado, pero actualmente se usan los grid de jquery.
 // http://sajjadhossain.com/2008/10/31/javascript-string-trimming-and-padding/
 String.prototype.lpad = function(padString, length) {
 	var str = this;
@@ -256,23 +256,19 @@ String.prototype.rpad = function(padString, length) {
 
 // Actualización de los valores de la página
 function update_controls () {
+
+    // Nombre del altavoz en el título de la página
     $("[name='tittle']").text("FIRtro [" + $php_data["loudspeaker"] + "]");
     var $first_item=true;
+
     // Página activa del documento
     switch ($.mobile.activePage.attr('id')) {
         
         case 'info_page':
         
-            // --- ESTADO de FIRtro ---
-            //     -----------------------------------------
-            //  1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
-            //  2  Bass: -2     Treb: -3     SysEQ  DRC  PEQ
-            //  3  P: preset_name            LOUD   xover:mp
-            //     -----------------------------------------
-            //  4  I: input_name       ::plause::     44100
-            //     -----------------------------------------
+            // El estado del AUDIO se muestra usando variables info_xxx que son 
+            // función de los valores del estado de FIRtro contenidos en $php_data
 
-            // LINEA 1:
             if ($php_data['muted'] == false)    $("#info_vol").text("Vol: " + $php_data["level"]);
             else                                $("#info_vol").text("Vol: MUTE");
 
@@ -280,7 +276,6 @@ function update_controls () {
 
             $("#info_bal").text("Bal: " + $php_data["balance"]);
                         
-            // LINEA 2:
             $("#info_bas").text("Bass: " + $php_data["bass"])
             $("#info_tre").text("Treb: " + $php_data["treble"])
 
@@ -293,32 +288,41 @@ function update_controls () {
             if ( ($php_data['peq'] != "") && ($php_data['peqdefeat'] != true) ) $("#info_peq").text("PEQ");
             else                                                                $("#info_peq").text(" - ");
             
-            // LINEA 3:
             $("#info_pre").text("Preset: " + $php_data["preset"])
             if ($php_data['loudness_track']==true)  $("#info_lou").text("LOUD");
             else                                    $("#info_lou").text("    ");
             if ($php_data['mono'] == "on")          $("#info_ste").text("  MONO");
             else                                    $("#info_ste").text("Stereo");
 
-            // LINEA 4:
             $("#info_inp").text($php_data["input_name"].toUpperCase())
             $("#info_fs").text($php_data["fs"])
             $("#info_xov").text("xo: " + $php_data["filter_type"])
             
-            // --- INFO_PLAYER (metadatos) ---
-            $player = $php_data['input_name'];
-            if ($player.indexOf("tdt") !== -1)    $player = "mplayer"; 
-            $artist = $php_data[$player].artist;
-            $album = $php_data[$player].album;
-            $title = $php_data[$player].title;
-            $state = $php_data[$player].state;
-            if ($artist == "")  $artist = "--";
-            if ($album == "")   $album = "--";
-            if ($title == "")   $title = "--";
+            // El estado de los PLAYER se muestra usando variables info_xxx que se corresponden
+            // con los valores de los player también contenidos en $php_data
+            $iname = $php_data['input_name'];
+            $player = ""
+            // Players reconocidos:
+            if ($iname.indexOf("tdt")     !== -1)   $player = "mplayer";
+            if ($iname.indexOf("cdda")    !== -1)   $player = "mplayer";
+            if ($iname.indexOf("mpd")     !== -1)   $player = "mpd";
+            if ($iname.indexOf("spotify") !== -1)   $player = "spotify";
+            if ($player != "") {
+                $artist = $php_data[$player].artist;
+                $album =  $php_data[$player].album;
+                $title =  $php_data[$player].title;
+                $state =  $php_data[$player].state;
+            }
+            else {
+                $artist = "--";
+                $album = "--";
+                $title = "--";
+                $state = "listening";
+            }
             $("#info_artist").text($artist)
             $("#info_album").text($album)
             $("#info_title").text($title)
-            $("#info_sta").text("::" + $state + "::");
+            $("#info_sta").text(":: " + $state + " ::");
             
             break;
         
@@ -747,13 +751,17 @@ $(document).on('pageinit', function(){
 
 $(document).on('pageinit', '#info_page', function(){
     if ($php_data) {
+
+        // Creación dinámica de los selectores HTML para entradas y presets en función
+        // de cada lista (array) de items. Es una réplica de lo realizado en la #inputs_page
         
         // Recorremos el array de ENTRADAS para añadir el código correspondiente al selector
         // OjO se usa el nombre de la entrada como id del selector para que luego sea mas sencillo de seleccionar
         // Por tanto NO puede haber dos entradas con el mismo nombre, lo cual es de esperar.
         $php_data['inputs'].forEach(function(item) {
-                $('#info_select_cg').append('<input type="radio" name="input_select" id="input_select_' + item + '" value="' + item + '" />'+
-                                   '<label for="input_select_' + item + '">' + item + '</label>');
+            // Añadimos el código HTML para cada elemento '<input ...' necesario para cada entrada
+            $('#info_select_cg').append('<input type="radio" name="input_select" id="input_select_' + item + '" value="' + item + '" />'+
+                                        '<label for="input_select_' + item + '">' + item + '</label>');
         });
         
         // Marcamos la entrada que hay actualmente activa como seleccionada. Se escapan los espacios
@@ -771,10 +779,10 @@ $(document).on('pageinit', '#info_page', function(){
                 //event.preventDefault();
         });
 
-        // Idem para el array de PRESETS
+        // Idem ahora para el array de PRESETS:
         $php_data['lista_de_presets'].forEach(function(item) {
-                $('#info_presets_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
-                                   '<label for="preset_select_' + item + '">' + item + '</label>');
+            $('#info_presets_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
+                                         '<label for="preset_select_' + item + '">' + item + '</label>');
         });
         
         $("#preset_select_" + $php_data['preset'].replace(/( )/g, "\\\ ")).attr('checked', true);
@@ -1007,11 +1015,12 @@ pagechange = triggered after changepage is done
 pagebeforeshow = triggered before the page is shown
 pageshow = triggered when the page is shown
 */
-
 $(document).on('pagechange', function(event){
-    // Primero inicializamos la página con los valores actuales si los hay, para que no se haga tan lenta la primera carga
+    // Primero inicializamos la página con los valores actuales si los hay,
+    // para que no se haga tan lenta la primera carga
     //if (typeof $php_data !== "undefined") update_controls();
     if ($php_data) update_controls();
-    // Ahora solicitamos al server el estado. Si las variables han cambiado, la propia función se encargará de actualizar los datos, sino no hará nada
+    // Ahora solicitamos al server el estado. Si las variables han cambiado,
+    //la propia función se encargará de actualizar los datos, sino no hará nada
     send_command( "status", "0");
 });
