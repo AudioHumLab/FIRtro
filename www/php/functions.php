@@ -1,4 +1,8 @@
 <?php
+    // v2.0:
+    // - Comandos para la botonera de la nueva página "info"
+    // - Funciones para la gestión de los players.
+
     $config_file = "../config/config.ini";
     $config;
     $config_ws;
@@ -100,21 +104,16 @@
         if (strpos($cinput, 'mpd') !== false )      $player = 'mpd';
         if (strpos($cinput, 'spotify') !== false )  $player = 'spotify';
         if (strpos($cinput, 'mplayer') !== false )  $player = 'mplayer';
-        if (strpos($cinput, 'tdt') !== false )      $player = 'mplayer';
-        if (strpos($cinput, 'cdda') !== false )     $player = 'mplayer';
+        if (strpos($cinput, 'tdt') !== false )      $player = 'mplayer_tdt';
+        if (strpos($cinput, 'cdda') !== false )     $player = 'mplayer_cdda';
         return $player;
     }
 
     function player_manage($player, $action) {
-        if ($player == 'mpd') {
-            mpd_manage($action);
-        }
-        if ($player == 'spotify') {
-            spotify_manage($action);
-        }
-        if ($player == 'mplayer') {
-            mplayer_manage($action);
-        }
+        if ($player == 'mpd')           mpd_manage($action);
+        if ($player == 'spotify')       spotify_manage($action);
+        if ($player == 'mplayer_tdt')   mplayer_tdt_manage($action);
+        if ($player == 'mplayer_cdda')  mplayer_cdda_manage($action);
     }
 
     function mpd_manage($action) {
@@ -134,27 +133,30 @@
         // el usuario como la sesión que corren FIRtro y Spotify.
         // Por tanto debemos recurrir al artificio firtro_socket("exec...
         // como en el caso de los comandos custom de la web de control.
-        $cmd = "";
         if ($action == 'play')  firtro_socket("exec spotifyctl.sh play");
         if ($action == 'pause') firtro_socket("exec spotifyctl.sh pause");
         if ($action == 'next')  firtro_socket("exec spotifyctl.sh next");
         if ($action == 'prev')  firtro_socket("exec spotifyctl.sh previous");
         if ($action == 'fwd')   firtro_socket("exec spotifyctl.sh 10 +");
         if ($action == 'rew')   firtro_socket("exec spotifyctl.sh 10 -");
-        shell_exec($cmd);
     }
 
-    function mplayer_manage($action) {
-        $cmd = "";
+    function mplayer_tdt_manage($action) {
+        // Se invocan los comandos de la radio integrados en FIRtro
+        // Nota: botńn 'rewind' para recuperar la última presintonia ('radio_prev' en audio/status)
+        //       botones 'next|prev' para recorrer las presintonías de audio/radio
+        if ($action == 'play')      firtro_socket("status");
+        if ($action == 'pause')     firtro_socket("status");
+        if ($action == 'stop')      firtro_socket("status");
+        if ($action == 'next')      firtro_socket("radio_channel next");
+        if ($action == 'prev')      firtro_socket("radio_channel prev");
+        if ($action == 'fwd')       firtro_socket("status");
+        if ($action == 'rew')       firtro_socket("radio_channel recall");
+    }
+
+    function mplayer_cdda_manage($action) {
         // work in progress
-        if ($action == 'play')      $cmd="";
-        if ($action == 'pause')     $cmd="";
-        if ($action == 'stop')      $cmd="";
-        if ($action == 'next')      $cmd="";
-        if ($action == 'prev')      $cmd="";
-        if ($action == 'fwd')       $cmd="";
-        if ($action == 'rew')       $cmd="";
-        shell_exec($cmd);
+        firtro_socket("status");
     }
 
     if($command == 'level_up') {
