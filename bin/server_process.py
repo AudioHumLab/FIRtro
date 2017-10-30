@@ -31,9 +31,9 @@
 # v2.0c (2017-may)
 #
 # - Se enlaza con el volumen ficitio de MPD. Se incorpora un temporizador para
-#   evitar atender el innecesario, por ser repetido, aunque inocuo, cambio de 'gain' 
+#   evitar atender el innecesario, por ser repetido, aunque inocuo, cambio de 'gain'
 #   que llegará desde MPD después de ejecutar aquí un ajuste de 'level'.
-# - Se separa la función 'firtroData' (antes 'fdata') que formatea en json 
+# - Se separa la función 'firtroData' (antes 'fdata') que formatea en json
 #   la información de FIRtro que se facilita a la página web de control.
 #
 # v2.0d (2017-ago,sep)
@@ -42,9 +42,12 @@
 # - Se pone write_status=False en la orden 'input restore'
 #
 # v.2.0e
-# - Se añade comando radio_channel para pasar a gestionar aquí la radio tdt, 
+# - Se añade comando radio_channel para pasar a gestionar aquí la radio tdt,
 #   de manera que server.py conozca los cambios de canal.
-# - 'exec' acepta argumentos del ejecutable
+# - Se admite 'radio_channel next|prev' para rotar sobre los presets del archivo audio/radio,
+#   y 'radio_channel recall' para recuperar el último preset escuchado (radio_prev).
+# - 'exec' acepta argumentos con el ejecutable.
+#
 #----------------------------------------------------------------------
 
 import time
@@ -70,7 +73,7 @@ import soundcards
 import wait4
 import presets                  ## <PRESETS>
 import monostereo               ## <MONO> Funcionalidad mono/stereo.
-import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado 
+import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado
                                 ##        en modo server tcp/ip en el arranque (initfirtro.py).
 import peq2fr                   ##        Módulo auxiliar para procesar archivos de EQs paramétricos.
 import jack_dummy_ports         ## Levanta puertos dummy en jack para ser usados por ej MPD. Solo esta línea.
@@ -138,25 +141,25 @@ def pcm_fft (freq, fs, pcm_file, window_m=0):
     #else:
     #    fft = fft[0:((m-1)/2)+1] #m impar
     #m = fft.size
-    
+
     # O hacemos directamente un rfft, que devuelve solamente las frecuencias positivas.
     # Ojo hay 1 muestra de diferencia.
     fft_data = np.fft.rfft(pcm)
-    
+
     # Longitud de la fft
     m = fft_data.size
-    
+
     # Convertimos a dB la parte absoluta
     fft_data = 20 * np.log10(np.abs(fft_data))
-    
+
     # Obtenemos las frecuencias en Hz. Tres metodos:
     # Esto da solo freq positivas, para la longitud especificada
     fft_freq = np.linspace(0, fs/2.0, m)
     # Esto da freq positivas y negativas correspondientes a una fft, hay que dividir el resultado:
-    #fft_freq = np.fft.fftfreq(len(pcm),1./fs) 
+    #fft_freq = np.fft.fftfreq(len(pcm),1./fs)
     # Esto solo da las positivas, correspondietes a una rfft de la señal pcm:
     #fft_freq = np.fft.rfftfreq(len(pcm),1./fs)
-    
+
     # Ahora buscamos los valores para las frecuencias especificadas
     for i in range(len(freq)):
         for j in range(len(fft_data)):
@@ -182,7 +185,7 @@ def peq2mag_i (peqFile, channel):
     w, h = peq2fr.frSum(Fs, FRs)
     # en dBs:
     hdB = 20 * np.log10(np.abs(h))
-    
+
     # Ahora queda trasladar la respuesta (calculada con Fs) a los 63
     # valores de frecuencia 'freq' de la etapa EQ y manejados en las gráficas de la web.
     f = w * Fs/(2*np.pi)    # Traducimos las w normalizadas a frecuencias reales.
@@ -272,10 +275,10 @@ def do (order):
         firtro_ports = ecasound_ports
     else:
         firtro_ports = brutefir_ports
-        
+
     global last_level_change_timestamp      ## <MPD> ##
     global radio, radio_prev                # v2.0e se centraliza la gestión de la radio tdt aquí
-    
+
     # Borramos los warnings
     warnings = []
 
@@ -324,7 +327,9 @@ def do (order):
             #      " (reason MPD_GAIN_FWD_TIMER=" + str(MPD_GAIN_FWD_TIMER) + ")" # DEBUG
             return firtroData(locals(), globals(), inputs.sections())
 
-    # Comprueba el comando y se decide las acciones a ejecutar:
+    #############################################################
+    # Comprueba el comando y se decide las acciones a ejecutar: #
+    #                                                           #
     if control_output > 0:
         print "(server_process) Command:", order
 
@@ -551,7 +556,7 @@ def do (order):
                 new_radiopreset = arg1
                 change_radio = True
                 # Debido a que Mplayer desactiva momentaneamente sus puertos en jack al resintonizar,
-                # activamos los indicadores usados en 'input restore':
+                # activamos los mismos indicadores usados en 'input restore':
                 change_input = True
                 change_gain = True
                 change_xovers = True
@@ -568,16 +573,32 @@ def do (order):
     # Si no hubo excepciones, se pasa a la ejecución: #
     ###################################################
 
+    ## <RADIO> ## v2.0e: Canales de radio gestionados a través del server.
     if change_radio:
         # OjO al resintonizar la TDT los puertos de Mplayer se desactivan momentaneamente,
         # por tanto esta sección se coloca al principio de la ejecución para que tengan efecto
         # los indicadores como cuando se pide un 'input restore'
+
+        # Lista de presets definidos (descartamos los que están en blanco en audio/radio)
+        lpd = [ x[0] for x in  radio_channel.channels.items('channels') if x[1] ]
+
+        # Acondicionamos un posible argumento de texto:
+        # Admitimos 'next|prev' para rotar por los presets de audio/radio:
+        if new_radiopreset == "next":
+            new_radiopreset = lpd[ (lpd.index(radio) + 1) % len(lpd) ]
+        if new_radiopreset == "prev":
+            new_radiopreset = lpd[ (lpd.index(radio) - 1) % len(lpd) ]
+        # O bien, con 'recall' se recupera el último preset escuchado, es decir 'radio_prev':
+        if new_radiopreset == "recall":
+            new_radiopreset = radio_prev
+
+        # Selección ordinaria de una presintonía de audio/radio:
         if radio_channel.select_preset(new_radiopreset):
             radio_prev = radio
             radio = new_radiopreset
             write_status = True
             # Esperamos a que Mplayer se desactive y vuelva a estar disponible en Jack
-            time.sleep (1) # OjO importante esperar un poco a que se desactiven.
+            time.sleep (1) # OjO importante esperar un poco a que se desactiven los puertos.
             wait4.wait4result("jack_lsp", "mplayer_tdt", tmax=8, quiet=True)
         else:
             warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
@@ -840,7 +861,7 @@ def do (order):
 
         headroom = round(headroom, 2)               # para que el display no muestre "-0.0 dB"
         if headroom == -0.00: headroom = 0.00
-        
+
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
@@ -860,7 +881,7 @@ def do (order):
                     # actualizamos el "falso volumen" de MPD
                     client_mpd.setvol(100 + gain)
                     last_level_change_timestamp = time.time()
-                
+
             if change_eq:
                 eq_str = ""
                 l = len(freq)
