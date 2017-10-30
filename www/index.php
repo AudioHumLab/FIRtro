@@ -157,7 +157,11 @@
             <h1 name="tittle">FIRtro</h1>
             <a href="#level_page" data-icon="home" data-iconpos="notext" data-direction="reverse">Home</a>
         </div>
-        <div style="font-size:48px; > <!--font-family:courier"-->
+        <!--
+            Letras grandes: Xvw (viewport percentage)
+                            también 48px por si el browser no lo soporta
+        -->
+        <div style="font-size:48px; font-size:5.2vw;> <!--font-family:courier"-->
             <!--  ESTADO de FIRTRO
                    -----------------------------------------
                 1  Vol: -32.0   Hr: 34.0     Bal: -2  Stereo
@@ -195,7 +199,7 @@
                 <!-- LINEA 4-->
                 <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%">
                     <div class="ui-block-a" id="info_inp" style="text-align:center; width:50%">I:</div>
-                    <div class="ui-block-b" id="info_sta" style="text-align:center; width:25%; font-size:36px;">_____</div>
+                    <div class="ui-block-b" id="info_sta" style="text-align:center; width:25%; font-size:36px; font-size:4vw;">_____</div>
                     <div class="ui-block-c" id="info_fs"  style="text-align:center; width:25%">(fs)</div>
                 </div>
             </div>
