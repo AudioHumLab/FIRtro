@@ -290,15 +290,15 @@ def main(run_level):
 
                 # Mplayer CDDA:
                 if load_mplayer_cdda:
-                    opts += " -profile cdda -input file=" + cdda_fifo
+                    opts_cdda = opts + " -profile cdda -input file=" + cdda_fifo
                     print "(initfirtro) Arrancando MPLAYER (CDDA)..."
-                    Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
+                    Popen([mplayer_path] + opts_cdda.split(), stdout=None, stderr=None)
 
                 # Mplayer TDT:
                 if load_mplayer_tdt:
-                    opts += " -profile tdt -input file=" + tdt_fifo
+                    opts_tdt = opts + " -profile tdt -input file=" + tdt_fifo
                     print "(initfirtro) Arrancando MPLAYER (TDT)..."
-                    Popen([mplayer_path] + opts.split(), stdout=None, stderr=None)
+                    Popen([mplayer_path] + opts_tdt.split(), stdout=None, stderr=None)
 
             # Jacktrip
             if load_jacktrip:
