@@ -290,7 +290,7 @@ function update_controls () {
             
             $("#info_pre").text("Preset: " + $php_data["preset"])
             if ($php_data['loudness_track']==true)  $("#info_lou").text("LOUD");
-            else                                    $("#info_lou").text("    ");
+            else                                    $("#info_lou").text(" -- ");
             if ($php_data['mono'] == "on")          $("#info_ste").text("  MONO");
             else                                    $("#info_ste").text("Stereo");
 
