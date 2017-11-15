@@ -877,6 +877,11 @@ def do (order):
                     bf_cli('cfia 0 0 ' + str(-gain_0) + ' ; cfia 1 1 ' + str(-gain_1))
                     # AMR 2º Entrada de brutefir (para analogica con filtros mp):
                     # bf_cli('cfia 2 2 ' + str(-gain_0) + ' ; cfia 3 3 ' + str(-gain_1))
+                # (!) Para evitar que arranque sin atenuacion si partimos de muted=True:
+                else:
+                    bf_cli('cfia 0 0 m0; cfia 1 1 m0')
+                    # AMR 2º Entrada de brutefir (para analogica con filtros mp):
+                    #bf_cli('cfia 2 2 m0; cfia 3 3 m0')
                 if not gain_direct and "level" in order and mpd_volume_linked2firtro:        ## <MPD> ##
                     # actualizamos el "falso volumen" de MPD
                     client_mpd.setvol(100 + gain)
