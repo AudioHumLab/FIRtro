@@ -155,8 +155,15 @@
     }
 
     function mplayer_cdda_manage($action) {
-        // work in progress
+        // work in progress: no funciona para fifos de otros usuarios <> 'firtro'
         firtro_socket("status");
+        if ($action == 'play')      fifo_write ($fifoCddaPath, "loadfile cdda://");
+        if ($action == 'pause')     fifo_write ($fifoCddaPath, "pause");
+        if ($action == 'stop')      fifo_write ($fifoCddaPath, "stop");
+        if ($action == 'next')      fifo_write ($fifoCddaPath, "seek_chapter +1");
+        if ($action == 'prev')      fifo_write ($fifoCddaPath, "seek_chapter -1");
+        if ($action == 'fwd')       fifo_write ($fifoCddaPath, "seek +10");
+        if ($action == 'rew')       fifo_write ($fifoCddaPath, "seek -10");
     }
 
     if($command == 'level_up') {
@@ -185,6 +192,9 @@
         }
     elseif($command == 'status') {
         $json=firtro_socket ("status");
+        }
+    elseif($command == 'xover_toggle') {
+        $json=firtro_socket ("xover toggle");
         }
     elseif($command == 'loudness_switch') {
         if ($value == "on")  $json=firtro_socket ("loudness_track");
