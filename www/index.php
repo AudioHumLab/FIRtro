@@ -254,6 +254,7 @@
                 <!-- Botonera AUDIO CONTROL -->
                 <div class="ui-block-e" style="width:30%">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-right:0px">
+			<input name="xover_toggle" type="submit" value="XO" />
                         <input name="loudness_toggle" type="submit" value="Loud" />
                         <input name="mono"            type="submit" value="Mono" />
                         <input name="level_down"      type="submit" value="Vol" data-icon="minus" />
