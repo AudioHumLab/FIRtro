@@ -197,10 +197,10 @@
             </div>
             <div style="margin:10px; border-style:solid;">
                 <!-- LINEA 4-->
-                <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%">
+                <div class="ui-grid-b" style="margin:10px;font-weight:bold; width:100%; vertical-align=bottom">
                     <div class="ui-block-a" id="info_inp" style="text-align:center; width:50%">I:</div>
                     <div class="ui-block-b" id="info_sta" style="text-align:center; width:25%; font-size:36px; font-size:4vw;">_____</div>
-                    <div class="ui-block-c" id="info_fs"  style="text-align:center; width:25%; font-size:36px; font-size:4vw;">(fs)</div>
+                    <div class="ui-block-c" id="info_fs"  style="text-align:center; width:25%; font-size:36px; font-size:3vw;">(fs)</div>
                 </div>
             </div>
             <!--   Metadatos del PLAYER en tres lineas enmarcadas -->
