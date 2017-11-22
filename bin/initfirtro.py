@@ -249,6 +249,7 @@ def main(run_level):
 
         # Controlserver (v2.2f)
         print "(initfirtro) Arrancando el SERVER ..."
+        control = Popen(["python", control_path], stdout=None, stderr=None)
 
         # PLAYERS INTEGRADOS
         if run_level in ["core", "all"]:
