@@ -224,14 +224,16 @@ if __name__ == "__main__":
                 break
 
             # Se pide salir de este script y cerrar todo (modo interactivo)
-            elif data.rstrip('\r\n') == "quit":
+            elif data.rstrip('\r\n') in ("quit", "terminate"):
                 sc.send("OK")
                 if getconfig.control_output > 1:
-                    print "(server) Closing connection..."
+                    print "(server) Closing connection ..."
                 if use_lcd:
                     srvLCD.cLCD.close()
                 sc.close()
+                print "(server) Terminating the server socket..."
                 fsocket.close()
+                print "(server) Ending server.py."
                 sys.exit(1)
 
             # Llegan metadatos de un PLAYER
