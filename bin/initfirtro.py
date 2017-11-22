@@ -68,6 +68,9 @@
 # - Se añade spotifymonitor y mpdmonitor para informar a los servidores de display
 # - OJO los servidores de display arrancan justo después de stopfirtro para 
 #   que estén disponibles para el server.py
+#
+# v2.2h
+# - Se reubica el chequeo de server accesible
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -246,23 +249,6 @@ def main(run_level):
 
         # Controlserver (v2.2f)
         print "(initfirtro) Arrancando el SERVER ..."
-        control = Popen(["python", control_path], stdout=None, stderr=None)
-        # Esperamos hasta 10 segundos para máquinas lentas
-        segundos = 10
-        while segundos > 0:
-            try:
-                # OjO debemos usar "close" para terminar la conexión:
-                client.firtro_socket("close")
-                break
-            except:
-                pass
-            segundos -= 1
-            sleep(1)
-        if segundos > 0:
-            print "(initfirtro) Ha arrancado el SERVER."
-        else:
-            print "(initfirtro) Inicio interrumpido: el SERVER no está accesible :-/"
-            sys.exit() # INTERRUMPIMOS INITFIRTRO
 
         # PLAYERS INTEGRADOS
         if run_level in ["core", "all"]:
@@ -355,7 +341,23 @@ def main(run_level):
                     print "(initfirtro) Arrancando MPDMONITOR ..."
                     Popen([mpdmonitor_path] + mpdmonitor_options.split(), stdout=None, stderr=None)
 
-        # NOTA: arriba hemos comprobado que el server esté en ejecucion.
+        # Esperamos al SERVER para máquinas lentas (v2.2h)
+        segundos = 20
+        while segundos:
+            print "(initfirtro) Esperando al SERVER ("+ str(20-segundos) + "s) " + "." * segundos
+            try:
+                # OjO debemos usar "close" para terminar la conexión:
+                client.firtro_socket("close")
+                break
+            except:
+                pass
+            segundos -= 1
+            sleep(1.0)
+        if segundos:
+            print "(initfirtro) Ha arrancado el SERVER :-)"
+        else:
+            print "(initfirtro) Inicio interrumpido: el SERVER no está accesible. Bye :-/"
+            sys.exit() # INTERRUMPIMOS INITFIRTRO
 
         # Restaura el estado anterior
         # (Para que no salga todo el status que devuelve 
