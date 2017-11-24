@@ -40,9 +40,9 @@ def tabulaREW(printado):
     for linea in printado.split("\n"):
         if "Filter" in linea and (not "Settings" in linea) and ("Fc") in linea:
             Active  = linea[11:14].strip()
-            Fc      = linea[28:34].strip().replace(".","").replace(",",".")
-            Gain    = linea[44:49].strip().replace(".","").replace(",",".")
-            Q       = linea[56:61].strip().replace(".","").replace(",",".")
+            Fc      = linea[28:34].strip().replace(",",".")
+            Gain    = linea[44:49].strip().replace(",",".")
+            Q       = linea[56:61].strip().replace(",",".")
             # convertimos Q en BW(oct)
             BW = str(q2bw(float(Q)))[:6]
             # traducimos Active ON|OFF => 1|0
