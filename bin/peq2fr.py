@@ -125,7 +125,7 @@ def frSum(Fs, frs):
     """ suma las ganancias de varias FR (respuestas de frecuencia)
         nota: se asume que las frecuencias son homogeneas en cada FR
     """
-    hsum = np.zeros(Fs)
+    hsum = np.zeros(int(Fs))
     hsum = hsum + (1 + 0j)
     for w, h in frs:        
         hsum *= h
