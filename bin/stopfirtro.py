@@ -83,6 +83,11 @@ def main(run_level):
             # netjack
             if load_netjack:
                 Popen (["killall", netjack_path], stdout=fnull, stderr=fnull)
+            # zita-njbridge
+            if load_zita_j2n:
+                Popen (["killall", zita_j2n_path], stdout=fnull, stderr=fnull)
+            if load_zita_n2j:
+                Popen (["killall", zita_n2j_path], stdout=fnull, stderr=fnull)
             # mplayer
             if load_mplayer_cdda or load_mplayer_tdt:
                 Popen (["killall", mplayer_path], stdout=fnull, stderr=fnull)
