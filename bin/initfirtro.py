@@ -71,6 +71,7 @@
 #
 # v2.2h
 # - Se reubica el chequeo de server accesible
+# - Se incorpora zita-njbridge (cable de audio por la red)
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -301,6 +302,16 @@ def main(run_level):
             if load_netjack:
                 print "(initfirtro) Arrancando NETJACK ..."
                 netjack = Popen([netjack_path] + netjack_options.split(), stdout=None, stderr=None)
+                sleep(command_delay)
+
+            # Zita-njbridge
+            if load_zita_j2n:
+                print "(initfirtro) Arrancando ZITA-Jack2Net ..."
+                Popen([zita_j2n_path] + zita_j2n_options.split(), stdout=None, stderr=None)
+                sleep(command_delay)
+            if load_zita_n2j:
+                print "(initfirtro) Arrancando ZITA-Net2Jack ..."
+                Popen([zita_n2j_path] + zita_n2j_options.split(), stdout=None, stderr=None)
                 sleep(command_delay)
 
             # Shairport
