@@ -88,6 +88,14 @@ load_netjack =              config.getboolean('path', 'load_netjack')
 netjack_path =              config.get('path', 'netjack_path')
 netjack_options =           config.get('path', 'netjack_options')
 
+load_zita_j2n =             config.getboolean('path', 'load_zita_j2n')
+zita_j2n_path =             config.get('path', 'zita_j2n_path')
+zita_j2n_options =          config.get('path', 'zita_j2n_options')
+
+load_zita_n2j =             config.getboolean('path', 'load_zita_n2j')
+zita_n2j_path =             config.get('path', 'zita_n2j_path')
+zita_n2j_options =          config.get('path', 'zita_n2j_options')
+
 load_client175 =            config.getboolean('path', 'load_client175')
 client175_path =            config.get('path', 'client175_path')
 client175_options =         config.get('path', 'client175_options')
