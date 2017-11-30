@@ -88,6 +88,8 @@ sudo apt-get install libasound2-dev
 sudo apt-get install libjack-jackd2-dev
 # Librerias para Python y para compilar
 sudo apt-get install python-dev gcc flex
+# Utilidades opcionales para enlazar Jack con otras tarjetas de sonido y con la red:
+sudo apt-get install zita-ajbridge zita-njbridge
 
 # Modulo py-jack para comunicar con Jack desde Python (no es paquete Debian)
 # OPC 1:
