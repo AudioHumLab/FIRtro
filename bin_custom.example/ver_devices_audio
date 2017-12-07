@@ -26,6 +26,6 @@ if [[ $(fuser -v /dev/snd/*) ]]; then
         echo ""
     fi
 else
-    echo "No hay procesos de $USER en /dev/snd/*"
+    echo "No hay procesos de $USER usando /dev/snd/*"
 
 fi
