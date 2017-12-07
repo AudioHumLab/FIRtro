@@ -1,14 +1,24 @@
 #!/bin/bash
-# v2.0 se muestra el estado de las tarjetas y los procesos que usan los devices de audio
 
-echo ""
-ver_orden_tarjetas
+# v2.0b se muestra el estado de las tarjetas y los procesos que usan los devices de audio
 
+# path de este script y de los demás usados aquí
+mypath=$(dirname $(realpath $0))
+
+# 1. Mostramos el orden ALSA de las tarjetas de sonido
 echo ""
-echo "Estado de las tarjetas:"
+echo "Orden de las tarjetas de sonido en ALSA:"
 echo ""
-ver_tarjetas_audio.py
+$mypath/ver_orden_tarjetas
+
+# 2. Mostramos el estado de las tarjetas
+echo ""
+echo "Estado de las tarjetas en /proc/asound:"
+echo ""
+$mypath/ver_tarjetas_audio.py
 echo ""
 
-# muestra los procesos que usan los /dev/snd/*
-ver_devices_audio
+# 3. Muestra los procesos que usan los /dev/snd/*
+echo ""
+echo "Procesos que usan los devices de audio /dev/snd/*"
+$mypath/ver_devices_audio
