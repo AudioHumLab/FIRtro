@@ -1,23 +1,31 @@
 #!/bin/bash
 
-echo ""
-echo "Procesos que usan los dispositivos de audio:"
-echo ""
-fuser -v /dev/snd/*
+# v1.0b
 
 echo ""
-echo "    Leyenda:"
-echo "              c      current directory.
-              e      executable being run.
-              f      open file.  f is omitted in default display mode.
-              F      open file for writing.  F is omitted in default display mode.
-              r      root directory.
-              m      mmap'ed file or shared library."
+echo "(i) Para ver procesos de otros usuarios"
+echo "    se necesitan privilegios de acceso."
 echo ""
 
-# truqui cutre
-printado=$(fuser -v /dev/snd/* 2>&1)
-if [[ $printado == *"pulseaudio"* ]]; then
-    echo "    Nota:     'pulseaudio' puede usar una tarjeta no declarada en ~/audio/config."
+
+if [[ $(fuser -v /dev/snd/*) ]]; then
+
     echo ""
+    echo "    Leyenda:"
+    echo "              c      current directory."
+    echo "              e      executable being run."
+    echo "              f      open file.  f is omitted in default display mode."
+    echo "              F      open file for writing.  F is omitted in default display mode."
+    echo "              r      root directory."
+    echo "              m      mmap'ed file or shared library."
+    echo ""
+
+    printado=$(fuser -v /dev/snd/* 2>&1)
+    if [[ $printado == *"pulseaudio"* ]]; then
+        echo "    Nota:     'pulseaudio' puede usar una tarjeta no declarada en ~/audio/config."
+        echo ""
+    fi
+else
+    echo "No hay procesos de $USER en /dev/snd/*"
+
 fi
