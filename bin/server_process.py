@@ -1113,7 +1113,7 @@ except:
 #### Niveles:
 ## <MONO> compensacion interna, no computada en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
 monoCompens = 0.0
-if mono:
+if mono == "on":
     monoCompens = -6.0
 input_gain = 0
 gain = level + input_gain + ref_level_gain
