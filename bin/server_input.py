@@ -21,10 +21,11 @@
 # - Se reordena el código para legibilidad
 # - Se deja de intervenir aquí en los players integrados (radio, mpd, etc),
 #   se recurre al nuevo módulo players_integrated
+# v2.1d2
+# - Logging sobre $USER/tmp
 
 # módulos genéricos
-from os import path as os_path, remove as os_remove
-from sys import path as sys_path
+import os, sys
 from time import sleep
 import jack
 
@@ -46,7 +47,8 @@ import players_integrated as players
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
 # https://docs.python.org/3/howto/logging.html#logging-basic-tutorial
 import logging
-logFile = '/home/firtro/tmp/server_input.log'
+usuario = os.getlogin()
+logFile = '/home/' + usuario + '/tmp/server_input.log'
 if os_path.isfile(logFile):
     os_remove(logFile)
 logging.basicConfig(filename=logFile, level=logging.ERROR)
