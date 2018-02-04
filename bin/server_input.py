@@ -21,19 +21,20 @@
 # - Se reordena el código para legibilidad
 # - Se deja de intervenir aquí en los players integrados (radio, mpd, etc),
 #   se recurre al nuevo módulo players_integrated
+# v2.1d2
+# - Logging sobre $USER/tmp
 #
 # v2.1f
 # - players_integrated.py renombrado players.py
 
 # módulos genéricos
-from os import path as os_path, remove as os_remove
-from sys import path as sys_path
+import os, sys
 from time import sleep
 import jack
 
 # módulos de FIRtro
-HOME = os_path.expanduser("~")
-sys_path.append(HOME + "/bin")
+HOME = os.path.expanduser("~")
+sys.path.append(HOME + "/bin")
 from getconfig import *
 
 # FIRtro2: puertos de monitores de la señal (los convertimos a lista)
@@ -49,9 +50,10 @@ import players
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
 # https://docs.python.org/3/howto/logging.html#logging-basic-tutorial
 import logging
-logFile = '/home/firtro/tmp/server_input.log'
-if os_path.isfile(logFile):
-    os_remove(logFile)
+usuario = os.getlogin()
+logFile = '/home/' + usuario + '/tmp/server_input.log'
+if os.path.isfile(logFile):
+    os.remove(logFile)
 logging.basicConfig(filename=logFile, level=logging.ERROR)
 
 # Alias con retardos experimentales (normalmente no usados) para operaciones jack con/disconnect
