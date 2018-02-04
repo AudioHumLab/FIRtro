@@ -30,8 +30,8 @@ from time import sleep
 import jack
 
 # módulos de FIRtro
-HOME = os_path.expanduser("~")
-sys_path.append(HOME + "/bin")
+HOME = os.path.expanduser("~")
+sys.path.append(HOME + "/bin")
 from getconfig import *
 
 # FIRtro2: puertos de monitores de la señal (los convertimos a lista)
@@ -49,8 +49,8 @@ import players_integrated as players
 import logging
 usuario = os.getlogin()
 logFile = '/home/' + usuario + '/tmp/server_input.log'
-if os_path.isfile(logFile):
-    os_remove(logFile)
+if os.path.isfile(logFile):
+    os.remove(logFile)
 logging.basicConfig(filename=logFile, level=logging.ERROR)
 
 # Alias con retardos experimentales (normalmente no usados) para operaciones jack con/disconnect
