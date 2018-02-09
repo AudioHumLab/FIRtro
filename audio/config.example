@@ -130,7 +130,7 @@ load_shairport = False
 ;shairport_path = /home/firtro/bin_custom/shairport
 ; Ejemplo de path para programa instalado con apt Debian
 shairport_path = shairport-sync
-; Ejemplo de opciones para salida por Pulseaudio
+; Ejemplo de opciones para salida por Pulseaudio (con shairport-sync indicar '-o pa')
 ; shairport_options = -a FirtroSalon -o pulse
 ; Ejemplo de opciones para salida por ALSA
 shairport_options = -a FirtroSalon -o alsa -- -d jack
