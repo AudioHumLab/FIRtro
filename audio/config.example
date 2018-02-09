@@ -126,9 +126,14 @@ mplayer_options = -quiet -nolirc
 
 ; -- SHAIRPORT -- Opcional (FIRtro como altavoz AirPlay)
 load_shairport = False
+; Ejemplo de path para ejecutable compilado a mano:
 ;shairport_path = /home/firtro/bin_custom/shairport
+; Ejemplo de path para programa instalado con apt Debian
 shairport_path = shairport-sync
-shairport_options = -a FirtroSalon -o pulse
+; Ejemplo de opciones para salida por Pulseaudio
+; shairport_options = -a FirtroSalon -o pulse
+; Ejemplo de opciones para salida por ALSA
+shairport_options = -a FirtroSalon -o alsa -- -d jack
 
 ; -- SQUEEZESLAVE --  Opcional
 load_squeezeslave = False
