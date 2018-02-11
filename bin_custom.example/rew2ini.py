@@ -5,6 +5,8 @@
  Convierte archivos .txt de filtros paramétricos de RoomEqWizard
  a una estructura '.ini' utilizable por el módulo Ecasound del FIRtro
  
+ (i) Se precisa que en REW se utilice [Equaliser: Generic]
+ 
  Uso:
  
  rew2ini.py  /path/to/left.txt /path/to/right.txt [ > fichero_de_salida ]
