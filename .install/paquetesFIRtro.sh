@@ -96,6 +96,7 @@ sudo apt-get install zita-ajbridge zita-njbridge
 # primero instala 'pip' y se auto-actualiza ('pip' es la utilidad de paquetes python)
 sudo apt-get install python-pip
 sudo pip install --upgrade python-pip
+sudo pip install setuptools
 # y ahora instala 'py-jack'
 sudo pip install py-jack
 # OPC 2: (se usa la 1)
