@@ -2,6 +2,7 @@
 
 # v0.1
 # v0.2 se incluye la instalacion de py-jack
+# v0.2b +libasound2-plugins
 
 echo ""
 echo "(i) para instalar los paquetes debes ser"
@@ -83,7 +84,7 @@ sudo apt-get install sox libsox-dev libsoxr-dev libsoxr-lsr0
 # source-highlight
 sudo apt-get install source-highlight
 # librería para ALSA
-sudo apt-get install libasound2-dev
+sudo apt-get install libasound2-dev libasound2-plugins
 # Librerias para JACK (!) OJO asumimos JACK2
 sudo apt-get install libjack-jackd2-dev
 # Librerias para Python y para compilar
