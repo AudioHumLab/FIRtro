@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+    v1.0
     Script para hacer backups de los archivos de FIRtro.
 
     Uso:
