@@ -155,7 +155,7 @@ jacktrip_options = -c rpi2fir -r 2 --nojackportsconnect
 
 ; -- ZITA-NJBRIDGE zita network to jack bridge -- Opcional
 ;    OJO, elegir un rol: j2n (envia) o bien n2j (recibe) en cada puerto udp 
-load_zita_j2n       = True
+load_zita_j2n       = False
 zita_j2n_path       = /usr/bin/zita-j2n
 zita_j2n_options    = --chan 2 --16bit 192.168.1.202 9990
 load_zita_n2j       = False
