@@ -218,9 +218,8 @@ def main(run_level):
         # Brutefir
         print "(initfirtro) Arrancando BRUTEFIR ..."
         import brutefir_cli
-        bf_config_path = audio_folder  + "brutefir_config"
-        bf_params = brutefir_options.replace("brutefir_config", "") + " " + bf_config_path
-        brutefir = Popen([brutefir_path] + [bf_params] , stdout=None, stderr=None)
+        tmp = brutefir_path + " " + audio_folder + "brutefir_config " + brutefir_options
+        Popen(tmp, shell=True)
         # esperamos a Brutefir
         if wait4result("echo 'quit' | nc localhost 3000", "Welcome", tmax=5, quiet=True):
             print "(initfirtro) Ha arrancado BRUTEFIR."
