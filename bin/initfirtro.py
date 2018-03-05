@@ -63,6 +63,9 @@
 #   para levantar los puertos dummy en jack que serán usados por MPD.
 # - Se deja de gestionar aquí el pausado de los players integrados.
 # - Nueva opción de volumen predefinido al arranque
+#
+# v2.2h (incorporado de testing)
+# - Se reubica el chequeo de server accesible
 #--------------------------------------------------------------------------------------
 
 import sys
@@ -231,22 +234,7 @@ def main(run_level):
         # Controlserver (v2.2f)
         print "(initfirtro) Arrancando el SERVER ..."
         control = Popen(["python", control_path], stdout=None, stderr=None)
-        # Esperamos hasta 10 segundos para máquinas lentas
-        segundos = 10
-        while segundos > 0:
-            try:
-                # OjO debemos usar "close" para terminar la conexión:
-                client.firtro_socket("close")
-                break
-            except:
-                pass
-            segundos -= 1
-            sleep(1)
-        if segundos > 0:
-            print "(initfirtro) Ha arrancado el SERVER."
-        else:
-            print "(initfirtro) Inicio interrumpido: el SERVER no está accesible :-/"
-            sys.exit() # INTERRUMPIMOS INITFIRTRO
+        # La espera a que responda el SERVER se ha trasladado después de los players y resto de funciones.
 
         # PLAYERS INTEGRADOS
         if run_level in ["core", "all"]:
@@ -332,7 +320,23 @@ def main(run_level):
                     mpdlcd = Popen([mpdlcd_path] + mpdlcd_options.split(), stdout=None, stderr=None)
                     sleep(command_delay)
 
-        # NOTA: arriba hemos comprobado que el server esté en ejecucion.
+        # Esperamos al SERVER para máquinas lentas (v2.2h)
+        segundos = 20
+        while segundos:
+            print "(initfirtro) Esperando al SERVER ("+ str(20-segundos) + "s) " + "." * segundos
+            try:
+                # OjO debemos usar "close" para terminar la conexión:
+                client.firtro_socket("close")
+                break
+            except:
+                pass
+            segundos -= 1
+            sleep(1.0)
+        if segundos:
+            print "(initfirtro) Ha arrancado el SERVER :-)"
+        else:
+            print "(initfirtro) Inicio interrumpido: el SERVER no está accesible. Bye :-/"
+            sys.exit() # INTERRUMPIMOS INITFIRTRO
 
         # Restaura el estado anterior
         # (Para que no salga todo el status que devuelve 
