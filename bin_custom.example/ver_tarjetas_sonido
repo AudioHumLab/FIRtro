@@ -1,0 +1,14 @@
+#!/bin/bash
+# v2.0 se muestra el estado de las tarjetas y los procesos que usan los devices de sonido
+
+echo ""
+ver_orden_tarjetas_sonido
+
+echo ""
+echo "Estado de las tarjetas de sonido:"
+echo ""
+ver_tarjetas_sonido.py
+echo ""
+
+# muestra los procesos que usan los /dev/snd/*
+ver_devices_snd
