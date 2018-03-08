@@ -1,0 +1,33 @@
+#!/bin/bash
+
+f=$HOME"/tmp/orden_tarjetas_sonido.log"
+
+function ayuda () {
+    echo "    v1.0"
+    echo "    Visualiza el orden de las tarjetas ALSA:"
+    echo "        -w escribe en el log."
+    echo "        -l vuelca por pantalla el log."
+    echo ""
+    echo "    La idea es poder seguir el azaroso orden de carga que provoca udev ..."
+    echo "    (el archivo de log es: ~/tmp/orden_tarjetas.log"
+    echo ""
+}
+
+# Si se pide escribir en el archivo log
+if [ "$1" == "-w" ]; then
+    echo "--- "$(date)" -----------------------" >> $f
+    ls -lh /proc/asound/ | grep "\->" | cut -f9,10,11 -d" " | sort -k3 >> $f
+    echo "" >> $f
+
+# o si se pide un listado se vuelca todo
+elif [ "$1" == "-l" ]; then
+    cat $f
+
+# o se pide ayuda
+elif [[ "$1" == *"h"* ]]; then
+    ayuda
+
+# y si no se pide nada se consulta lo ultimo:
+else
+    ls -lh /proc/asound/ | grep "\->" | cut -f9,10,11 -d" " | sort -k3
+fi
