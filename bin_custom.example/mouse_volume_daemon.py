@@ -4,8 +4,8 @@
     v0.1beta
     cutre script para gobernar el volumen de FIRtro mediante un ratón
 
-    left button   -->  vol ++
-    right button  -->  vol --
+    left button   -->  vol --
+    right button  -->  vol ++
     wheel         -->  togles mute
 
 """
