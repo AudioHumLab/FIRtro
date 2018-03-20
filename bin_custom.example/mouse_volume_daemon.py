@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    v0.2beta
+    v0.3beta
     Cutre script para gobernar el volumen de FIRtro mediante un ratón
 
     Uso:
@@ -29,12 +29,13 @@
     crw-rw---- 1 root input 13, 32 Mar 19 20:53 mouse0
 
 """
+# v0.2beta: beeps con un synth de SoX (play)
+# v0.3beta: beeps en un aviso.wav con aplay
+
 import sys, os, time
 import subprocess as sp
 import binascii
 #import struct
-HOME = os.path.expanduser("~")
-fmice = open( "/dev/input/mice", "rb" );
 
 def getMouseEvent():
     """
@@ -90,9 +91,15 @@ def check_headroom():
     return 0.0
 
 def pita():
-    sp.call("play --null synth 1 sine 880 gain -10.0 > /dev/null 2>&1", shell=True)
+    # El sinte de SoX (play) es lento
+    #os.system("play --null synth 1 sine 880 gain -10.0 > /dev/null 2>&1")
+    # Usamos un aviso.wav
+    os.system("aplay -Djack /home/firtro/bin_custom/aviso.wav > /dev/null 2>&1")
 
 if __name__ == "__main__":
+
+    HOME = os.path.expanduser("~")
+    fmice = open( "/dev/input/mice", "rb" );
 
     SALTOdBs = 2.0
     HRthr    = 6.0
@@ -118,7 +125,6 @@ if __name__ == "__main__":
     level_ups = False
     ha_pitado = False
     while True:
-
         # leemos el ratón
         ev = getMouseEvent();
 
@@ -136,7 +142,7 @@ if __name__ == "__main__":
         if level_ups:
             hr = check_headroom()
             if hr < HRthr:
-                #print hr
+                print hr
                 if not ha_pitado and pitar:
                     pita()
                     ha_pitado = True
@@ -144,3 +150,4 @@ if __name__ == "__main__":
                 ha_pitado = False
 
     fmice.close();
+
