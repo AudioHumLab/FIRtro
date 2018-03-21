@@ -142,7 +142,7 @@ if __name__ == "__main__":
         if level_ups:
             hr = check_headroom()
             if hr < HRthr:
-                print hr
+                #print hr
                 if not ha_pitado and pitar:
                     pita()
                     ha_pitado = True
