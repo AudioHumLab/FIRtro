@@ -200,6 +200,13 @@
         if ($value == "on")  $json=firtro_socket ("loudness_track");
         else                 $json=firtro_socket ("loudness_track_off");
         }
+    elseif($command == 'syseq_toggle') {
+        $fstatusRaw = firtro_socket("status");
+        $firtro_status = json_decode($fstatusRaw);
+        $system_eq = $firtro_status->{"system_eq"};
+        if ($system_eq) $json=firtro_socket("syseq_off");
+        else            $json=firtro_socket("syseq");
+        }
     elseif($command == 'loudness_toggle') {
         $fstatusRaw = firtro_socket("status");
         $firtro_status = json_decode($fstatusRaw);
