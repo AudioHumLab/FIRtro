@@ -217,11 +217,11 @@
         <div data-role="footer" class="footer-docs" data-theme="d">
             <div class="ui-grid-d">
                 <!-- Copyright Firtro mobile-->
-                <div class="ui-block-a" style="width:12%; padding-right:0px">
+                <div class="ui-block-a" style="width:10%; padding-right:0px">
                     <p>&copy; FIRtro mobile</p>
                 </div>
                 <!-- Collapsible de PRESETS -->
-                <div class="ui-block-b" style="width:17%; padding-right:5px">
+                <div class="ui-block-b" style="width:16%; padding-right:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Presets</h3>
                         <div id="info_presets_radiodiv">
@@ -231,7 +231,7 @@
                     </div>
                 </div>
                 <!-- Collapsible de INPUTS -->
-                <div class="ui-block-c" style="width:19%; padding-left:5px">
+                <div class="ui-block-c" style="width:18%; padding-left:5px">
                     <div data-role="collapsible" data-collapsed="True" data-mini="true">
                         <h3>Inputs</h3>
                         <div id="info_inputs_radiodiv">
@@ -252,9 +252,10 @@
                     </div>
                 </div>
                 <!-- Botonera AUDIO CONTROL -->
-                <div class="ui-block-e" style="width:30%">
+                <div class="ui-block-e" style="width:34%">
                     <div data-role="controlgroup" data-type="horizontal" class="footer_level" style="padding-right:0px">
-			<input name="xover_toggle" type="submit" value="XO" />
+                        <input name="xover_toggle"    type="submit" value="XO" />
+                        <input name="syseq_toggle"    type="submit" value="SQ" />
                         <input name="loudness_toggle" type="submit" value="Loud" />
                         <input name="mono"            type="submit" value="Mono" />
                         <input name="level_down"      type="submit" value="Vol" data-icon="minus" />
