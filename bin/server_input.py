@@ -28,7 +28,7 @@
 # - players_integrated.py renombrado players.py
 
 # módulos genéricos
-import os, sys
+import os, sys, getpass
 from time import sleep
 import jack
 
@@ -53,7 +53,8 @@ import logging
 try: # a veces con login remoto ocurre "OSError: [Errno 25] Inappropriate ioctl for device"
     usuario = os.getlogin()
 except:
-    usuario
+    #usuario = 'firtro'
+    usuario = getpass.getuser()
 logFile = '/home/' + usuario + '/tmp/server_input.log'
 if os.path.isfile(logFile):
     os.remove(logFile)
