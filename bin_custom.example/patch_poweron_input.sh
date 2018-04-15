@@ -7,15 +7,11 @@
 # arrancar FIRtro, insertando una llamada a este script en /etc/rc.local
 
 # ---- CONFIGURACION ----
-#badInput=apple  # pattern
 badInput=spoti  # pattern
 goodInput=pulse
 
 # ---- MAIN ----
-
-#statusfile="/home/firtro/audio/status"
-statusfile="tmp/status"
-
+statusfile='/home/firtro/audio/status'
 if [[ ! $(grep -i $badInput $statusfile) == '' ]]; then
     # insert la nueva linea, para append seria '/pattern/a nueva_linea '
     sed -i '/input\ =/i input\ =\ '$goodInput  $statusfile
