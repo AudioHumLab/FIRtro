@@ -9,7 +9,9 @@
 # arrancar FIRtro, insertando una llamada a este script en /etc/rc.local
 # antes de la ejecución de initfirtro.py
 
-# USO:  patch_poweron_input.sh  badInput  newInput
+# Ejemplo de uso:
+# rc.local
+#   su -l firtro -c 'patch_poweron_input.sh   apple  pulse'
 
 # ---- CONFIGURACION ----
 badInput=$1
