@@ -47,7 +47,9 @@ import players_integrated as players
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
 # https://docs.python.org/3/howto/logging.html#logging-basic-tutorial
 import logging
-try: # a veces con login remoto ocurre "OSError: [Errno 25] Inappropriate ioctl for device"
+# os.getlogin() con login remoto puede ocurrir "OSError: [Errno 25] Inappropriate ioctl for device",
+# también puede fallar al arranque de la máquina por ser non login 
+try: 
     usuario = os.getlogin()
 except:
     #usuario = 'firtro'
