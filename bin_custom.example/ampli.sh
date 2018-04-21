@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# (i) se necesita el binario 'usbrelay' en el mismo directorio que este script
+
 # Basado en el binario 'usbrelay', compilado con la libreria hidraw, ver detalles en:
 # https://github.com/darrylb123/usbrelay
 # El binario 'usbrelay':
