@@ -1,33 +1,38 @@
 #!/bin/bash
 
-# Basado en el binario 'usbrelay'
-# En RPI3 se ha compilado con la libreria hidraw, ver detalles en:
-#     https://github.com/darrylb123/usbrelay
+# Basado en el binario 'usbrelay', compilado con la libreria hidraw, ver detalles en:
+# https://github.com/darrylb123/usbrelay
 # El binario 'usbrelay':
 #   - Sin argumentos muestra el estado de los reles.
 #   - Con argumentos BITFT_n=x modifica los reles.
 #   - El estado de los relés se ofrece en stdout, la información adicional
 #     o los errores se ofrecen en stderr.
 
-# Este script admite un parametro que puede ser 1/on para activar el relé que enciende un amplificador.
+# Este script admite un parametro que puede ser 1/on para activar el rele
 # cualquier otro valor lo desactivará.
-# Si no se pasa parámetro, se mostrará el estado del relé al final del printado.
+# Si no se pasa parámetro, se mostrará el estado del relé al final de este script.
 
-# NOTA: Se puede usar ssh para ordenar la ejecución de usbrelay desde una máquina remota.
-#       Se dejan preparadas dos lineas comentadas más abajo.
+# NOTA: se puede usar ssh para ordenar la ejecución de usbrelay en una máquina remota.
+# Se dejan dos lineas comentadas más abajo.
 
+# Si se pasa parámetro on/off se ejecuta:
 if [[ $1 ]]; then
     tmp="BITFT_1=0"
     if [[ $1 == "on" || $1 == "1" ]]; then
         tmp="BITFT_1=1"
     fi
-    cmd="sudo /home/pi/bin/usbrelay "$tmp
+    cmd="$HOME/bin_custom/usbrelay "$tmp
+    # opc.1 para ejecución en local:
     $cmd
-    #ssh pi@rpi3clac $cmd
+    # opc.2 para ejecución en máquina remota:
+    #ssh firtro@remote_addr $cmd
 fi
-# Vemos el estado del relé.
-cmd="sudo /home/pi/bin/usbrelay"
+
+# Vemos el estado del relé:
+cmd="$HOME/bin_custom/usbrelay"
+# opc.1 para ejecución en local:
 eval $($cmd)
+# opc.2 para ejecución en máquina remota:
 #eval $(ssh pi@rpi3clac $cmd)
 # EL resultado son variables BITFT_1=x y BITFT_2=y, con x,y in (0,1)
 # que son leidas por el shell.
