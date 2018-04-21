@@ -35,7 +35,7 @@ cmd="$HOME/bin_custom/usbrelay"
 # opc.1 para ejecución en local:
 eval $($cmd)
 # opc.2 para ejecución en máquina remota:
-#eval $(ssh pi@rpi3clac $cmd)
+#eval $(ssh pi@remote_addr $cmd)
 
 # Mostramos el resultado: que son las variables 
 #   BITFT_1=x y BITFT_2=y, con x,y in (0,1)
