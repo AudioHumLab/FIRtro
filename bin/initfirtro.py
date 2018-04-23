@@ -393,7 +393,17 @@ def main(run_level):
         else:
             client.firtro_socket("preset " + preset)
         # y nos ponemos al dia de los efectos del preset
-        status.readfp(statusfile)
+        t = 0
+        while True:
+            try:
+                status.readfp(statusfile)
+                break
+            except:
+                t += 1
+                sleep (.2)
+                if t > 5:
+                    print "(initfirtro.py) ERROR leyendo audio/status" 
+                    break
 
         # v2.0 Volumen limitado opcional al arranque
         limit_level(level_on_startup, max_level_on_startup)
