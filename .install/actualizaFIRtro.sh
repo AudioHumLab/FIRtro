@@ -208,7 +208,8 @@ cd
 # FIN
 #########################################################
 # Dejamos una marca indicando la branch contenida
-echo "as per actualizaFIRtro.sh" > "~/bin/aa_README_THIS_IS_"$branch"_BRANCH"
+touch ~/bin/README_THIS_IS_"$branch"_BRANCH
+echo "as per actualizaFIRtro.sh" > ~/bin/README_THIS_IS_"$branch"_BRANCH
 echo ""
 echo "(i) Hecho. Para probar la configuración de prueba de FIRtro ejecutar el comando:"
 echo "    initfirtro.py"
