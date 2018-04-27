@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" 
-    Script para printar las conexiones en jack.
-    v1.1:
-    Admite un literal para filtrar por nombre de puerto
-    Admite un símbolo >|< para filtrar por dirección 
-    Ejemplo:
-    jack_conexiones.py "brutefir" ">"
 """
+    Script para printar las conexiones en jack.
 
+    Admite un literal para filtrar por nombre de puerto,
+    y un símbolo >|<|* para filtrar por dirección.
+    
+    Ejemplo:
+    jack_conexiones.py "brutefir" "<"
+"""
+# v1.1b
+#   por defecto pinta -->--
 
 import jack
 from sys import argv as sys_argv, exit as sys_exit
@@ -40,7 +42,7 @@ def jackConexiones(nombrePuerto="", direccion="*"):
 
 if __name__ == "__main__" :
     nombre = ""
-    direcc = "*"
+    direcc = ">"
     if len(sys_argv) > 1:
         for n in range(1,len(sys_argv)):
             opc = sys_argv[n]
@@ -55,4 +57,3 @@ if __name__ == "__main__" :
     for x in jackConexiones(nombre, direcc):
         print x[0].ljust(30), x[1], x[2]
     print
-
