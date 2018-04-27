@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# v1.0b
+#   Dejamos un archivo indicando la branch actualizada
+
 # NOTAS previas:
 #
 # - Las carpetas *custom*/ y lspk/ no se modifican,
@@ -206,6 +209,8 @@ cd
 #########################################################
 # FIN
 #########################################################
+# Dejamos una marca indicando la branch contenida
+touch ~/bin/aa_THIS_BRANCH_IS_$branch
 echo ""
 echo "(i) Hecho. Para probar la configuración de prueba de FIRtro ejecutar el comando:"
 echo "    initfirtro.py"
