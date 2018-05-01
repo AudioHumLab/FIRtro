@@ -276,7 +276,7 @@ if __name__ == "__main__":
                 # 2. RESPONDEMOS a los clientes (la web) con el json
                 # del status de FIRtro y los metadata de los PLAYERS:
                 json_status_players = json.dumps(dicci_status_players)
-                sc.send(json_status_players + '\n')
+                sc.send(json_status_players + '\n') # 3.0b-BETA añade linefeed
 
                 # 3. Presentamos el estado en el LCD
                 if use_lcd:
@@ -313,6 +313,7 @@ if __name__ == "__main__":
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
 
+                # 3.0b-BETA
                 sc.close()
                 break
                     
