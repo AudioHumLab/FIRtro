@@ -34,6 +34,7 @@
 # v3.0b-BETA
 # - Se cierra el socket tras recibir un comando y se devuelve el json + '\n'
 # - Se quita el sleep final
+# - Se ignora un comando vacio (line feed)
 #
 # TODO:
 # - Que los metadata se actualicen en la web sin esperar a que la web ordene
@@ -256,6 +257,9 @@ if __name__ == "__main__":
 
             # Llega una ORDEN para server_process.do(comando parámetros...)
             else:
+                # nohace nada si la orden es en blanco (line feed)
+                if not data.strip():
+                    break
                 # 1. ENVIAMOS la orden al gestor de FIRtro (server_process.py)
                 # que nos responderá con el estado general en formato json
                 orden = data
