@@ -31,6 +31,10 @@
 #   a mayores en el Json del estado del audio que llega de server_process.do(orden)
 #   y que se envía a la web de FIRtro que se conecta como cliente de este server.
 #
+# v3.0b-BETA
+# - Se cierra el socket tras recibir un comando y se devuelve el json + '\n'
+# - Se quita el sleep final
+#
 # TODO:
 # - Que los metadata se actualicen en la web sin esperar a que la web ordene
 #   'status' para actulizarse.
@@ -272,7 +276,7 @@ if __name__ == "__main__":
                 # 2. RESPONDEMOS a los clientes (la web) con el json
                 # del status de FIRtro y los metadata de los PLAYERS:
                 json_status_players = json.dumps(dicci_status_players)
-                sc.send(json_status_players)
+                sc.send(json_status_players + '\n')
 
                 # 3. Presentamos el estado en el LCD
                 if use_lcd:
@@ -309,4 +313,7 @@ if __name__ == "__main__":
                 if getconfig. control_output > 1 and getconfig.control_clear:
                     print "(server) Conected to client", addr[0]
 
-        sleep(0.05)
+                sc.close()
+                break
+                    
+        #sleep(0.05)
