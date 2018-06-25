@@ -57,6 +57,9 @@ from getspeaker import *        # OjO tomarermos system_eq del archivo de config
 from getinputs import inputs
 from subprocess import Popen
 from math import copysign
+from math import log
+from math import log10
+from math import exp
 import numpy as np
 from scipy import signal
 
@@ -824,8 +827,10 @@ def do (order):
                     # AMR 2º Entrada de brutefir (para analogica con filtros mp):
                     #bf_cli('cfia 2 2 m0; cfia 3 3 m0')
                 if not gain_direct and "level" in order:        ## <MPD> ##
-                    # actualizamos el "falso volumen" de MPD
-                    client_mpd.setvol(100 + gain)
+                    # update MPD "fake volume"
+                    vol = 100*(exp(max((gain/client_mpd.slider_range+1),0)**(1/1.293)*log(2))-1)
+                    if vol < 1: vol = 1 # minimal mpd volume
+                    client_mpd.setvol(vol)
                     last_level_change_timestamp = time.time()
                 
             if change_eq:
