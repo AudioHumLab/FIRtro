@@ -321,6 +321,9 @@ def do (order):
         print "(server_process) Command:", order
 
     try:
+        radio = status.get('inputs', 'radio')
+        radio_prev = status.get('inputs', 'radio_prev')
+
         if command == "status":
             write_status = False
 
