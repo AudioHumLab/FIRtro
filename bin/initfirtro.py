@@ -310,12 +310,7 @@ def main(run_level):
                 if load_irexec:
                     irexec = Popen([irexec_path] + irexec_options.split(), stdout=None, stderr=None)
 
-                # client175
-                if load_client175:
-                    client175 = Popen(["python", client175_path] + client175_options.split(), stdout=fnull, stderr=fnull)
-                    sleep(command_delay)
-
-                # mpdlcd (MPD client for lcdproc)
+                  # mpdlcd (MPD client for lcdproc)
                 if load_mpdlcd:
                     mpdlcd = Popen([mpdlcd_path] + mpdlcd_options.split(), stdout=None, stderr=None)
                     sleep(command_delay)
