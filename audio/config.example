@@ -169,11 +169,6 @@ load_irexec = False
 irexec_path = /usr/bin/irexec
 irexec_options = -d
 
-; -- CLIENT175 -- Opcional
-load_client175 = False
-client175_path = /home/firtro/.client175/server.py
-client175_options = >/dev/null 2>&1
-
 [net]
 ;-- dirección IP del FIRtro
 ip_address = 192.168.1.94
