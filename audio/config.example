@@ -45,11 +45,9 @@ jack_internal_monitors =
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
 jack_external_monitors = 
 
-
 [speakers]
 
 loudspeaker = ejemplo2vias
-
 
 [presets]
 
@@ -168,11 +166,6 @@ jacktrip_options = -c rpi2fir -r 2 --nojackportsconnect
 load_irexec = False
 irexec_path = /usr/bin/irexec
 irexec_options = -d
-
-; -- CLIENT175 -- Opcional
-load_client175 = False
-client175_path = /home/firtro/.client175/server.py
-client175_options = >/dev/null 2>&1
 
 ; -- DISPLAY de MPD en el LCD -- Opcional                                       
 ; https://pypi.python.org/pypi/mpdlcd

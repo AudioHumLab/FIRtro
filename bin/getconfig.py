@@ -93,10 +93,6 @@ load_netjack =              config.getboolean('path', 'load_netjack')
 netjack_path =              config.get('path', 'netjack_path')
 netjack_options =           config.get('path', 'netjack_options')
 
-load_client175 =            config.getboolean('path', 'load_client175')
-client175_path =            config.get('path', 'client175_path')
-client175_options =         config.get('path', 'client175_options')
-
 load_mpdlcd =               config.getboolean('path', 'load_mpdlcd')
 mpdlcd_path =               config.get('path', 'mpdlcd_path')
 mpdlcd_options =            config.get('path', 'mpdlcd_options')
