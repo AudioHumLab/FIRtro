@@ -335,9 +335,6 @@ def main(run_level):
                 # Lirc
                 if load_irexec:
                     irexec = Popen([irexec_path] + irexec_options.split(), stdout=None, stderr=None)
-                # client175
-                if load_client175:
-                    client175 = Popen(["python", client175_path] + client175_options.split(), stdout=fnull, stderr=fnull)
 
                 # -- DISPLAY Clients:
                 # mpdlcd (MPD client for lcdproc)
