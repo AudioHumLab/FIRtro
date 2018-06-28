@@ -73,6 +73,7 @@ resamplingQ =3
 
 ; ---- SERVIDORES: ----
 
+
 ; -- CONTROL SERVER -- Obligatorio
 control_path = /home/firtro/bin/server.py
 ; salida en pantalla: 0 (Nada) - 1 (Minino) - 2 (Completo)
