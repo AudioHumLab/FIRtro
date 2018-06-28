@@ -56,9 +56,6 @@ def main(run_level):
             # mpdmonitor
             if load_mpdmonitor:
                 Popen (["pkill", "-9", "-f", mpdmonitor_path], stdout=fnull, stderr=fnull)
-            # client175
-            if load_client175:
-                Popen (["pkill", "-9", "-f", client175_path], stdout=fnull, stderr=fnull)
             # mpdlcd (MPD client for lcdproc)
             if load_mpdlcd:
                 Popen (["pkill", "-9", "-f", mpdlcd_path], stdout=fnull, stderr=fnull)
