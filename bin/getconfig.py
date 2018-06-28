@@ -96,10 +96,6 @@ load_zita_n2j =             config.getboolean('path', 'load_zita_n2j')
 zita_n2j_path =             config.get('path', 'zita_n2j_path')
 zita_n2j_options =          config.get('path', 'zita_n2j_options')
 
-load_client175 =            config.getboolean('path', 'load_client175')
-client175_path =            config.get('path', 'client175_path')
-client175_options =         config.get('path', 'client175_options')
-
 load_irexec =               config.getboolean('path', 'load_irexec')
 irexec_path =               config.get('path', 'irexec_path')
 irexec_options =            config.get('path', 'irexec_options')
