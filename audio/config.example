@@ -45,11 +45,9 @@ jack_internal_monitors =
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
 jack_external_monitors = 
 
-
 [speakers]
 
 loudspeaker = ejemplo2vias
-
 
 [presets]
 
@@ -72,7 +70,6 @@ resamplingQ =3
 [path]
 
 ; ---- SERVIDORES: ----
-
 
 ; -- CONTROL SERVER -- Obligatorio
 control_path = /home/firtro/bin/server.py
