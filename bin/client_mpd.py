@@ -10,7 +10,11 @@
 import os
 import mpd # mpd is replaced by python-mpd2
 import client as firtroClient
-from math import log10
+from math import log
+
+# Slider volume range as per audio/config
+from getconfig import mpd_volume_slider_range as slider_range
+slider_range = abs(int(slider_range)) # Must be positive integer
 
 def connect_mpd(mpd_host=None, mpd_port=None, mpd_passwd=None):
     """Connect to mpd.
@@ -33,7 +37,6 @@ def connect_mpd(mpd_host=None, mpd_port=None, mpd_passwd=None):
         client.password(mpd_passwd)
     return client
 
-
 def idle_loop(c):
     """MPD idle loop (daemon mode)
     """
@@ -50,8 +53,8 @@ def idle_loop(c):
             raise SystemExit, 0
 
         newVol = c.status()['volume']
-        # Ajustamos la ganancia en FIRtro:
-        g = str(int(newVol) - 100)
+        # set FIRtro gain:
+        g = str(int(round(((log(1+float(newVol)/100)/log(2))**1.293-1)*slider_range)))
         firtroClient.firtro_socket("gain " + g, quiet=True)
 
 def setvol(vol):
