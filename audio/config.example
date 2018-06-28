@@ -169,11 +169,6 @@ load_irexec = False
 irexec_path = /usr/bin/irexec
 irexec_options = -d
 
-; -- CLIENT175 -- Opcional
-load_client175 = False
-client175_path = /home/firtro/.client175/server.py
-client175_options = >/dev/null 2>&1
-
 ; -- DISPLAY de MPD en el LCD -- Opcional                                       
 ; https://pypi.python.org/pypi/mpdlcd
 load_mpdlcd = False
