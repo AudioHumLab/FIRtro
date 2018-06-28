@@ -13,13 +13,6 @@ command_delay = .5
 ; -- Opciones de la orden "beep" para indicar carga del FIRtro
 beep_options = 
 
-; -- Usar LCD externo (requiere servicio LCDproc accesible))
-enable_lcd = False
-; tiempo de presentacion de informaciones temporales
-lcd_info_timeout = 1
-; opcion de presentacion LCD (consultar con "bin/server_lcdproc.py -h" )
-lcd_layout = 1
-
 ; -- Tope de ganancia (dB) admitada en Brutefir.
 gmax = 0
 ; -- Tonos a cero en el arranque (True/False)
@@ -125,9 +118,9 @@ mplayer_options = -quiet -nolirc
 
 ; -- SHAIRPORT -- Opcional (FIRtro como altavoz AirPlay)
 load_shairport = False
-; Ejemplo de path para ejecutable compilado a mano:
+; Ejemplo de path para ejecutable compilado a mano (ver en Wiki):
 ;shairport_path = /usr/local/bin/shairport
-; Ejemplo de path para programa instalado con apt Debian
+; Ejemplo de path para programa instalado con apt Debian (ver en Wiki)
 shairport_path = shairport-sync
 ; Ejemplo de opciones para salida por Pulseaudio (con shairport-sync indicar '-o pa')
 ; shairport_options = -a FirtroSalon -o pulse
@@ -166,12 +159,6 @@ jacktrip_options = -c rpi2fir -r 2 --nojackportsconnect
 load_irexec = False
 irexec_path = /usr/bin/irexec
 irexec_options = -d
-
-; -- DISPLAY de MPD en el LCD -- Opcional                                       
-; https://pypi.python.org/pypi/mpdlcd
-load_mpdlcd = False
-mpdlcd_path = /usr/local/bin/mpdlcd
-mpdlcd_options =
 
 [net]
 ;-- dirección IP del FIRtro
@@ -219,3 +206,19 @@ tone_variation = 6
 loudness_variation = 10
 balance_variation = 6
 no_phase_xo = lp
+
+[displays]
+; --- Configuraciones para visualizar información (LCD, INFOFIFO, etc)
+
+; -- Usar LCD externo (requiere servicio LCDproc accesible))
+enable_lcd = False
+; tiempo de presentacion de informaciones temporales
+lcd_info_timeout = 1
+; opcion de presentacion LCD (consultar con "bin/server_lcdproc.py -h" )
+lcd_layout = 1
+
+; -- DISPLAY de MPD en el LCD -- Opcional                                       
+; https://pypi.python.org/pypi/mpdlcd
+load_mpdlcd = False
+mpdlcd_path = /usr/local/bin/mpdlcd
+mpdlcd_options =

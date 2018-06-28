@@ -22,10 +22,6 @@ tone_defeat_on_startup =    config.getboolean('misc', 'tone_defeat_on_startup')
 command_delay =             config.getfloat('misc', 'command_delay')
 beep_options =              config.get('misc', 'beep_options')
 
-enable_lcd =                config.getboolean('misc', 'enable_lcd')
-lcd_info_timeout =          config.getfloat('misc', 'lcd_info_timeout')
-lcd_layout =                config.get('misc', 'lcd_layout')
-
 dummy_ports =               config.get('misc', 'dummy_ports')
 pause_players =             config.getboolean('misc', 'pause_players')
 resume_players =            config.getboolean('misc', 'resume_players')
@@ -93,10 +89,6 @@ load_netjack =              config.getboolean('path', 'load_netjack')
 netjack_path =              config.get('path', 'netjack_path')
 netjack_options =           config.get('path', 'netjack_options')
 
-load_mpdlcd =               config.getboolean('path', 'load_mpdlcd')
-mpdlcd_path =               config.get('path', 'mpdlcd_path')
-mpdlcd_options =            config.get('path', 'mpdlcd_options')
-
 load_irexec =               config.getboolean('path', 'load_irexec')
 irexec_path =               config.get('path', 'irexec_path')
 irexec_options =            config.get('path', 'irexec_options')
@@ -141,3 +133,13 @@ treble_pha_path =           config_folder + treble_pha_filename
 bass_mag_path =             config_folder + bass_mag_filename
 bass_pha_path =             config_folder + bass_pha_filename
 freq_path =                 config_folder + freq_filename
+
+#[displays]
+enable_lcd =                config.getboolean('displays', 'enable_lcd')
+lcd_info_timeout =          config.getfloat  ('displays', 'lcd_info_timeout')
+lcd_layout =                config.get       ('displays', 'lcd_layout')
+
+load_mpdlcd =               config.getboolean('displays', 'load_mpdlcd')
+mpdlcd_path =               config.get       ('displays', 'mpdlcd_path')
+mpdlcd_options =            config.get       ('displays', 'mpdlcd_options')
+
