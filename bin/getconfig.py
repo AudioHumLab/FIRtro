@@ -60,6 +60,7 @@ load_mpd =                  config.getboolean('path', 'load_mpd')
 mpd_path =                  config.get('path', 'mpd_path')
 mpd_options =               config.get('path', 'mpd_options')
 mpd_volume_linked2firtro =  config.getboolean('path', 'mpd_volume_linked2firtro')
+mpd_volume_slider_range =   config.getint('path', 'mpd_volume_slider_range')
 
 load_mplayer_tdt  =         config.getboolean('path', 'load_mplayer_tdt')
 load_mplayer_cdda =         config.getboolean('path', 'load_mplayer_cdda')
