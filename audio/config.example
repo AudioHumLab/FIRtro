@@ -108,6 +108,7 @@ mpd_options =
 ; El volumen de MPD puede gobernar el volumen de FIRtro
 ; NOTA: no es compatible con Pulseaudio, ver doc/dev/MPD_volume2FIRtro.md
 mpd_volume_linked2firtro = False
+mpd_volume_slider_range = 30
 
 ; -- MPLAYER -- Opcional (se carga una instancia por cada servicio cdda y/o tdt)
 mplayer_path = /usr/bin/mplayer
