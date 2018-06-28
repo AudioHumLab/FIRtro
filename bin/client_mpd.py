@@ -10,7 +10,11 @@
 import os
 import mpd # mpd is replaced by python-mpd2
 import client as firtroClient
-from math import log10
+from math import log
+
+# Slider volume range as per audio/config
+from getconfig import mpd_volume_slider_range as slider_range
+slider_range = abs(int(slider_range)) # Must be positive integer
 
 def connect_mpd(mpd_host=None, mpd_port=None, mpd_passwd=None):
     """Connect to mpd.
@@ -33,27 +37,19 @@ def connect_mpd(mpd_host=None, mpd_port=None, mpd_passwd=None):
         client.password(mpd_passwd)
     return client
 
-
 def idle_loop(c):
     """MPD idle loop (daemon mode)
     """
     while True:
-
-        # https://pythonhosted.org/python-mpd2/topics/commands.html
-        #'MPDClient.idle(sub1, ...)' waits for a MPD change on the indicated subsystems* ...
-        # ... when something happens, idle ends, then this script continues.
-        # (*) 'mixer' filters only volume events.
-        try:
-            c.idle('mixer')
-        except:
-            print "(client) Terminado. se ha perdido la conexión con MPD."
-            raise SystemExit, 0
+        #### 'c.idle' waits for a MPD change..., 'mixer' filters only volume events:
+        c.idle('mixer')
+        #### ... .. when something happens, idle ends.
 
         newVol = c.status()['volume']
-        # Ajustamos la ganancia en FIRtro:
-        g = str(int(newVol) - 100)
+        # set FIRtro gain:
+        g = str(int(round(((log(1+float(newVol)/100)/log(2))**1.293-1)*slider_range)))
         firtroClient.firtro_socket("gain " + g, quiet=True)
-
+                        
 def setvol(vol):
     try:
         c = connect_mpd()
