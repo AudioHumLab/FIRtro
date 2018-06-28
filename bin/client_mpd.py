@@ -41,15 +41,22 @@ def idle_loop(c):
     """MPD idle loop (daemon mode)
     """
     while True:
-        #### 'c.idle' waits for a MPD change..., 'mixer' filters only volume events:
-        c.idle('mixer')
-        #### ... .. when something happens, idle ends.
+
+        # https://pythonhosted.org/python-mpd2/topics/commands.html
+        #'MPDClient.idle(sub1, ...)' waits for a MPD change on the indicated subsystems* ...
+        # ... when something happens, idle ends, then this script continues.
+        # (*) 'mixer' filters only volume events.
+        try:
+            c.idle('mixer')
+        except:
+            print "(client) Terminado. se ha perdido la conexión con MPD."
+            raise SystemExit, 0
 
         newVol = c.status()['volume']
         # set FIRtro gain:
         g = str(int(round(((log(1+float(newVol)/100)/log(2))**1.293-1)*slider_range)))
         firtroClient.firtro_socket("gain " + g, quiet=True)
-                        
+
 def setvol(vol):
     try:
         c = connect_mpd()
