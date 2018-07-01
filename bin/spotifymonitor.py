@@ -243,7 +243,7 @@ if __name__ == "__main__":
             do_static_INFOFIFOscreen()
         if use_firtro:
             do_spotify_send_metadata(["not connected to Spotify", "", ""])
-        print "(spotifymonitor) ERROR conectando con MPD"
+        print "(spotifymonitor) ERROR conectando con SPOTIFY Desktop"
         raise SystemExit, 0
 
     # EVENTOS atendidos y HANDLERS asociados:
