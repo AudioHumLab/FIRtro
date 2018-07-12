@@ -24,7 +24,7 @@
 # - Se amplían las opciones por línea de comandos
 # v2.0
 # - Se reescriben las funciones de configuracion y activación de las vias:
-#   Se distibgue cada canal, se optimiza el código.
+#   Se distingue cada canal, se optimiza el código.
 # - Se adapta para manejar distintos subwoofers
 # - Se usa RawConfigParser + .optionxform = str para preservar nombres de vias case sensitive en presets.ini
 
