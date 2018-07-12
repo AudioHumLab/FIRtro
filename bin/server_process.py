@@ -31,15 +31,25 @@
 # v2.0c (2017-may)
 #
 # - Se enlaza con el volumen ficitio de MPD. Se incorpora un temporizador para
-#   evitar atender el innecesario, por ser repetido, aunque inocuo, cambio de 'gain' 
+#   evitar atender el innecesario, por ser repetido, aunque inocuo, cambio de 'gain'
 #   que llegará desde MPD después de ejecutar aquí un ajuste de 'level'.
-# - Se separa la función 'firtroData' (antes 'fdata') que formatea en json 
+# - Se separa la función 'firtroData' (antes 'fdata') que formatea en json
 #   la información de FIRtro que se facilita a la página web de control.
 #
 # v2.0d (2017-ago,sep)
 # - Debian 9.1: se asegura type integer en los índices de las arrays de tonos y loudness
 # - Levanta puertos dummy en jack para ser usados por ej por MPD
 # - Se pone write_status=False en la orden 'input restore'
+#
+# v.2.0e
+# - Se añade comando radio_channel para pasar a gestionar aquí la radio tdt,
+#   de manera que server.py conozca los cambios de canal.
+# - Se admite 'radio_channel next|prev' para rotar sobre los presets del archivo audio/radio,
+#   y 'radio_channel recall' para recuperar el último preset escuchado (radio_prev).
+# - 'exec' acepta argumentos con el ejecutable.
+#
+# v2.0f
+# - Se desliga el cambio de xover lp|mp de los presets.
 #
 #----------------------------------------------------------------------
 
@@ -49,7 +59,6 @@ import socket
 import sys
 import json
 import server_input
-import soundcards
 from basepaths import *
 from getconfig import *
 from getstatus import *
@@ -57,24 +66,27 @@ from getspeaker import *        # OjO tomarermos system_eq del archivo de config
 from getinputs import inputs
 from subprocess import Popen
 from math import copysign
-from math import log
-from math import log10
-from math import exp
 import numpy as np
 from scipy import signal
 
 ################################################################
 # (i) FIRtro 2.0 EN ADELANTE SE DESTACAN LAS LINEAS AFECTADAS  #
 ################################################################
+import soundcards
+import wait4
 import presets                  ## <PRESETS>
 import monostereo               ## <MONO> Funcionalidad mono/stereo.
-import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado 
+import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado
                                 ##        en modo server tcp/ip en el arranque (initfirtro.py).
 import peq2fr                   ##        Módulo auxiliar para procesar archivos de EQs paramétricos.
-import client_mpd               ## <MPD>  Control de volumen enlazado con MPD.
-MPD_GAIN_FWD_TIMER = .2         ##        Temporizador que elude la orden 'gain' que llega de MPD
-                                ##        despueś de ejecutar aquí un ajuste de 'level'.
 import jack_dummy_ports         ## Levanta puertos dummy en jack para ser usados por ej MPD. Solo esta línea.
+import radio_channel            ## gestion de radio_channels.py centralizada para que el server conozca los cammbios.
+if mpd_volume_linked2firtro:    ## <MPD>  Control de volumen enlazado con MPD.
+    import client_mpd
+MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain' que llega de MPD
+                                ##        despueś de ejecutar aquí un ajuste de 'level'.
+
+import read_brutefir_process as brutefir ## v2.0f
 
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
@@ -134,25 +146,25 @@ def pcm_fft (freq, fs, pcm_file, window_m=0):
     #else:
     #    fft = fft[0:((m-1)/2)+1] #m impar
     #m = fft.size
-    
+
     # O hacemos directamente un rfft, que devuelve solamente las frecuencias positivas.
     # Ojo hay 1 muestra de diferencia.
     fft_data = np.fft.rfft(pcm)
-    
+
     # Longitud de la fft
     m = fft_data.size
-    
+
     # Convertimos a dB la parte absoluta
     fft_data = 20 * np.log10(np.abs(fft_data))
-    
+
     # Obtenemos las frecuencias en Hz. Tres metodos:
     # Esto da solo freq positivas, para la longitud especificada
     fft_freq = np.linspace(0, fs/2.0, m)
     # Esto da freq positivas y negativas correspondientes a una fft, hay que dividir el resultado:
-    #fft_freq = np.fft.fftfreq(len(pcm),1./fs) 
+    #fft_freq = np.fft.fftfreq(len(pcm),1./fs)
     # Esto solo da las positivas, correspondietes a una rfft de la señal pcm:
     #fft_freq = np.fft.rfftfreq(len(pcm),1./fs)
-    
+
     # Ahora buscamos los valores para las frecuencias especificadas
     for i in range(len(freq)):
         for j in range(len(fft_data)):
@@ -178,7 +190,7 @@ def peq2mag_i (peqFile, channel):
     w, h = peq2fr.frSum(Fs, FRs)
     # en dBs:
     hdB = 20 * np.log10(np.abs(h))
-    
+
     # Ahora queda trasladar la respuesta (calculada con Fs) a los 63
     # valores de frecuencia 'freq' de la etapa EQ y manejados en las gráficas de la web.
     f = w * Fs/(2*np.pi)    # Traducimos las w normalizadas a frecuencias reales.
@@ -215,6 +227,7 @@ def do (order):
     exec_path = '/home/firtro/bin/'
     change_clock = False        ## v2.0a <CLOCK> recuperado de Testing3
     change_fs = False
+    change_radio = False
 
     # Al poner este proceso en una función, las variables que estén definidas
     # en los modulos importados hay que ponerlas como globales.
@@ -267,9 +280,10 @@ def do (order):
         firtro_ports = ecasound_ports
     else:
         firtro_ports = brutefir_ports
-        
+
     global last_level_change_timestamp      ## <MPD> ##
-    
+    global radio, radio_prev                # v2.0e se centraliza la gestión de la radio tdt aquí
+
     # Borramos los warnings
     warnings = []
 
@@ -298,6 +312,8 @@ def do (order):
     input_name_old = input_name
     filter_type_old = filter_type
     mono_old = mono                         ## <MONO> ##
+    radio_old = radio
+    radio_prev_old = radio_prev
 
     # Quitamos los caracteres finales
     order = order.rstrip('\r\n')
@@ -316,7 +332,9 @@ def do (order):
             #      " (reason MPD_GAIN_FWD_TIMER=" + str(MPD_GAIN_FWD_TIMER) + ")" # DEBUG
             return firtroData(locals(), globals(), inputs.sections())
 
-    # Comprueba el comando y se decide las acciones a ejecutar:
+    #############################################################
+    # Comprueba el comando y se decide las acciones a ejecutar: #
+    #                                                           #
     if control_output > 0:
         print "(server_process) Command:", order
 
@@ -333,7 +351,7 @@ def do (order):
                     change_gain = True
                     change_xovers = True
                     change_eq = True
-                    muted = False
+                    #muted = False
                     write_status = False
                 elif name == input_name.lower():
                     # Si la entrada ya es la activa, y no estoy restaurandolas, no hago nada
@@ -419,9 +437,8 @@ def do (order):
             if len(line) > 1:
                 filter_type = arg1
                 change_eq = True
-                change_xovers = True  ## <PRESETS> ##
-                change_preset = True  ## ver más abajo: no hacemos nada if change_xovers, simplemente
-            else: raise               ## regeneramos el preset completo con el modulo presets.py
+                change_xovers = True
+            else: raise
 
         elif command == "drc":
             if len(line) > 1:
@@ -510,7 +527,9 @@ def do (order):
 
         elif command == "exec":
             if len(line) > 1:
-                exec_arg = arg1.translate(None,'/')
+                # exec_arg = arg1.translate(None,'/')  # v2.0e Aceptamos argumentos del ejecutable:
+                exec_arg = line[1:]
+                exec_arg = " ".join([ x.translate(None,'/') for x in exec_arg])
                 exec_cmd = True
             else: raise
 
@@ -536,6 +555,17 @@ def do (order):
             invert = False
             write_status = False
 
+        elif command == "radio_channel":
+            if len(line) > 1:
+                new_radiopreset = arg1
+                change_radio = True
+                # Debido a que Mplayer desactiva momentaneamente sus puertos en jack al resintonizar,
+                # activamos los mismos indicadores usados en 'input restore':
+                change_input = True
+                change_gain = True
+                change_xovers = True
+                change_eq = True
+            else: raise
         # Si no se reconoce el comando
         else:
             raise
@@ -547,25 +577,37 @@ def do (order):
     # Si no hubo excepciones, se pasa a la ejecución: #
     ###################################################
 
-    ## <PRESETS> ##
-    ## OjO (1/2) estos dos IF estaban justo antes del IF CHANGE_DRC (en Resto de comandos),
-    ## ahora los subo aquí para que surjan efecto FILTER_TYPE, DRC, BALANCE,
-    ## u otros parámetros futuros soportados en presets.ini
-    if change_xovers:
-        ## /// este es el código original (Resto de comandos..) que he sustituido por el modulo presets.py
-        #for channel in speaker.options("out_channels"):
-        #    bf_filter = '"f_' + speaker.get("out_channels", channel).split()[0] + '"'
-        #    bf_coeff = '"c_' + filter_type + '-' + speaker.get("out_channels", channel).split()[1] + '"'
-        #    bf_cli('cfc ' + bf_filter + ' ' + bf_coeff)
-        ## \\\ ahora el cambio de xovers (filter_type = mp|lp) lo realiza el nuevo modulo "presets.py"
+    ## <RADIO> ## v2.0e: Canales de radio gestionados a través del server.
+    if change_radio:
+        # OjO al resintonizar la TDT los puertos de Mplayer se desactivan momentaneamente,
+        # por tanto esta sección se coloca al principio de la ejecución para que tengan efecto
+        # los indicadores como cuando se pide un 'input restore'
 
-        # Añadimos la POSIBILIDAD de ALTERNAR el filter_type para usearse desde un botón de la web:
-        if filter_type in ["cambia", "alterna", "change", "switch", "toggle"]:
-            if filter_type_old == "lp": filter_type = "mp"
-            else:                       filter_type = "lp"
+        # Lista de presets definidos (descartamos los que están en blanco en audio/radio)
+        lpd = [ x[0] for x in  radio_channel.channels.items('channels') if x[1] ]
+
+        # Acondicionamos un posible argumento de texto:
+        # Admitimos 'next|prev' para rotar por los presets de audio/radio:
+        if new_radiopreset == "next":
+            new_radiopreset = lpd[ (lpd.index(radio) + 1) % len(lpd) ]
+        if new_radiopreset == "prev":
+            new_radiopreset = lpd[ (lpd.index(radio) - 1) % len(lpd) ]
+        # O bien, con 'recall' se recupera el último preset escuchado, es decir 'radio_prev':
+        if new_radiopreset == "recall":
+            new_radiopreset = radio_prev
+
+        # Selección ordinaria de una presintonía de audio/radio:
+        if radio_channel.select_preset(new_radiopreset):
+            radio_prev = radio
+            radio = new_radiopreset
+            write_status = True
+            # Esperamos a que Mplayer se desactive y vuelva a estar disponible en Jack
+            time.sleep (1) # OjO importante esperar un poco a que se desactiven los puertos.
+            wait4.wait4result("jack_lsp", "mplayer_tdt", tmax=8, quiet=True)
+        else:
+            warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
 
     ## <PRESETS> ##
-    ## OjO (2/2)
     if change_preset:
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
         # a la vez que configuramos el preset, obtenemos el drc y el balance que le corresponde:
@@ -805,7 +847,7 @@ def do (order):
 
         headroom = round(headroom, 2)               # para que el display no muestre "-0.0 dB"
         if headroom == -0.00: headroom = 0.00
-        
+
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
@@ -821,18 +863,18 @@ def do (order):
                     bf_cli('cfia 0 0 ' + str(-gain_0) + ' ; cfia 1 1 ' + str(-gain_1))
                     # AMR 2º Entrada de brutefir (para analogica con filtros mp):
                     # bf_cli('cfia 2 2 ' + str(-gain_0) + ' ; cfia 3 3 ' + str(-gain_1))
-                # (!) Para evitar que arranque sin atenuacion si estaba muted=True:
+                # (!) Para evitar que arranque sin atenuacion si partimos de muted=True:
                 else:
                     bf_cli('cfia 0 0 m0; cfia 1 1 m0')
                     # AMR 2º Entrada de brutefir (para analogica con filtros mp):
                     #bf_cli('cfia 2 2 m0; cfia 3 3 m0')
-                if not gain_direct and "level" in order:        ## <MPD> ##
+                if not gain_direct and "level" in order and mpd_volume_linked2firtro:        ## <MPD> ##
                     # update MPD "fake volume"
                     vol = 100*(exp(max((gain/client_mpd.slider_range+1),0)**(1/1.293)*log(2))-1)
                     if vol < 1: vol = 1 # minimal mpd volume
                     client_mpd.setvol(vol)
                     last_level_change_timestamp = time.time()
-                
+
             if change_eq:
                 eq_str = ""
                 l = len(freq)
@@ -875,12 +917,39 @@ def do (order):
         # 2º Entrada de brutefir (para analogica con filtros mp)
         #bf_cli('cfia 2 2 m' + polarity + '1 ; cfia 3 3 m' + polarity + '1')
 
-    # (!!!) 'if change xovers' se ha pasado al inicio con la gestión de <PRESETS>
-    #if change_xovers:
-    #    for channel in speaker.options("out_channels"):
-    #        bf_filter='"f_' + speaker.get("out_channels", channel).split()[0] + '"'
-    #        bf_coeff='"c_' + filter_type + '-' + speaker.get("out_channels", channel).split()[1] + '"'
-    #        bf_cli('cfc ' + bf_filter + ' ' + bf_coeff)
+    if change_xovers: ## v2.0f ##
+        # Leemos en tiempo real los coeff cargados en los filtros de vías de Brutefir
+        # NOTA: en FIRtro 1.0 se leia speaker.get("out_channels", channel) que queda en desuso
+        #       por ser un mapeo que solo servía para resolver esta función.
+
+        # Añadimos la posibilidad de ALTERNAR el filter_type para usarse desde un botón de la web:
+        if filter_type in ["cambia", "alterna", "change", "switch", "toggle"]:
+            if filter_type_old == "lp": filter_type = "mp"
+            else:                       filter_type = "lp"
+        elif not filter_type in ["lp", "mp"]:
+            filter_type = filter_type_old
+
+        # Solo procede hacer change_xovers lp|mp en los filtros de vías:
+        etiquetasDeVias = ["fr", "lo", "mi", "hi", "sw"]
+        haLeidoBfir = True
+        try:
+            brutefir.lee_config()
+        except:
+            haLeidoBfir = False
+            print "(server_process) ERROR usando read_brutefir_process.py"
+        try:
+            brutefir.lee_running_config()
+        except:
+            haLeidoBfir = False
+            print "(server_process) ERROR usando read_brutefir_process.py"
+        if haLeidoBfir:
+            for filter_running in brutefir.filters_running:
+                # ejemplo: ['f_lo_L', '12', 'c_lp-lo4', 'lp-lo.pcm']
+                bfilter, coeffNum, coeffName, pcmName = filter_running
+                if [x for x in etiquetasDeVias if x in bfilter]:        # aquí verificamos que sea una etapa de filtro de vias
+                    newCoeffName = "c_" + filter_type + "-" + coeffName[5:]
+                    tmp = 'cfc "' + bfilter + '" "' + newCoeffName + '"; quit;'
+                    bf_cli(tmp)
 
     if change_drc:
         # Metodo 1: Se asignan siempre coeficientes predefinidos.
@@ -937,6 +1006,8 @@ def do (order):
         status.set('general', 'filter_type', filter_type)
         status.set('general', 'muted', muted)
         status.set('inputs', 'input', input_name)
+        status.set('inputs', 'radio', radio)
+        status.set('inputs', 'radio_prev', radio_prev)
         status.set('general', 'clock', clock)           ## <CLOCK> recuperado de Testing3 ##
         status.set('general', 'fs', fs)
         status.set('inputs', 'resampled', resampled)    ## <v2.0> Entrada a través de tarjeta resampleada ##
@@ -1003,6 +1074,8 @@ def do (order):
     # A efectos de control, devolvemos un diccionario 
     # conteniendo el estado del FIRtro
     return firtroData(locals(), globals(), inputs.sections())
+# ^^^^^^^^ FIN DEL do() PRINCIPAL ^^^^^^^^
+
 
 # V2.0c reescritura del diccionario de estado en una función separada
 def firtroData(locales, globales, entradas):
