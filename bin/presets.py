@@ -22,7 +22,7 @@
 # - Se continuá la ejecución en caso de que Brutefir no esté accesible
 # v1.3d
 # - Se amplían las opciones por línea de comandos
-# v2.0
+# v2.0a
 # - Se reescriben las funciones de configuracion y activación de las vias:
 #   Se distingue cada canal, se optimiza el código.
 # - Se adapta para manejar distintos subwoofers
@@ -34,6 +34,7 @@ import os
 from sys import path as sys_path, argv as sys_argv, exit as sys_exit
 import socket
 import ConfigParser
+import time
 
 # para conectar solo las salidas de brutefir de las VIAS EN USO a la tarjeta de sonido
 import jack
@@ -237,6 +238,9 @@ def conecta_tarjeta(vias):
     #   system:playback_5/sw1
     #   system:playback_6/sw2
 
+    to_disconnect=[]
+    to_connect = []
+    
     # Ahora debemos evaluar si es una salida a activar:
     for bfOutMap in brutefir.outputsMap:
         conectar = False
@@ -248,9 +252,14 @@ def conecta_tarjeta(vias):
                 conectar = True
 
         if conectar:
-            jack.connect(jackOrig, jackDest)
+            to_connect.append( (jackOrig, jackDest) )
         else:
-            jack.disconnect(jackOrig, jackDest)
+            to_disconnect.append( (jackOrig, jackDest) )
+    
+    for pair in to_disconnect:
+        jack.disconnect(pair[0], pair[1])
+    for pair in to_connect:
+        jack.connect(pair[0], pair[1])
 
     jack.detach()
 
