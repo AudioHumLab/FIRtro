@@ -4,12 +4,14 @@
 # v1.0: se permite argumento "-w" para escribir la salida en el archivo brutefir_config
 # v1.1: incorpora un coeff de xover "dirac pulse" para poder cargarlo en una vía full range"
 # v1.2: se permiten nuevos argumentos:
-#     - un archivo brutefir.ini alternativo
-#     - una carpeta de altavoz distinta de la configurada en el sistema en audio/config
-# KNOWN BUGS:
-# La primera vez que se ejecuta este script es posible que arroje un error
-#          ConfigParser.NoSectionError: No section: 'drcs'
-# Pero si se repite la ejecución todo va bien :-/ PENDIENTE DEPURAR.
+#       - un archivo brutefir.ini alternativo
+#       - una carpeta de altavoz distinta de la configurada en el sistema en audio/config
+# v1.2a: Los coeff de cruce se dejan de agrupar primero lp y luego mp,
+#        se printan por parejas lp/mp para mejor visibilidad de las atenuaciones de cada coeff.
+
+### ESTE SCRIPT ES MUY RUDIMENTARIO HABRIA QUE REESCRIBIRLO :-/
+### INCLUYENDO EL SCANEO DE PCMs Y TAL ...
+
 
 """
 Uso:
@@ -101,16 +103,16 @@ def hacer_CadenaConvolver(VIAS):
         print 'filter "f_eq_' + canal + '" {'
         for input in bf_ini.options("inputs"):
             if input[-1].upper() == canal:
-                print '\tfrom_inputs:  "' + input[:-1] + input[-1].upper() + '";'
-                print '\tto_filters:   "f_drc_' + canal + '";'
-                print '\tcoeff:        "c_eq' + str(CANALES.index(canal)) +'";'
+                print '    from_inputs:  "' + input[:-1] + input[-1].upper() + '";'
+                print '    to_filters:   "f_drc_' + canal + '";'
+                print '    coeff:        "c_eq' + str(CANALES.index(canal)) +'";'
         print '};'
 
     # DRC filtering:
     print '\n# --- DRC filtering:\n'
     for canal in CANALES:
         print 'filter "f_drc_' + canal + '" {'
-        print '\tfrom_filters: "f_eq_' + canal + '";'
+        print '    from_filters: "f_eq_' + canal + '";'
 
         # Ahora debemos llevar la señal a las VIAs y a los SUBs si existieran
         # tmp1 recoje las vias separadas por canal
@@ -119,12 +121,12 @@ def hacer_CadenaConvolver(VIAS):
         # tmp2 recoje los posibles subwoofers
         tmp2 = [via for via in VIAS if 'sw' in via]
         tmp2 = [x[:-1]+x[-1].upper() for x in tmp2]
-        print '\tto_filters:   "f_' + '", "f_'.join(tmp1 + tmp2) + '";'
+        print '    to_filters:   "f_' + '", "f_'.join(tmp1 + tmp2) + '";'
 
         # podemos usar el primer DRC:
-        # print '\tcoeff:        "c_drc1_' + canal + '";'
+        # print '    coeff:        "c_drc1_' + canal + '";'
         # o podemos dejarlo plano a la espere de los scripts del FIRtro:
-        print '\tcoeff:        -1;'
+        print '    coeff:        -1;'
 
         print '};'
 
@@ -134,14 +136,14 @@ def hacer_CadenaConvolver(VIAS):
         for via in [x for x in VIAS if '_' + canal in x]:
             gain, polarity, delay = bf_ini.get("outputs", via).split()[1:]
             print 'filter "f_' + via + '" {'
-            print '\tfrom_filters: "f_drc_' + canal + '";'
-            print '\tto_outputs:   "' + via + '"/' + gain + '/' + polarity + ';'
+            print '    from_filters: "f_drc_' + canal + '";'
+            print '    to_outputs:   "' + via + '"/' + gain + '/' + polarity + ';'
 
             # busquemos el primer coeff disponible para la via en filters.ini
             for option in filters_ini.options('lp_xo'):
                 if option[5:7] == via[:2]:  # ej: fr_l ---> fr
                     break
-            print '\tcoeff:        "' + option + '";'
+            print '    coeff:        "' + option + '";'
 
             print '};'
 
@@ -156,14 +158,14 @@ def hacer_CadenaConvolver(VIAS):
 
             print 'filter "f_' + via + '" {'
             tmp = '"f_drc_' + ('"/' + mixAtt + ', "f_drc_').join(CANALES) + '"/' + mixAtt +';'
-            print '\tfrom_filters: ' + tmp
-            print '\tto_outputs:   "' + via + '"/' + gain + '/' + polarity + ';'
+            print '    from_filters: ' + tmp
+            print '    to_outputs:   "' + via + '"/' + gain + '/' + polarity + ';'
 
             # busquemos el primer coeff disponible para la via en filters.ini
             for option in filters_ini.options('lp_sw'):
                 if option[5:7] == via[:2]:  # ej: fr_l ---> fr
                     break
-            print '\tcoeff:        "' + option + '";'
+            print '    coeff:        "' + option + '";'
 
             print '};'
 
@@ -176,32 +178,32 @@ def hacer_IO():
     # ENTRADAS (CANALES)
     tmp2 = '"in_' + '", "in_'.join(CANALES) + '"'
     print '\ninput ' + tmp2 + ' {'
-    print '\t# Sin conexiones a priori en la entrada:'
-    print '\tdevice: "jack" { };'
-    print '\tsample: "AUTO";'
+    print '    # Sin conexiones a priori en la entrada:'
+    print '    device: "jack" { };'
+    print '    sample: "AUTO";'
     tmp = ','.join([str(x) for x in range(len(CANALES))])
-    print '\tchannels: ' + str(len(CANALES)) + '/' + tmp + ';'
+    print '    channels: ' + str(len(CANALES)) + '/' + tmp + ';'
     print '};'
 
     # SALIDAS (VIAS)
     tmp = '", "'.join(VIAS)
     print '\noutput "' + tmp + '" {'
-    print '\t# mapeo de las ' + str(len(VIAS)) + ' salidas:'
+    print '    # mapeo de las ' + str(len(VIAS)) + ' salidas:'
 
-    print '\tdevice: "jack" { ports:'
+    print '    device: "jack" { ports:'
     jackPorts = []
     for via in VIAS:
         jackPorts.append('"' + bf_ini.get("outputs", via).split()[0] + '"/"' + via + '"')
 
     # churro de puertos de salida organizado en dos columnas para legibilidad
-    churro = '\t'
+    churro = '    '
     maxCols= 2
     col  = 1
     indicePuerto  = 0
 
     while indicePuerto <= len(jackPorts)-1:  # recorremos los puertos de salida
         if col > maxCols:
-            churro += '\n\t'
+            churro += '\n    '
             col = 1
         churro += jackPorts[indicePuerto] + ', '
         indicePuerto += 1
@@ -209,19 +211,19 @@ def hacer_IO():
 
     print churro[:-2] + ';' # el último ", " lo cerramos con ";"
 
-    print '\t};'
+    print '    };'
 
-    print '\tsample:   "AUTO";'
+    print '    sample:   "AUTO";'
     tmp = ','.join([str(x) for x in range(len(VIAS))])
-    print '\tchannels: ' + str(len(VIAS)) + '/' + tmp + ';'
-    print '\tmaxdelay: 1000;'
-    print '\tdither:   ' + dither + ';'
+    print '    channels: ' + str(len(VIAS)) + '/' + tmp + ';'
+    print '    maxdelay: 1000;'
+    print '    dither:   ' + dither + ';'
 
     delaysMS= []
     for via in VIAS:
         delaysMS.append(bf_ini.get("outputs", via).split()[3])
     delaysSamples = [x.replace(x, str(int(fs*float(x)/1000))) for x in delaysMS]
-    print '\tdelay:    ' + ','.join(delaysSamples) + '; # \'samples\' that are equivalent in \'ms\' to ' \
+    print '    delay:    ' + ','.join(delaysSamples) + '; # \'samples\' that are equivalent in \'ms\' to ' \
           + ','.join(delaysMS)
 
     print '};'
@@ -234,9 +236,9 @@ def hacer_Coef_EQ():
 
     for i in range(len(CANALES)):
         print 'coeff "c_eq' + str(i) + '" {'
-        print '\tfilename: "dirac pulse";'
-        print '\tshared_mem: true;'
-        print '\tblocks: 1; # suficiente para hacer curvas de EQ suave'
+        print '    filename: "dirac pulse";'
+        print '    shared_mem: true;'
+        print '    blocks: 1; # suficiente para hacer curvas de EQ suave'
         print '};'
 
 def hacer_Coef_DRC():
@@ -251,48 +253,60 @@ def hacer_Coef_DRC():
             # por compatibilidad mayuscula al final
             tmp = coeff[:-1] + coeff[-1].upper()
             print 'coeff "' + tmp + '" {'
-            print '\tfilename:    "' + file + '";'
-            print '\tformat:      "FLOAT_LE";'
-            print '\tshared_mem:  false;'
-            print '\tattenuation: ' + gain + ';'
+            print '    filename:    "' + file + '";'
+            print '    format:      "FLOAT_LE";  shared_mem:  false;'
+            print '    attenuation: ' + gain + ';'
             print '};'
 
 def hacer_Coef_XO():
 
     print '\n# --------------------------------'
     print   '# ---------- XO COEFFs -----------'
-    print   '# --------------------------------\n'
+    print   '# --------------------------------'
+
+    listaTmp = []
 
     for type in ["lp", "mp"]:
 
         for coeff in filters_ini.options(type + "_xo"):
 
+            tmp = ""
             gain = filters_ini.get(type + "_xo", coeff).split()[0]
-            file = ' '.join(filters_ini.get(type + "_xo", coeff).split()[1:])
-            print 'coeff "' + coeff + '" {'
-            print '\tfilename:    "' + file + '";'
-            print '\tformat:      "FLOAT_LE";'
-            print '\tshared_mem:  false;'
-            print '\tattenuation: ' + gain + ';'
-            print '};'
+            pcmfile = ' '.join(filters_ini.get(type + "_xo", coeff).split()[1:])
+            tmp += 'coeff "' + coeff + '" {\n'
+            tmp +=  '    filename:    "' + pcmfile + '";\n'
+            tmp +=  '    format:      "FLOAT_LE";  shared_mem:  false;\n'
+            tmp +=  '    attenuation: ' + gain + ';\n'
+            tmp +=  '};'
+            listaTmp.append(tmp)
 
         for coeff in filters_ini.options(type + "_sw"):
 
+            tmp = ""
             gain = filters_ini.get(type + "_sw", coeff).split()[0]
-            file = ' '.join(filters_ini.get(type + "_sw", coeff).split()[1:])
-            print 'coeff "' + coeff + '" {'
-            print '\tfilename:    "' + file + '";'
-            print '\tformat:      "FLOAT_LE";'
-            print '\tshared_mem:  false;'
-            print '\tattenuation: ' + gain + ';'
-            print '};'
+            pcmfile = ' '.join(filters_ini.get(type + "_sw", coeff).split()[1:])
+            tmp +=  'coeff "' + coeff + '" {\n'
+            tmp +=  '    filename:    "' + pcmfile + '";\n'
+            tmp +=  '    format:      "FLOAT_LE";  shared_mem:  false;\n'
+            tmp +=  '    attenuation: ' + gain + ';\n'
+            tmp +=  '};'
+            listaTmp.append(tmp)
+
+    #v1.2a se reagrupan por el nombre del coeff para mejor visibilidad de las atenuaciones.
+    listaTmp = sorted(listaTmp, key=lambda x: (x[12:]), reverse=False)
+    cosaprev = ""
+    for cosa in listaTmp:
+        if not cosa[12:17] in cosaprev:
+            print
+        print cosa
+        cosaprev = cosa
+
 
     print '\n# coeficiente comodín para vias full range sin filtrado'
     print 'coeff "' + 'c_dirac-pulse' + '" {'
-    print '\tfilename:    "' + 'dirac pulse' + '";'
-    print '\tformat:      "FLOAT_LE";'
-    print '\tshared_mem:  false;'
-    print '\tattenuation: ' + '0.0' + ';'
+    print '    filename:    "' + 'dirac pulse' + '";'
+    print '    format:      "FLOAT_LE";  shared_mem:  false;'
+    print '    attenuation: ' + '0.0' + ';'
     print '};'
 
 def lee_secc_gral(param):
