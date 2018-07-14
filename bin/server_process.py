@@ -50,6 +50,8 @@
 #
 # v2.0f
 # - Se desliga el cambio de xover lp|mp de los presets.
+# - Se hace un mute antes de que un nuevo preset conecte nuevas vías para evitar escucharlas
+#   sin la necesaria EQ de sal que se aplicará a continuación.
 #
 #----------------------------------------------------------------------
 
@@ -87,6 +89,7 @@ MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain'
                                 ##        despueś de ejecutar aquí un ajuste de 'level'.
 
 import read_brutefir_process as brutefir ## v2.0f
+import brutefir_cli
 
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
@@ -105,7 +108,7 @@ def check_fs_directory(fs):
 def bf_cli (orden):
     global warnings
     try:
-        s = socket.socket()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((bfcli_address, bfcli_port))
         s.send(orden + '; quit\n')
         s.close()
@@ -609,8 +612,15 @@ def do (order):
 
     ## <PRESETS> ##
     if change_preset:
+        # (i)   Muteamos el FIRtro para evitar oir las nuevas vias sin la la nueva EQ de sala por ejemplo
+        #       en el caso de un nuevo subwooer muy dependiente de compensación del acoustic space
+        #       escucharemos un grave muy inflado hasta que no se aplica la EQ
+        bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
+        #       Este sleep es experimental 350ms sirve para que lo dicho arriba se cumpla.
+        #       La cosa es que la orden de mute tarda demasiado en ejecutarse :-/
+        sleep(.350)
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
-        # a la vez que configuramos el preset, obtenemos el drc y el balance que le corresponde:
+        # a la vez que configuramos las vias para el preset, obtenemos el drc y el balance que le corresponde:
         preset, drc_eq, balance, peq = presets.configura_preset(preset, filter_type)
         balance = int(balance)
         # si se hubiera pedido un preset erroneo se deja el que habia:
@@ -629,6 +639,8 @@ def do (order):
     #   3) un comando= peq_defeat --> peq cambia
     if change_peq:
         if load_ecasound:
+            # Muteamos el FIRtro para evitar oir la interrupción durenate la carga de los parametricos
+            bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
             peqdefeat = False
             change_input = True     # para reconectar la fuente a ecasound
             if "preset" in command or "reload" in command:
