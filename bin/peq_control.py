@@ -24,8 +24,10 @@
 #  Corregido cargaPEQini cuando el INI tiene menos bloques de plugins que ecasound
 #  Permite PEQdump sin ser el dueño del fichero /home/firtro/lspk/altavoz/peqdump.txt
 # v1.1a:
-#  suprimido el sleep(0.1) de cargaPEQini
+#  Suprimido el sleep(0.1) de cargaPEQini
 #  y cambiado sleep(0.02) antes 0.1 en PEQbypass (estos sleeps habría que depurarlos...)
+# v1.1b
+#  Se printan los mensajes intercalando  lineas en blanco para mejor lectura en la consola.
 
 from os import path as os_path, remove as os_remove
 from sys import path as sys_path, argv as sys_argv
@@ -98,13 +100,14 @@ def cargaPEQini(archivoPEQini):
                 # (!) por si el pop* se agota antes que los posibles filtros admitidos en ecasound
                 if listaParamsPlugins:
                     ecanet("cop-set " + str(cop) + "," + str(pos) + "," + listaParamsPlugins.pop(0)) #(*)
-    #sleep(.1)
-    print "(peq_control) Se ha cargado en Ecasound el archivo: " + archivoPEQini
-    print "(peq_control) Recuerda revisar la Ganancia global del primer plugin."
+
+    #sleep(.1) # valor experimental ya no hace falta v1.1a
+    print "\n(peq_control) Se ha cargado en Ecasound el archivo: " + archivoPEQini
+    print "(peq_control) Recuerda revisar la Ganancia global del primer plugin.\n"
     try:
         if len(listaParamsPlugins) > 0:
-            print "(peq_control) La lista de filtros excede la capacidad de " + str(len(plugins)) \
-                  + " plugins de Ecasound"
+            print "\n(peq_control) La lista de filtros excede la capacidad de " + str(len(plugins)) \
+                  + " plugins de Ecasound\n"
     except:
         pass
 
@@ -124,9 +127,9 @@ def PEQdefeat():
         ecanet("cs-connect")
         ecanet("start")
         # printamos:
-        print "(peq_control) Ecasound ha cargado el archivo: " + ecsDefeatFile
+        print "\n(peq_control) Ecasound ha cargado el archivo: " + ecsDefeatFile + "\n"
     else:
-        print "(peq_control) ERROR accediendo al archivo: " + ecsDefeatFile
+        print "\n(peq_control) ERROR accediendo al archivo: " + ecsDefeatFile + "\n"
         return False
 
 def PEQgain(level):
