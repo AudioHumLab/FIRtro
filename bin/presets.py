@@ -34,7 +34,6 @@ import os
 from sys import path as sys_path, argv as sys_argv, exit as sys_exit
 import socket
 import ConfigParser
-import time
 
 # para conectar solo las salidas de brutefir de las VIAS EN USO a la tarjeta de sonido
 import jack
