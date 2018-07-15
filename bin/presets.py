@@ -22,6 +22,11 @@
 # - Se continuá la ejecución en caso de que Brutefir no esté accesible
 # v1.3d
 # - Se amplían las opciones por línea de comandos
+# v2.0a
+# - Se reescriben las funciones de configuracion y activación de las vias:
+#   Se distingue cada canal, se optimiza el código.
+# - Se adapta para manejar distintos subwoofers
+# - Se usa RawConfigParser + .optionxform = str para preservar nombres de vias case sensitive en presets.ini
 
 import brutefir_cli
 from subprocess import Popen
@@ -38,16 +43,21 @@ import jack
 # y tambien proporciona el mapeo de salidas de Brutefir en Jack
 import read_brutefir_process  as brutefir
 # rev 1.3c:
-brutefir.outputs = []
+brutefir.outputsMap = []
 brutefir.coeffs = []
 brutefir.filters_at_start = []
 brutefir.filters_running = []
+
 # Para que funcione la cosa actualizamos las listas:
 bferror = False
-try:    brutefir.lee_config()
-except: bferror = True
-try:    brutefir.lee_running_config()
-except: bferror = True
+try:   
+    brutefir.lee_config()
+except:
+    bferror = True
+try:
+    brutefir.lee_running_config()
+except:
+    bferror = True
 if bferror:
     print "(presets.py) No se ha podido comunicar con Brutefir"
 
@@ -64,7 +74,8 @@ status.read(config_folder + "/status")
 altavoz_folder = loudspeaker_folder + loudspeaker
 
 # archivo de definición de nuestros presets para este altavoz:
-presets = ConfigParser.ConfigParser()
+presets = ConfigParser.RawConfigParser()
+presets.optionxform = str
 presets.read(altavoz_folder + "/presets.ini")
 # recopilador de avisos para printar
 avisos = []
@@ -79,36 +90,45 @@ def configura_preset(presetID, filter_type):
         - el ajuste de balance
     """
     global avisos
-
+    
     if presets.has_section(presetID):
         avisos += [ "(presets) Ha seleccionado preset: " + presetID ]
-        viasActivas = []
+        avisos += [ "\n                                        ftype:\taten:\tdelay:\tpcm:" ]
+        viasDelPreset = []
+        etiquetasDeVias = ["fr", "lo", "mi", "hi", "sw"]
 
+        # [presetID]
+        # opcion1 = valor1
+        # opcion2 = valor2
+        # ...     = ...... 
+        # etc
         for opcion in presets.options(presetID):
             valor = presets.get(presetID, opcion)
 
+            # opciones del ini relativas a DRC:
             if opcion in ["drc"]:
                 drc_num = configura_drc_coeff(valor)
 
-            if opcion in ["fr", "lo", "mi", "hi", "sw"]:
+            # opciones del ini relativas a VÍAS:
+            if [x for x in etiquetasDeVias if x in opcion]:
                 via = opcion # solo para legibilidad
                 atten, delay, pcm_name = valor.split()
-                configura_via_coeff(via, pcm_name, filter_type)
-                configura_via_atten(via, atten)
-                configura_via_delay(via, delay)
-                viasActivas.append(via)
-                avisos += [ "(presets) Se configura la via " + via + " " + filter_type + ":\t" \
-                            + atten + "\t" + delay + "\t" + pcm_name ]
+                configura_via(via, atten, delay, pcm_name, filter_type)
+                viasDelPreset.append(via)
+                avisos += [ "(presets) Se configura la via: " + via.ljust(8) \
+                            + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
 
+            # opciones del ini relativas a BALANCE:
             if opcion in ["balance"]:
                 balance = ajusta_balance(valor)
 
+            # opciones del ini relativas a PEQ:
             if opcion in ["peq"]:
                 peq = ajusta_peq(valor)
 
-        avisos += ["(presets) Enjoy!"]
+        avisos += ["(presets) Enjoy!\n"]
         # Conectamos a la tarjeta solo las vias definidas en el preset:
-        conecta_tarjeta(viasActivas)
+        conecta_tarjeta(viasDelPreset)
 
     else:
         presetID = "ERROR PRESET NO VALIDO"
@@ -163,89 +183,82 @@ def configura_drc_coeff(fName):
         if drc_nums[0] == drc_nums[1]:
             # devolvemos el drc que hay que configurar para que se ocupe server_process.py
             return drc_nums[0]
-            avisos += ["(presets) se configura drc num." + drc_nums[0] + " con filtro: " + fName]
+            avisos += ["(presets) Se configura drc num." + drc_nums[0] + " con filtro: " + fName]
 
     except:
         return "0"
         avisos += ["(presets) algo no ha ido bien localizando el drc"]
 
-def configura_via_coeff(via, fName, filter_type):
-    """ funcion auxiliar para cargar en Brutefir (orden CLI: cfc) el filtro de xover del preset seleccionado
+def configura_via(via, atten, delay, pcmName, filter_type):
+    """ Funcion auxiliar para cargar en Brutefir el filtro de xover
+        definido en el preset seleccionado.
+        NOTA:   Se ha convenido que presets.ini no incluya el prefigo 'lp-'/'mp-'
+                ni la extensión '.pcm'
     """
-    #global avisos
-    if "dirac" in fName:
-        filtro_pcm = "dirac pulse"
+    atten = str(float(atten))
+    samples = str(int(float(delay)/1000*44100))
+    if "dirac" in pcmName:
+        pcmName = "dirac pulse"
     else:
-        filtro_pcm = filter_type + "-" + fName + ".pcm"
+        pcmName = filter_type + "-" + pcmName + ".pcm"
 
-    for coeff in brutefir.coeffs[2:]:           # eludimos recorrer los primeros coeff del EQ
+    # Recorremos los coeff disponibles, saltamos los dos primeros que son de la etapa de EQ.
+    for bfirCoeff in brutefir.coeffs[2:]:
 
-        if filtro_pcm == coeff[2]:              # coeff[2] es el nombre del pcm
+        coeffNum, coeffName, coeffPcm = bfirCoeff
 
-            bCoeff = coeff[1]                   # coeff[1] es el nombre del coeff en Brutefir
+        # Vemos si es el pcm solicitado
+        if pcmName == coeffPcm:
+            
+            bfilter = "f_" + via
 
-            for bFilter in vias_como_esta(via):
-                # enviamos el comando a Brutefir:
-                tmp = 'cfc "' + bFilter + '" "' + bCoeff + '"; quit;'
-                #print ">>>>>>>  comando a Brutefir:", tmp # DEBUG
-                brutefir_cli.bfcli(tmp)
+            # 1) carga el coeff:    cfc <filter> <coeff>
+            tmp = 'cfc "' + bfilter + '" "' + coeffName + '"; quit;'
+            brutefir_cli.bfcli(tmp)
 
-def configura_via_atten(via, atten):
-    """ funcion auxiliar para configurar la atten de una vía en Brutefir (orden CLI: cfoa)
-    """
-    #global avisos
-    for bFilter in vias_como_esta(via):
+            # 2) ajusta la atten:   cfoa <filter> <output> <attenuation>
+            tmp = 'cfoa "' + bfilter + '" "' + via + '" ' + atten + '; quit;'
+            brutefir_cli.bfcli(tmp)
 
-        atten = str(float(atten))
+            # 3) ajusta el delay:   cod <output> <delay>
+            tmp = 'cod "' + via + '" ' + samples + '; quit;'
+            brutefir_cli.bfcli(tmp)
 
-        # enviamos el comando a Brutefir:
-        tmp = 'cfoa "' + bFilter + '" "' + bFilter[2:] + '" ' + atten + '; quit;'
-        #print ">>>>>>>  comando a Brutefir:", tmp # DEBUG
-        brutefir_cli.bfcli(tmp)
+def conecta_tarjeta(vias):
 
-def configura_via_delay(via, delay):
-    """ funcion auxiliar para configurar el retardo de una vía en Brutefir (orden CLI: cod)
-    """
-    #global avisos
-    for bFilter in vias_como_esta(via):
-
-        bOutput = bFilter[2:]
-        delaySamples = str(int(float(delay)/1000*44100))
-
-        # enviamos el comando a Brutefir:
-        tmp = 'cod "' + bOutput + '" ' + delaySamples + '; quit;'
-        #print ">>>>>>>  comando a Brutefir:", tmp # DEBUG
-        brutefir_cli.bfcli(tmp)
-
-# Subfuncion auxiliar para recorrer las etapas de filtrado
-# del tipo indicado (fr, hi, mi, lo o sw):
-def vias_como_esta(tipoVia):
-    """ funcion auxiliar que proporciona las vias de subwoofer definidas en brutefir
-    """
-    viasComoEsta = []
-    for filtroRunning in brutefir.filters_running:
-        if tipoVia in filtroRunning[0]:
-            viasComoEsta.append(filtroRunning[0])
-    return viasComoEsta
-
-def conecta_tarjeta(viasActivas):
     jack.attach("tmp")
 
-    # disponemos de la funcion brutefir.outputs que contiene el mapeo de vias
-    for output in brutefir.outputs:
+    # Disponemos de la funcion brutefir.outputsMap que contiene 
+    # el mapeo de vias tal como esta definido en brutefir_config, por ejemplo:
+    #   system:playback_3/hi_L
+    #   system:playback_4/hi_R
+    #   system:playback_7/lo_L
+    #   system:playback_8/lo_R
+    #   system:playback_5/sw1
+    #   system:playback_6/sw2
 
-        brutefirPort = "brutefir:" + output.split("/")[1].replace('"', '')
-        jackPort     =               output.split("/")[0].replace('"', '')
+    to_disconnect=[]
+    to_connect = []
+    
+    # Ahora debemos evaluar si es una salida a activar:
+    for bfOutMap in brutefir.outputsMap:
+        conectar = False
+        jackDest, bfOut = bfOutMap.split('/')
+        jackOrig        = "brutefir:" + bfOut
 
-        # ahora debemos evaluar si es una salida de una via activa
-        salidaActiva = False
-        for viaActiva in viasActivas:
-            if viaActiva in output:
-                salidaActiva = True
-        if salidaActiva:
-            jack.connect(brutefirPort, jackPort)
+        for via in vias:
+            if via.lower() in bfOut.lower():
+                conectar = True
+
+        if conectar:
+            to_connect.append( (jackOrig, jackDest) )
         else:
-            jack.disconnect(brutefirPort, jackPort)
+            to_disconnect.append( (jackOrig, jackDest) )
+    
+    for pair in to_disconnect:
+        jack.disconnect(pair[0], pair[1])
+    for pair in to_connect:
+        jack.connect(pair[0], pair[1])
 
     jack.detach()
 
@@ -255,7 +268,7 @@ def lista_de_presets():
     """
     return presets.sections()
 
-# Para uso en la línea de comandos
+# Solo para uso en la línea de comandos
 def printa_presets(x=''):
     """ muestra los presets definidos en el archivo presets.ini del altavoz
     """
@@ -275,6 +288,7 @@ def printa_presets(x=''):
                     print option.ljust(12), "=".ljust(4), presets.get(preset, option)
             print
 
+# Uso en la línea de comandos
 if __name__ == '__main__':
 
     if sys_argv[1:]:

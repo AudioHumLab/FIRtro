@@ -7,7 +7,7 @@
     Se lee brutefir_config y se conecta con el proceso brutefir.
     
     Se proporcionan CUATRO listas:
-    outputs: lista de salidas y su correspondiente puerto ej JACK.
+    outputsMap: lista de salidas y su correspondiente puerto ej JACK.
     coeffs: lista de coeficientes disponibles.
     filters_at_start: lista de filtros con los coeficientes definidos en la carga de Brutefir.
     filters_running: lista de filtros con los coeficientes en curso.
@@ -22,7 +22,9 @@
     v2.1
     - contempla la existencia de coeff "dirac pulse" para vias full range sin filtrar
     v2.1a
-    - se deja de usar nc localhost en favor de brutefir_cli.py
+    - Se deja de usar nc localhost en favor de brutefir_cli.py
+    v2.1b
+    - Se quitan las comillas en el mapeo de salidas, y se renombra la lista 'outputsMap' para mejor claridad.
 """
 
 import sys, os
@@ -50,9 +52,9 @@ def lee_config():
 
     # Outputs storage
     outputIniciado = False
-    global outputs
+    global outputsMap
     outputsTmp= ''
-    outputs = []
+    outputsMap = []
 
     # Coeff storage
     coeffIndex = -1
@@ -89,8 +91,9 @@ def lee_config():
             outputsTmp += linea.strip()
             if "}" in linea: # fin de la lectura de las outputs
                 outputIniciado = False
-                outputsTmp = outputsTmp.split("ports:")[1].split(";")[0].replace(" ","")
-                outputs = outputsTmp.split(",")
+                outputsTmp = outputsTmp.split("ports:")[1].split(";")[0].replace(" ", "")
+                outputsTmp = outputsTmp.replace('"', '')
+                outputsMap = outputsTmp.split(",")
 
         # Recopilamos COEFFs
         if linea.startswith("coeff"):
@@ -262,7 +265,7 @@ def main():
     lee_running_config()
     
     print "\n--- Outputs map:"
-    for x in outputs:
+    for x in outputsMap:
         print x
 
     print "\n--- Coeffs available:"
@@ -286,6 +289,3 @@ def main():
 if __name__ == "__main__" :
 
     main()
-    
-    
-    
