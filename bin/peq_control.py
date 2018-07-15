@@ -102,7 +102,7 @@ def cargaPEQini(archivoPEQini):
                     ecanet("cop-set " + str(cop) + "," + str(pos) + "," + listaParamsPlugins.pop(0)) #(*)
 
     #sleep(.1) # valor experimental ya no hace falta v1.1a
-    print "\n(peq_control) Se ha cargado en Ecasound el archivo: " + archivoPEQini
+    print "\n(peq_control) Se ha cargado en Ecasound el archivo: " + archivoPEQini.split("/")[-1]
     print "(peq_control) Recuerda revisar la Ganancia global del primer plugin.\n"
     try:
         if len(listaParamsPlugins) > 0:
