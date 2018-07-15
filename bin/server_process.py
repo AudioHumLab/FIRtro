@@ -92,7 +92,7 @@ if mpd_volume_linked2firtro:    ## <MPD>  Control de volumen enlazado con MPD.
 MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain' que llega de MPD
                                 ##        despueś de ejecutar aquí un ajuste de 'level'.
 
-import read_brutefir_process as brutefir ## v2.0f
+import read_brutefir_process as brutefir ## v2.0g
 import brutefir_cli
 
 ##########################################################
@@ -645,7 +645,7 @@ def do (order):
     #   3) un comando= peq_defeat --> peq cambia
     if change_peq:
         if load_ecasound:
-            # Muteamos el FIRtro para evitar oir la interrupción durenate la carga de los parametricos
+            # Muteamos el FIRtro para evitar oir la interrupción durante la carga de los parametricos
             bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
             peqdefeat = False
             change_input = True     # para reconectar la fuente a ecasound
@@ -700,7 +700,7 @@ def do (order):
     if change_input:
         input_gain  = float(inputs.get(input_name, "gain"))
         input_ports =       inputs.get(input_name, "in_ports")
-        if change_xovers: # v2.0f
+        if change_xovers: # v2.0g
             filter_type =   inputs.get(input_name, "xo")
         resampled   =       inputs.get(input_name, "resampled")
         new_fs      =       inputs.get(input_name, "fs")
