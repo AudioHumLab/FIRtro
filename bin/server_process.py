@@ -47,6 +47,15 @@
 # - Se admite 'radio_channel next|prev' para rotar sobre los presets del archivo audio/radio,
 #   y 'radio_channel recall' para recuperar el último preset escuchado (radio_prev).
 # - 'exec' acepta argumentos con el ejecutable.
+# 
+# v2.0f
+# - mpd client slider LOG_volume
+#
+# v2.0g
+# - Se desliga el cambio de xover lp|mp de los presets.
+# - Se hace un mute antes de que un nuevo preset conecte nuevas vías para evitar escucharlas
+#   sin la necesaria EQ de sal que se aplicará a continuación.
+# - Se corrige change_inputs: se recarga el xover de audio/inputs solo si change_xovers=True
 #
 #----------------------------------------------------------------------
 
@@ -83,6 +92,9 @@ if mpd_volume_linked2firtro:    ## <MPD>  Control de volumen enlazado con MPD.
 MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain' que llega de MPD
                                 ##        despueś de ejecutar aquí un ajuste de 'level'.
 
+import read_brutefir_process as brutefir ## v2.0g
+import brutefir_cli
+
 ##########################################################
 # Comprueba que exista el directorio de una Fs requerida #
 ##########################################################
@@ -100,7 +112,7 @@ def check_fs_directory(fs):
 def bf_cli (orden):
     global warnings
     try:
-        s = socket.socket()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((bfcli_address, bfcli_port))
         s.send(orden + '; quit\n')
         s.close()
@@ -432,9 +444,8 @@ def do (order):
             if len(line) > 1:
                 filter_type = arg1
                 change_eq = True
-                change_xovers = True  ## <PRESETS> ##
-                change_preset = True  ## ver más abajo: no hacemos nada if change_xovers, simplemente
-            else: raise               ## regeneramos el preset completo con el modulo presets.py
+                change_xovers = True
+            else: raise
 
         elif command == "drc":
             if len(line) > 1:
@@ -604,27 +615,18 @@ def do (order):
             warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
 
     ## <PRESETS> ##
-    ## OjO (1/2) estos dos IF estaban justo antes del IF CHANGE_DRC (en Resto de comandos),
-    ## ahora los subo aquí para que surjan efecto FILTER_TYPE, DRC, BALANCE,
-    ## u otros parámetros futuros soportados en presets.ini
-    if change_xovers:
-        ## /// este es el código original (Resto de comandos..) que he sustituido por el modulo presets.py
-        #for channel in speaker.options("out_channels"):
-        #    bf_filter = '"f_' + speaker.get("out_channels", channel).split()[0] + '"'
-        #    bf_coeff = '"c_' + filter_type + '-' + speaker.get("out_channels", channel).split()[1] + '"'
-        #    bf_cli('cfc ' + bf_filter + ' ' + bf_coeff)
-        ## \\\ ahora el cambio de xovers (filter_type = mp|lp) lo realiza el nuevo modulo "presets.py"
-
-        # Añadimos la POSIBILIDAD de ALTERNAR el filter_type para usearse desde un botón de la web:
-        if filter_type in ["cambia", "alterna", "change", "switch", "toggle"]:
-            if filter_type_old == "lp": filter_type = "mp"
-            else:                       filter_type = "lp"
-
-    ## <PRESETS> ##
-    ## OjO (2/2)
     if change_preset:
+                
+        # (i)   Muteamos el FIRtro para evitar oir las nuevas vias sin la la nueva EQ de sala por ejemplo
+        #       en el caso de un nuevo subwooer muy dependiente de compensación del acoustic space
+        #       escucharemos un grave muy inflado hasta que no se aplica la EQ
+        bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
+        #       Este sleep es experimental 350ms sirve para que lo dicho arriba se cumpla.
+        #       La cosa es que la orden de mute tarda demasiado en ejecutarse :-/
+        sleep(.350)
+        
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
-        # a la vez que configuramos el preset, obtenemos el drc y el balance que le corresponde:
+        # a la vez que configuramos las vias para el preset, obtenemos el drc y el balance que le corresponde:
         preset, drc_eq, balance, peq = presets.configura_preset(preset, filter_type)
         balance = int(balance)
         # si se hubiera pedido un preset erroneo se deja el que habia:
@@ -643,6 +645,8 @@ def do (order):
     #   3) un comando= peq_defeat --> peq cambia
     if change_peq:
         if load_ecasound:
+            # Muteamos el FIRtro para evitar oir la interrupción durante la carga de los parametricos
+            bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
             peqdefeat = False
             change_input = True     # para reconectar la fuente a ecasound
             if "preset" in command or "reload" in command:
@@ -696,7 +700,8 @@ def do (order):
     if change_input:
         input_gain  = float(inputs.get(input_name, "gain"))
         input_ports =       inputs.get(input_name, "in_ports")
-        filter_type =       inputs.get(input_name, "xo")
+        if change_xovers: # v2.0g
+            filter_type =   inputs.get(input_name, "xo")
         resampled   =       inputs.get(input_name, "resampled")
         new_fs      =       inputs.get(input_name, "fs")
         new_clock   =       inputs.get(input_name, "clock")
@@ -710,10 +715,14 @@ def do (order):
             change_clock = True
 
         if check_fs_directory(fs):
-            if not change_clock and not change_fs:      # SI NO HAY CAMBIO DE Fs o de CLOCK intentamos el CAMBIO de INPUT:
-                if server_input.change_input (input_name, input_ports.split(), firtro_ports.split(), resampled):
-                    pass                                # El cambio de input ha ido bien.
-                else:
+            # SI NO HAY CAMBIO DE Fs o de CLOCK
+            if not change_clock and not change_fs:
+                # SE CAMBIA la INPUT:
+                if not server_input.change_input (input_name, \
+                                                  input_ports.split(), \
+                                                  firtro_ports.split(), \
+                                                  resampled):
+                    # Si falla el cambio de input:
                     warnings.append("Error changing to input " + input_name)
                     input_name      = input_name_old
                     filter_type     = filter_type_old
@@ -722,7 +731,8 @@ def do (order):
                     change_gain     = False
                     write_status    = True
             else:
-                pass                                    # DEJAMOS que change_clock/change_fs REINICIE el AUDIO del FIRtro
+                # DEJAMOS que change_clock/change_fs REINICIE el AUDIO del FIRtro
+                pass
         else:
             warnings.append("Error changing to input " + input_name)
             # marcha atrás
@@ -765,8 +775,11 @@ def do (order):
     #if replaygain_track:           # revisar esto : gain o level  ¿ !!! PENDIENTE long time ago ...?
     #    gain += loudness_ref
 
-    # Cambios de ganancia o de EQ (con control de clipping debido a input_gain y eq_mag)
-    # aka "máquina de control de volumen"
+    #################################
+    # MÁQUINA DE CONTROL DE VOLUMEN
+    # Gestiona los cambios de ganancia o de EQ, con 
+    # control de clipping debido a input_gain y eq_mag.
+    #################################
     if (change_gain or change_eq):
 
         # Info para el potenciómetro de volumen (p.ej el slider de la web) (recálculo)
@@ -884,7 +897,7 @@ def do (order):
                     #bf_cli('cfia 2 2 m0; cfia 3 3 m0')
                 if not gain_direct and "level" in order and mpd_volume_linked2firtro:        ## <MPD> ##
                     # update MPD "fake volume"
-                    vol = 100*(exp(max((gain/client_mpd.slider_range+1),0)**(1/1.293)*log(2))-1)
+                    vol = 100*(np.exp(max((gain/client_mpd.slider_range+1),0)**(1/1.293)*np.log(2))-1)
                     if vol < 1: vol = 1 # minimal mpd volume
                     client_mpd.setvol(vol)
                     last_level_change_timestamp = time.time()
@@ -931,12 +944,39 @@ def do (order):
         # 2º Entrada de brutefir (para analogica con filtros mp)
         #bf_cli('cfia 2 2 m' + polarity + '1 ; cfia 3 3 m' + polarity + '1')
 
-    # (!!!) 'if change xovers' se ha pasado al inicio con la gestión de <PRESETS>
-    #if change_xovers:
-    #    for channel in speaker.options("out_channels"):
-    #        bf_filter='"f_' + speaker.get("out_channels", channel).split()[0] + '"'
-    #        bf_coeff='"c_' + filter_type + '-' + speaker.get("out_channels", channel).split()[1] + '"'
-    #        bf_cli('cfc ' + bf_filter + ' ' + bf_coeff)
+    if change_xovers: ## v2.0f ##
+        # Leemos en tiempo real los coeff cargados en los filtros de vías de Brutefir
+        # NOTA: en FIRtro 1.0 se leia speaker.get("out_channels", channel) que queda en desuso
+        #       por ser un mapeo que solo servía para resolver esta función.
+
+        # Añadimos la posibilidad de ALTERNAR el filter_type para usarse desde un botón de la web:
+        if filter_type in ["cambia", "alterna", "change", "switch", "toggle"]:
+            if filter_type_old == "lp": filter_type = "mp"
+            else:                       filter_type = "lp"
+        elif not filter_type in ["lp", "mp"]:
+            filter_type = filter_type_old
+
+        # Solo procede hacer change_xovers lp|mp en los filtros de vías:
+        etiquetasDeVias = ["fr", "lo", "mi", "hi", "sw"]
+        haLeidoBfir = True
+        try:
+            brutefir.lee_config()
+        except:
+            haLeidoBfir = False
+            print "(server_process) ERROR usando read_brutefir_process.py"
+        try:
+            brutefir.lee_running_config()
+        except:
+            haLeidoBfir = False
+            print "(server_process) ERROR usando read_brutefir_process.py"
+        if haLeidoBfir:
+            for filter_running in brutefir.filters_running:
+                # ejemplo: ['f_lo_L', '12', 'c_lp-lo4', 'lp-lo.pcm']
+                bfilter, coeffNum, coeffName, pcmName = filter_running
+                if [x for x in etiquetasDeVias if x in bfilter]:        # aquí verificamos que sea una etapa de filtro de vias
+                    newCoeffName = "c_" + filter_type + "-" + coeffName[5:]
+                    tmp = 'cfc "' + bfilter + '" "' + newCoeffName + '"; quit;'
+                    bf_cli(tmp)
 
     if change_drc:
         # Metodo 1: Se asignan siempre coeficientes predefinidos.
