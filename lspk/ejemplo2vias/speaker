@@ -6,8 +6,3 @@ house_atten = 2
 
 [calibration]
 ref_level_gain = -12.2
-
-[out_channels]
-out_l = combi_L combi_L
-out_r = combi_R combi_R
-
