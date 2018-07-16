@@ -623,7 +623,7 @@ def do (order):
         bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
         #       Este sleep es experimental 350ms sirve para que lo dicho arriba se cumpla.
         #       La cosa es que la orden de mute tarda demasiado en ejecutarse :-/
-        sleep(.350)
+        time.sleep(.350)
         
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
         # a la vez que configuramos las vias para el preset, obtenemos el drc y el balance que le corresponde:
