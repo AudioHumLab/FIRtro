@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    v1.2
+    v1.2b
     modulo auxiliar para reconfigurar ~/.mpdconf con los puertos jack
     adecuados a la configuracion de FIRtro: brutefir o ecasound
 
@@ -10,21 +10,21 @@
         mpdconf_adjust.py  brutefir|ecasound|dummy
 """
 # v1.1:
-# se añade la revisión del archivo ~/.mpdconf modificado
+# - Se añade la revisión del archivo ~/.mpdconf modificado
 # v1.2:
-# se incluye dummy de jack
+# - Se incluye dummy de jack
+# v1.2b
+# - Se evita acumular lineas en blanco al final de .mpdconf
 
 from os import path as os_path
 from sys import argv as sys_argv
 import getconfig
 
 HOME = os_path.expanduser("~")
-
-def _lee(file):
-    f = open(file, "r")
-    lineas = f.read().split("\n")
-    f.close()
-    return lineas
+F_IN  = HOME + "/.mpdconf"
+F_OUT = HOME + "/.mpdconf"
+#F_IN  = HOME + "/prueba"
+#F_OUT = HOME + "/prueba"
 
 def _revisa(lineas):
     """ En cualquiera de los siguientes casos esta función devolverá False:
@@ -75,28 +75,29 @@ def _busca_firtro_ports_deseados(opcion):
     return firtro_ports
 
 def modifica_jack_destination_ports(opcion):
-
+    
     firtro_ports = _busca_firtro_ports_deseados(opcion)
     if not firtro_ports:
         return False
 
     # leemos .mpdconf
-    lineas = _lee(HOME + "/.mpdconf")
-
-    # y lo sobreescribimos
-    f = open(HOME + "/.mpdconf", "w")
-    #f = open(HOME + "/prueba", "w") # DEBUG
-
+    f = open(F_IN, "r")
+    lineas = f.readlines()
+    f.close()
+    
     is_section_output = False
     is_jack_output    = False
-    hay_cambios = False
+    nuevas_lineas = []
 
     # repasamos línea a línea:
+    linea_prev  = ""
+    nueva_linea = ""
     for linea in lineas:
 
+        linea = linea[:-1] # quitamos el \n final
+        
         # solo analizamos las no comentadas
         if not '#' in linea:
-
             if linea.replace(' ', '') == 'audio_output{':
                 is_section_output = True
 
@@ -110,17 +111,29 @@ def modifica_jack_destination_ports(opcion):
             if 'destination_ports' in linea and is_jack_output:
                 # tomamos la primera parte de la linea y
                 # la completamos añadiendo lon nuevos puertos
-                linea = linea.split('"')[0].rstrip() + ' "' + firtro_ports + '"'
-                hay_cambios = True
+                nueva_linea = linea.split('"')[0].rstrip() + ' "' + firtro_ports + '"'
 
-        # reescribimos cada linea como en el original, ahora con los nuevos puertos.
-        f.write(linea + "\n")
+        # Almacenamos cada linea como en el original, pero ahora con los nuevos puertos.
+        if nueva_linea:
+            nuevas_lineas.append(nueva_linea)
+            nueva_linea = ""
+        # Evitamos repetición de lineas en blanco al final:
+        elif linea <> linea_prev:
+                nuevas_lineas.append(linea)
 
+        linea_prev = linea
+            
+    # Escribimos:
+    f = open(F_OUT, "w")
+    for l in nuevas_lineas:
+        f.write(l + "\n")
     f.close()
 
     # finalmente revisamos el archivo modificado
-    if _revisa(_lee(HOME + "/.mpdconf")):
-    #if _revisa(_lee(HOME + "/prueba")): # DEBUG
+    f = open(F_OUT, "r")
+    lineas = f.readlines()
+    f.close()
+    if _revisa(lineas):
         return True
     else:
         return False
@@ -129,12 +142,9 @@ def modifica_jack_destination_ports(opcion):
 # opcionalmente podemos usar el módulo desde un terminal
 if __name__ == "__main__":
 
-    if len(sys_argv) > 1:
-        if modifica_jack_destination_ports(sys_argv[1]):
-            print "done"
-        else:
-            print "error"
-
+    # opcion 'brutefir' o 'ecasound'
+    opcion = sys_argv[1]
+    if modifica_jack_destination_ports(opcion):
+        print "done"
     else:
-        print __doc__
-
+        print "error"
