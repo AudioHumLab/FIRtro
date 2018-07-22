@@ -615,14 +615,23 @@ def do (order):
             warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
 
     ## <PRESETS> ##
+
+    ## tomamos nota de la atten de la señal para poder mutear/desmutear
+    ## directo en brutefir para evitar transiciones en los cambios.
+    if change_preset or change_peq:
+        tmp = brutefir_cli.bfcli("lf;quit;")
+        bfAtten0 = [x for x in tmp.split("\n") if ("from inputs:  0" in x)][-1].split("/")[-1]
+        bfAtten1 = [x for x in tmp.split("\n") if ("from inputs:  1" in x)][-1].split("/")[-1]
+
     if change_preset:
                 
-        # (i)   Muteamos el FIRtro para evitar oir las nuevas vias sin la la nueva EQ de sala por ejemplo
-        #       en el caso de un nuevo subwooer muy dependiente de compensación del acoustic space
-        #       escucharemos un grave muy inflado hasta que no se aplica la EQ
+        # (i)   Muteamos temporalmente Brutefir para evitar oir las nuevas vias sin la la nueva EQ de sala,
+        #       por ejemplo en el caso de un nuevo subwooer muy dependiente de compensación del
+        #       room gain escucharemos un grave muy inflado hasta que no se aplica la EQ.
+        #       El desmuteo no es necesario, ya que change_preset implica change_gain.
         bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
-        #       Este sleep es experimental 350ms sirve para que lo dicho arriba se cumpla.
-        #       La cosa es que la orden de mute tarda demasiado en ejecutarse :-/
+        #       Este sleep es experimental 350 ms sirve para que lo dicho arriba se cumpla.
+        #       La cosa es que el muteo tarda demasiado en ejecutarse :-/
         time.sleep(.350)
         
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
@@ -645,7 +654,7 @@ def do (order):
     #   3) un comando= peq_defeat --> peq cambia
     if change_peq:
         if load_ecasound:
-            # Muteamos el FIRtro para evitar oir la interrupción durante la carga de los parametricos
+            # Muteamos temporalmente Brutefir para evitar oir la interrupción durante la carga de los parametricos
             bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
             peqdefeat = False
             change_input = True     # para reconectar la fuente a ecasound
@@ -668,6 +677,10 @@ def do (order):
                 # curvas informativas para la web:
                 peq_l_mag_i = np.zeros(len(freq))
                 peq_r_mag_i = np.zeros(len(freq))
+
+            # Y desmuteamos:
+            bf_cli("cfia 0 0 " + bfAtten0 +" m0; cfia 1 1 " + bfAtten1 + "m0")
+
         elif not load_ecasound and peq <> "off":
             pass
             warnings += ["(!) Preset con PEQ pero ECASOUND está DESACTIVADO"]
