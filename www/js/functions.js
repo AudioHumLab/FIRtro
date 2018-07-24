@@ -457,7 +457,7 @@ function update_controls () {
             
             // Datos para el grafico.
             $.each($php_data['freq_i'], function(index, value) {
-                $plot_data_new[index]=[value, $php_data['drc2_r_mag_i'][index]];
+                $plot_data_new[index]=[value, $php_data['drcTot_r_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
             
@@ -471,7 +471,7 @@ function update_controls () {
             
             // Datos para el grafico. Los guardamos en una variable nueva
             $.each($php_data['freq_i'], function(index, value) {
-                $plot_data_new[index]=[value, $php_data['drc2_l_mag_i'][index]];
+                $plot_data_new[index]=[value, $php_data['drcTot_l_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
             
