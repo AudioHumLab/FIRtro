@@ -27,6 +27,8 @@
 # - Se revisa el código de gestión de pcms para DRC al final de este módulo.
 # - Se integra la gráfica de los paramétricos ecasound en las gráficas de la web.
 # - Se revisan los comentarios de este módulo.
+# - Se incluye 'system_eq' en el archivo de estado "audio/status"
+#   y se deja modificar el archivo "lspk/altavoz/speaker" ahora solo de lectura.
 #
 # v2.0c (2017-may)
 #
@@ -56,6 +58,7 @@
 # - Se hace un mute antes de que un nuevo preset conecte nuevas vías para evitar escucharlas
 #   sin la necesaria EQ de sal que se aplicará a continuación.
 # - Se corrige change_inputs: se recarga el xover de audio/inputs solo si change_xovers=True
+# - Mejoras en los comentarios del código.. y reubicación de algunas de las recientes novedades..
 #
 #----------------------------------------------------------------------
 
@@ -64,20 +67,22 @@ import ConfigParser
 import socket
 import sys
 import json
-import server_input
-from basepaths import *
-from getconfig import *
-from getstatus import *
-from getspeaker import *        # OjO tomarermos system_eq del archivo de configuración 'speaker'
-from getinputs import inputs
 from subprocess import Popen
 from math import copysign
 import numpy as np
 from scipy import signal
 
-################################################################
-# (i) FIRtro 2.0 EN ADELANTE SE DESTACAN LAS LINEAS AFECTADAS  #
-################################################################
+import server_input
+
+from basepaths import *
+from getconfig import *
+from getstatus import *
+from getspeaker import *
+from getinputs import inputs
+
+##################################################################
+# (i) FIRtro 2.0 EN ADELANTE SE DESTACARÁN LAS LINEAS AFECTADAS  #
+##################################################################
 import soundcards
 import wait4
 import presets                  ## <PRESETS>
@@ -95,9 +100,16 @@ MPD_GAIN_FWD_TIMER = .2         ## <MPD>  Temporizador que elude la orden 'gain'
 import read_brutefir_process as brutefir ## v2.0g
 import brutefir_cli
 
-##########################################################
-# Comprueba que exista el directorio de una Fs requerida #
-##########################################################
+
+################################################################
+################################################################
+####            Funciones AUXILIARES:                       ####
+################################################################
+################################################################
+
+################################################################
+### AUX. Comprueba que exista el directorio de una Fs requerida
+################################################################
 def check_fs_directory(fs):
     fsPath = loudspeaker_folder + loudspeaker + "/" + format(fs)
     if os.path.exists(fsPath):
@@ -106,9 +118,9 @@ def check_fs_directory(fs):
         print "(server_process) Directory not found: " + fsPath
         return False
 
-#########################################
-# Funcion para comunicarse con Brutefir #
-#########################################
+################################################################
+### AUX. Funcion para enviar comandos a Brutefir
+################################################################
 def bf_cli (orden):
     global warnings
     try:
@@ -122,13 +134,13 @@ def bf_cli (orden):
         if error not in warnings: 
             warnings.append (error)
 
-#############################################################
-# Funcion para obtener la fft de los pcm DRC                #
-# Se mapea sobre el array 'freq' de la etapa EQ de Brutefir #
-#############################################################
+################################################################
+### AUX. Funcion para obtener la fft de los pcm DRC
+#   Nota: mismos bins que los del array 'freq' del EQ de Brutefir.
+################################################################
 def pcm_fft (freq, fs, pcm_file, window_m=0):
     # Array que contendrá el fft simplificado para las frecuencias especificadas
-    fft_mag = np.zeros(len(freq))
+    fft_mag = [0] * len(freq)
     # Abrimos el fichero en modo binario
     try:
         fd = open(pcm_file, 'rb')
@@ -181,13 +193,13 @@ def pcm_fft (freq, fs, pcm_file, window_m=0):
     #return [round(float(data),2) for data in fft_mag_i.tolist()]
     return fft_mag
 
-#############################################################
-# Funcion para obtener la FR de un EQ paramétrico           #
-# Se mapea sobre el array 'freq' de la etapa EQ de Brutefir #
-#############################################################
+################################################################
+### AUX. Funcion para obtener la FR de un EQ paramétrico
+#   Nota: mismos bins que los del array 'freq' del EQ de Brutefir.
+################################################################
 def peq2mag_i (peqFile, channel):
     Fs = int(fs)
-    mag_i = np.zeros(len(freq))
+    mag_i = [0] * len(freq)
 
     # Filtros paramétricos (frec, BWoct, gain):
     peqs = peq2fr.leePEQ_canal(peqFile, channel)
@@ -198,9 +210,11 @@ def peq2mag_i (peqFile, channel):
     # en dBs:
     hdB = 20 * np.log10(np.abs(h))
 
+    f = w * Fs/(2*np.pi)    # w normalizadas --> frecuencias reales.
+
     # Ahora queda trasladar la respuesta (calculada con Fs) a los 63
     # valores de frecuencia 'freq' de la etapa EQ y manejados en las gráficas de la web.
-    f = w * Fs/(2*np.pi)    # Traducimos las w normalizadas a frecuencias reales.
+    
     # Y usamos el algoritmo de Alberto (ver función pcm_ftt) para completar los 63 valores:
     for i in range(len(freq)):
         for j in range(len(hdB)):
@@ -210,11 +224,81 @@ def peq2mag_i (peqFile, channel):
 
     return mag_i
 
-##########################################
-# Funcion principal que procesar ordenes #
-##########################################
+################################################################
+### AUX. V2.0c El diccionario de estado devuelto por do(order)
+################################################################
+def firtroData(locales, globales, entradas):
+    # Obtenemos el diccionario con todas la variables y sus valores
+    # 1. Variables locales
+    data = locales
+    # 2. añadimos las variables globales
+    data.update(globales)
+    # 3. y la lista de entradas
+    data.update({'inputs':entradas})
+    
+    # Variables que nos interesan del dicionario general 'data':
+    keys = ['treble', 'bass', 'replaygain_track', 'level', 'maxlevel_i', 'headroom', 'muted', 'polarity',
+        'fs', 'drc_eq', 'filter_type', 'clock', 'loudness_track', 'loudness_ref', 'loudness_level_info',
+        'radio', 'input_name', 'input_gain', 'system_eq', 'room_gain', 'house_corner', 'house_atten',
+        'ref_level_gain', 'loudspeaker', 'inputs', 'warnings', 'order','freq_i','tone_mag_i','loudeq_mag_i',
+        'drcTot_r_mag_i','drcTot_l_mag_i','drc_index','balance','balance_variation',
+        'preset', 'lista_de_presets', 'mono', 'peq', 'peqdefeat']    ## <PRESETS> <MONO> <PEQ> ##
+    # Y obtenemos un nuevo diccionario filtrado, con solo las opciones que nos interesan
+    fdata = { key: data[key] for key in keys}
+    # Lo formateamos y lo mandamos como salida de esta función:
+    fdata = json.dumps(fdata)
+    # Devolvemos el diccionario
+    return fdata
+
+###############################################################
+###############################################################
+####    FUNCION PRINCIPAL do(order) para procesa ordenes   ####
+###############################################################
+###############################################################
 def do (order):
 
+    ####  (i) Acceso a VARIABLES GLOBALES (incluyendo las importadas):
+    
+    global warnings             # Avisos runtime
+
+    global ref_level_gain       # Ganancia del altavoz ref al SPL nominal (/lspk/altavoz/speaker)
+    global gmax                 # Tope de ganacia admitido en Brutefir (audio/config)
+
+    global fs
+    global clock                ## <CLOCK> recuperado de Testing3 ##
+
+    global gain, level, headroom, balance, muted, polarity, filter_type, replaygain_track
+    global bass, treble, loudness_ref, loudness_track, loudness_level_info
+    global mono, monoCompens    ## <MONO> ##
+
+    global system_eq, drc_eq
+    global preset               ## <PRESETS> ##
+    global peq, peqdefeat       ## <PEQ> ##
+
+    global inputs
+    global input_name, input_gain, resampled
+    global radio, radio_prev    # v2.0e se centraliza la gestión de la radio tdt aquí
+
+                                # Curvas informativas para la web
+    global tone_mag_i, loudeq_mag_i, syseq_mag_i, drc_l_mag_i, drc_r_mag_i
+    global drcTot_l_mag_i
+    global drcTot_r_mag_i       # Las curvas 'drcTot' incluyen DRC_fir + sysEQ + PEQ
+    global drc_index
+    global peq_l_mag_i          ## <PEQ> ##
+    global peq_r_mag_i
+
+    global brutefir_ports       ## v2.0 'firtro_ports' ##
+    global ecasound_ports
+
+    global last_level_change_timestamp      ## Usado solo por <MPD> ##
+
+    global control_output       # Gestión de printados por consola
+    global control_clear        # Sin uso
+
+    #### Inicialización de las acciones a tomar en este procesamiento do(order)
+    
+    write_status = True         # Normalmente se refrescará el archivo de estado audio/status
+    warnings = []               # Borramos los warnings
     change_gain = False
     change_eq = False
     change_xovers = False
@@ -223,79 +307,17 @@ def do (order):
     change_peq = False
     change_input = False
     change_mono = False         ## <MONO> ##
-    write_status = True
-    # write_speaker = False     ## obsoleto (ahora system_eq se guarda temporalmente en audio/status)
     change_polarity = False
     do_mute = False
     gain_direct = False
-    close = False
-    quit = False
     exec_cmd = False
     exec_path = '/home/firtro/bin/'
     change_clock = False        ## v2.0a <CLOCK> recuperado de Testing3
     change_fs = False
     change_radio = False
 
-    # Al poner este proceso en una función, las variables que estén definidas
-    # en los modulos importados hay que ponerlas como globales.
-    # Si no se crean como locales, OjO
-    global warnings
-    global gmax
-    global bass
-    global treble
-    global loudness_ref
-    global loudness_track
-    global loudness_level_info
-    global input_gain
-    global ref_level_gain
-    global gain
-    global level
-    global headroom
-    global balance
-    global system_eq
-    global preset               ## <PRESETS> ##
-    global peq                  ## <PEQ> ##
-    global peqdefeat
-    global drc_eq
-    global polarity
-    global filter_type
-    global muted
-    global input_name
-    global resampled            ## posible entrada resampleada ##
-    global mono, monoCompens    ## <MONO> ##
-    global replaygain_track
-    global loudness_level_info
-    global inputs
-    global control_output
-    global control_clear
-    global tone_mag_i
-    global loudeq_mag_i
-    global syseq_mag_i
-    global drc_l_mag_i
-    global drc_r_mag_i
-    global drc2_l_mag_i
-    global drc2_r_mag_i
-    global drc_index
-    global peq_l_mag_i          ## <PEQ> ##
-    global peq_r_mag_i
-    global fs                   ##
-    global clock                ## <CLOCK> recuperado de Testing3 ##
-
-    global brutefir_ports       ## v2.0 firtro_ports ##
-    global ecasound_ports
-    if load_ecasound:
-        firtro_ports = ecasound_ports
-    else:
-        firtro_ports = brutefir_ports
-
-    global last_level_change_timestamp      ## <MPD> ##
-    global radio, radio_prev                # v2.0e se centraliza la gestión de la radio tdt aquí
-
-    # Borramos los warnings
-    warnings = []
-
-    # Memorizamos los valores para poder restaurarlos
-    # si no se pueden aplicar por falta de headroom
+    #### Memorizamos ajustes para poder restaurarlos si no se pudieran aplicar (e.g. por falta de headroom)
+    
     bass_old                = bass
     treble_old              = treble
     loudness_ref_old        = loudness_ref
@@ -309,42 +331,47 @@ def do (order):
     tone_mag_i_old          = tone_mag_i
     loudeq_mag_i_old        = loudeq_mag_i
     syseq_mag_i_old         = syseq_mag_i
-    fs_old                  = fs            ## <CLOCK> ##
-    clock_old               = clock
     preset_old              = preset        ## <PRESETS> ##
     drc_eq_old              = drc_eq
     peq_old                 = peq           ## <PEQ> ##
-
-    # Memorizamos los parámetros de cambio de entrada por si ocurre algún error
+    fs_old                  = fs            ## <CLOCK> ##
+    clock_old               = clock
     input_name_old = input_name
     filter_type_old = filter_type
     mono_old = mono                         ## <MONO> ##
     radio_old = radio
     radio_prev_old = radio_prev
+    
+    #############################################################
+    ##        Leemos la orden solicitada 'do(order)'           ##
+    ##        y se deciden las acciones correspondientes       ##
+    #############################################################
 
-    # Quitamos los caracteres finales
-    order = order.rstrip('\r\n')
-    # Separamos el comando de los argumentos
-    line = order.split()
-    if len(line) > 0: command = line[0]
-    else: command = ""
+    #########################################################
+    #     <MPD> control de volumen de MPD ligado a FIRtro
+    # (i) INTERRUMPIMOS EL PROCESAMIENTO si se tratase de una
+    # orden gain rebotada por mpd inmediatamente después 
+    # de haber ajustado aquí el volumen del sistema.
+    #########################################################
+    if mpd_volume_linked2firtro:
+        if (time.time() - last_level_change_timestamp) < MPD_GAIN_FWD_TIMER:
+            #print "(server_process) comando descartado: " + order + \
+            #      " (reason MPD_GAIN_FWD_TIMER=" + str(MPD_GAIN_FWD_TIMER) + ")" # DEBUG
+            dicci_estado = firtroData(locals(), globals(), inputs.sections())
+            return dicci_estado
+
+    order = order.rstrip('\r\n')            # Quitamos los caracteres finales
+    line = order.split()                    # Separamos el comando de los argumentos
+    if len(line) > 0:   command = line[0]
+    else:               command = ""
     if len(line) > 1: arg1 = line[1]
     if len(line) > 2: arg2 = line[2]
     if len(line) > 3: arg3 = line[3]
-
-    ## <MPD> ## v2.0c rev1 control de volumen de MPD ligado a FIRtro
-    if time.time() - last_level_change_timestamp < MPD_GAIN_FWD_TIMER:
-        if mpd_volume_linked2firtro:
-            #print "(server_process) comando descartado: " + order + \
-            #      " (reason MPD_GAIN_FWD_TIMER=" + str(MPD_GAIN_FWD_TIMER) + ")" # DEBUG
-            return firtroData(locals(), globals(), inputs.sections())
-
-    #############################################################
-    # Comprueba el comando y se decide las acciones a ejecutar: #
-    #                                                           #
-    if control_output > 0:
+    
+    if control_output > 0:                  # Printa por consola
         print "(server_process) Command:", order
 
+    ### Acciones a tomar según el comando o RAISE
     try:
         if command == "status":
             write_status = False
@@ -416,14 +443,12 @@ def do (order):
         elif command == "level":
             if len(line) > 1:
                 level = float(arg1)
-                #gain = level + ref_level_gain
                 change_gain = True
             else: raise
 
         elif command == "level_add":
             if len(line) > 1:
                 level += float(arg1)
-                #gain = level + ref_level_gain
                 change_gain = True
             else: raise
 
@@ -455,17 +480,16 @@ def do (order):
             else:
                 raise
 
-        elif command == "preset":       ## <PRESETS> ##
+        elif command == "preset":           ## <PRESETS> ##
             if len(line) > 1:
-                #preset = arg1  evitamos la restricción de hasta 3 argumentos
-                preset = " ".join(line[1:])
+                preset = " ".join(line[1:]) # evitamos la restricción arg1 ... arg3
                 change_preset   = True
-                change_drc      = True  ## pq los preset tienen un DRC asociado
-                change_gain     = True  ## pq tb tienen ajuste de balance
-                change_peq      = True  ## pq tb tienen ajuste de PEQ
+                change_drc      = True      ## pq los preset tienen un DRC asociado
+                change_gain     = True      ## pq tb tienen ajuste de balance
+                change_peq      = True      ## pq tb tienen ajuste de PEQ
             else: raise
 
-        elif command == "peq_reload":
+        elif command == "peq_reload":       ## <PEQ> ##
             change_peq = True
 
         elif command == "peq_defeat":
@@ -525,12 +549,10 @@ def do (order):
         elif command == "syseq":
             system_eq = True
             change_eq = True
-            # write_speaker = True  # obsoleto
 
         elif command == "syseq_off":
             system_eq = False
             change_eq = True
-            # write_speaker = True  # obsoleto
 
         elif command == "exec":
             if len(line) > 1:
@@ -573,14 +595,15 @@ def do (order):
                 change_xovers = True
                 change_eq = True
             else: raise
-        # Si no se reconoce el comando
+
+        # (!) RAISE SI NO SE RECONOCE EL COMANDO
         else:
             raise
 
     except:
         warnings.append("Wrong command syntax")
 
-    #                                                 #
+    ###################################################
     # Si no hubo excepciones, se pasa a la ejecución: #
     ###################################################
 
@@ -615,14 +638,6 @@ def do (order):
             warnings.append("Radio: el preset #" + new_radiopreset + " NO está configurado")
 
     ## <PRESETS> ##
-
-    ## tomamos nota de la atten de la señal para poder mutear/desmutear
-    ## directo en brutefir para evitar transiciones en los cambios.
-    if change_preset or change_peq:
-        tmp = brutefir_cli.bfcli("lf;quit;")
-        bfAtten0 = [x for x in tmp.split("\n") if ("from inputs:  0" in x)][-1].split("/")[-1]
-        bfAtten1 = [x for x in tmp.split("\n") if ("from inputs:  1" in x)][-1].split("/")[-1]
-
     if change_preset:
                 
         # (i)   Muteamos temporalmente Brutefir para evitar oir las nuevas vias sin la la nueva EQ de sala,
@@ -652,33 +667,38 @@ def do (order):
     #   1) una actualizacion de preset (comando =  preset xxxx --> peq cambia)
     #   2) se quiere una recarga del .peq actual pq ha sido editado (comando = peq_reload --> peq no cambia)
     #   3) un comando= peq_defeat --> peq cambia
+    #   (*)Nota: en cada do() traducimos los paramétricos a curvas de respuesta informativas para
+    #            la web para permitir cambios al vuelo del archivo 'lspk/altavoz/xxx.peq'.
     if change_peq:
         if load_ecasound:
-            # Muteamos temporalmente Brutefir para evitar oir la interrupción durante la carga de los parametricos
+
+            ## MUTEAMOS temporalmente Brutefir para evitar oir la interrupción durante la carga de los paramétricos.
+            #  Antes tomamos nota de la atten de la señal para poder desmutear bien.
+            tmp = brutefir_cli.bfcli("lf;quit;") # lee brutefir pero no pone el ';quit' como en 'bf_cli' de este módulo.
+            bfAtten0 = [x for x in tmp.split("\n") if ("from inputs:  0" in x)][-1].split("/")[-1]
+            bfAtten1 = [x for x in tmp.split("\n") if ("from inputs:  1" in x)][-1].split("/")[-1]
             bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
+
             peqdefeat = False
             change_input = True     # para reconectar la fuente a ecasound
+            # curvas informativas para la web (*):
+            peq_l_mag_i = [0] * len(freq)
+            peq_r_mag_i = [0] * len(freq)
             if "preset" in command or "reload" in command:
                 if peq <> "off":
                     PEQini = loudspeaker_folder + loudspeaker + "/" + peq + ".peq"
                     peq_control.cargaPEQini(PEQini)
-                    # curvas informativas para la web:
+                    # curvas informativas para la web (*):
                     peq_l_mag_i = peq2mag_i(PEQini, "left")
                     peq_r_mag_i = peq2mag_i(PEQini, "right")
                 else:
                     peq_control.PEQdefeat()
                     peqdefeat = True
-                    # curvas informativas para la web:
-                    peq_l_mag_i = np.zeros(len(freq))
-                    peq_r_mag_i = np.zeros(len(freq))
             elif "defeat" in command:
                 peq_control.PEQdefeat()
                 peqdefeat = True
-                # curvas informativas para la web:
-                peq_l_mag_i = np.zeros(len(freq))
-                peq_r_mag_i = np.zeros(len(freq))
 
-            # Y desmuteamos:
+            # y DESMUTEAMOS:
             bf_cli("cfia 0 0 " + bfAtten0 +" m0; cfia 1 1 " + bfAtten1 + "m0")
 
         elif not load_ecasound and peq <> "off":
@@ -706,23 +726,33 @@ def do (order):
             # y COMPENSAMOS NIVELES
             monoCompens = +0.0
 
-    ## v2.0a <CLOCK> no incluido en v2.0 :-|, se ha recuperado de Testing3 (OjO se ha reescrito)
-    ## NOTA:    los cambios de CLOCK o de FS pueden ser:
-    ##              -> explícitos en un comando "clock"
-    ##              -> implícitos en un comando "input"
+    ## v2.0a <CLOCK> se había perdido, se ha recuperado de Testing3 (OjO se ha reescrito).
+    ## nota: Los cambios de CLOCK o de FS pueden ser:
+    ##          -> explícitos en un comando "clock"
+    ##          -> implícitos en un comando "input"
     if change_input:
+
+        if load_ecasound:   firtro_ports = ecasound_ports
+        else:               firtro_ports = brutefir_ports
+
         input_gain  = float(inputs.get(input_name, "gain"))
         input_ports =       inputs.get(input_name, "in_ports")
+
         if change_xovers: # v2.0g
             filter_type =   inputs.get(input_name, "xo")
+
         resampled   =       inputs.get(input_name, "resampled")
         new_fs      =       inputs.get(input_name, "fs")
         new_clock   =       inputs.get(input_name, "clock")
+
         if not new_fs:      new_fs = fs             # apaño para audio/inputs con "fs" en blanco
+
         if not new_clock:   new_clock = clock       # apaño para audio/inputs con "clock" en blanco
+
         if new_fs != fs:
             fs = new_fs
             change_fs    = True
+
         if new_clock != clock:
             clock = new_clock
             change_clock = True
@@ -785,19 +815,19 @@ def do (order):
             clock        = clock_old
             write_status = True
 
-    #if replaygain_track:           # revisar esto : gain o level  ¿ !!! PENDIENTE long time ago ...?
+    # (!) revisar esto : ¿gain o level?  ¡¡¡OjO!!! PENDIENTE long time ago
+    #if replaygain_track:
     #    gain += loudness_ref
 
-    #################################
-    # MÁQUINA DE CONTROL DE VOLUMEN
-    # Gestiona los cambios de ganancia o de EQ, con 
-    # control de clipping debido a input_gain y eq_mag.
-    #################################
+    ###################################################
+    #          MÁQUINA DE CONTROL DE VOLUMEN
+    #  Gestiona los cambios de ganancia o de EQ, con
+    #  control de clipping debido a input_gain y eq_mag.
+    ###################################################
     if (change_gain or change_eq):
 
-        # Info para el potenciómetro de volumen (p.ej el slider de la web) (recálculo)
+        # Info para un potenciómetro de volumen externo (p.ej el slider de la web) (recálculo)
         maxlevel_i = gmax - ref_level_gain - input_gain
-
         # 1a) Se pide cambio de 'level' (vol. calibrado)
         if not gain_direct:
             gain = level + ref_level_gain + input_gain  # se traduce a gain.
@@ -946,7 +976,10 @@ def do (order):
             loudeq_mag_i = loudeq_mag_i_old
             syseq_mag_i = syseq_mag_i_old
 
-    ############ Resto de comandos ############
+    ############################################
+    ####        Resto de acciones:          ####
+    ############################################
+    
     if do_mute:
         bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
         # 2º Entrada de brutefir (para analogica con filtros mp)
@@ -992,33 +1025,28 @@ def do (order):
                     bf_cli(tmp)
 
     if change_drc:
-        # Metodo 1: Se asignan siempre coeficientes predefinidos.
-        # drc0 está definido con un dirac pulse, y no tiene efecto:
-        #bf_cli('cfc "f_drc_L" "c_drc' + drc_eq + '_L"; cfc "f_drc_R" "c_drc' + drc_eq + '_R"')
-
-        # Metodo 2: Si el drc es 0, entonces se asigna el coeficiente -1,
-        # optimizando latencia y uso de procesador
+        # Si el drc es 0, entonces se asigna el coeficiente -1 optimizando latencia y uso de procesador:
         if drc_eq == "0":
             bf_cli('cfc "f_drc_L" -1; cfc "f_drc_R" -1')
-            # 2º Entrada de brutefir (para analogica con filtros mp)
+            # (amr) 2º Entrada de brutefir (para analogica con filtros mp)
             #bf_cli('cfc "f_drc_L2" -1; cfc "f_drc_R2" -1')
         else:
             bf_cli('cfc "f_drc_L" "c_drc' + drc_eq + '_L"; cfc "f_drc_R" "c_drc' + drc_eq + '_R"')
-            # 2º Entrada de brutefir (para analogica con filtros mp)
+            # (amr) 2º Entrada de brutefir (para analogica con filtros mp)
             #bf_cli('cfc "f_drc_L2" "c_drc' + drc_eq + '_L"; cfc "f_drc_R2" "c_drc' + drc_eq + '_R"')
 
-    # Info para la web - EQ global aplicada (drc + syseq):
+    # Curvas info para la web - EQ global aplicada (drc + syseq):
     if (change_gain or change_eq or change_drc or change_peq):
         # L:
         if int(drc_eq) < len(drc_l_mag_i):
-            drc2_l_mag_i = [round(float(data),2) for data in (drc_l_mag_i[int(drc_eq)] + syseq_mag_i + peq_l_mag_i).tolist()]
+            drcTot_l_mag_i = [round(float(data),2) for data in (drc_l_mag_i[int(drc_eq)] + syseq_mag_i + peq_l_mag_i).tolist()]
         else:
-            drc2_l_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
+            drcTot_l_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
         # R:
         if int(drc_eq) < len(drc_r_mag_i):
-            drc2_r_mag_i = [round(float(data),2) for data in (drc_r_mag_i[int(drc_eq)] + syseq_mag_i + peq_r_mag_i).tolist()]
+            drcTot_r_mag_i = [round(float(data),2) for data in (drc_r_mag_i[int(drc_eq)] + syseq_mag_i + peq_r_mag_i).tolist()]
         else:
-            drc2_r_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
+            drcTot_r_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
 
     if exec_cmd:
         result = Popen(exec_path + exec_arg, shell=True)
@@ -1028,6 +1056,9 @@ def do (order):
     else:
         rg_tmp = ha_tmp = "0"
 
+    ################################################
+    # ACTUALIZA EL ARCHIVO DE ESTADO (audio/status)
+    ################################################
     if write_status:
         status.set('recording EQ', 'loudness_track', loudness_track)
         status.set('recording EQ', 'loudness_ref', loudness_ref)
@@ -1059,17 +1090,6 @@ def do (order):
             statusfile.close()
         except:
             warnings.append("Failed to open status file" + status_path)
-
-    ## Se traslada este indicador al archivo de estado "status"
-    ## y se deja el archivo "speaker" solo para configuracion de arranque.
-    #if write_speaker:
-    #    speaker.set('equalization', 'system_eq', system_eq)
-    #    try:
-    #        speakerfile = open(speaker_path, 'w')
-    #        speaker.write(speakerfile)
-    #        speakerfile.close()
-    #    except:
-    #        warnings.append("Failed to open speaker file" + status_path)
 
     # Mostramos en pantalla un resumen del estado
     if control_output > 0:
@@ -1113,44 +1133,33 @@ def do (order):
 
     # A efectos de control, devolvemos un diccionario 
     # conteniendo el estado del FIRtro
-    return firtroData(locals(), globals(), inputs.sections())
-# ^^^^^^^^ FIN DEL do() PRINCIPAL ^^^^^^^^
+    dicci_estado = firtroData(locals(), globals(), inputs.sections())
+    return dicci_estado
 
 
-# V2.0c reescritura del diccionario de estado en una función separada
-def firtroData(locales, globales, entradas):
-    # Obtenemos el diccionario con todas la variables y sus valores
-    # Variables locales
-    data = locales
-    # Añadimos las variables globales
-    data.update(globales)
-    # Y la lista de entradas
-    data.update({'inputs':entradas})
-    # En esta lista almacenaremos las variables que queremos extraer del dicionario global
-    keys = ['treble', 'bass', 'replaygain_track', 'level', 'maxlevel_i', 'headroom', 'muted', 'polarity',
-        'fs', 'drc_eq', 'filter_type', 'clock', 'loudness_track', 'loudness_ref', 'loudness_level_info',
-        'radio', 'input_name', 'input_gain', 'system_eq', 'room_gain', 'house_corner', 'house_atten',
-        'ref_level_gain', 'loudspeaker', 'inputs', 'warnings', 'order','freq_i','tone_mag_i','loudeq_mag_i',
-        'drc2_r_mag_i','drc2_l_mag_i','drc_index','balance','balance_variation',
-        'preset', 'lista_de_presets', 'mono', 'peq', 'peqdefeat']    ## <PRESETS> <MONO> <PEQ> ##
-    # Y obtenemos un nuevo diccionario filtrado, con solo las opciones que nos interesan
-    fdata = { key: data[key] for key in keys}
-    # Lo formateamos y lo mandamos como salida de la función
-    fdata = json.dumps (fdata)
-    # Devolvemos el diccionario
-    return (fdata)
 
-##################
-# Inicializacion #
-##################
+################################################################################
+##########################    INICIALIZACIONES:    #############################
+################################################################################
 
-#### <PRESETS>
+### NIVEL:
+input_gain = 0
+gain = level + input_gain + ref_level_gain
+# <MONO> no computa en el cálculo de headroom, se sumará a la ganancia final enviada a Brutefir.
+if mono == "on":
+    monoCompens = -6.0
+else:
+    monoCompens = -0.0
+# <MPD> control de volumen de MPD ligado a FIRtro
+last_level_change_timestamp = time.time()
+
+# <PRESETS>
 lista_de_presets = presets.lista_de_presets()
 
-#### Warnings informativos
-warnings = []
+# <PEQ>
+peqdefeat = False
 
-#### Curvas empleadas en la etapa EQ de Brutefir
+### Leemos las CURVAS EQ que se renderizadarán en 'eq' de Brutefir
 try:
     freq                = np.loadtxt(freq_path)
     loudness_mag_curves = np.loadtxt(loudness_mag_path)
@@ -1165,43 +1174,38 @@ except:
     print "(server_process) Error: Failed to load EQ files"
     sys.exit(-1)
 
-#### Niveles:
-## <MONO> compensacion interna, no computada en el cálculo de headroom, se sumará a la gain enviada a Brutefir.
-monoCompens = 0.0
-if mono == "on":
-    monoCompens = -6.0
-input_gain = 0
-gain = level + input_gain + ref_level_gain
+####################################################
+### VARIABLES INFORMATIVAS para sistemas de control:
+####################################################
+warnings = []
+# String informativa del loudness aplicado
 loudness_level_info = ""
-# Info para un potenciómetro de volumen (p.ej se usará en el slider de la web)
+
+### Información de estado útil para un potenciómetro de volumen externo (p.ej el slider de la web)
 maxlevel_i = gmax - ref_level_gain - input_gain
 
-#### <PEQ> indicador de estado de los paramétricos forzados a cero.
-peqdefeat = False
+### Informacion de las frecuencias utilizadas para la etapa de EQ
+freq_i = [ int(i) for i in freq] # No podemos hacer freq_i = freq porque resultaría en un alias
 
-# Informacion de las frecuencias utilizadas para la etapa de EQ
-freq_i = [ int(i) for i in freq]
-
-# Inicialización de curvas informativas (xxx_i) para las gráficas de la página web.
-syseq_mag_i     = np.zeros(len(freq))
-drc_l_mag_i     = {}
+### Inicialización de curvas informativas (xxx_i) para las gráficas DRC de la página web.
+syseq_mag_i     = [0] * len(freq)
+drc_l_mag_i     = {}                    # diccionarios de curvas
 drc_r_mag_i     = {}
-drc2_l_mag_i    = [0 for i in freq] # drc2 : drc + syseq
-drc2_r_mag_i    = [0 for i in freq] # drc2 : drc + syseq
-tone_mag_i      = [0 for i in freq]
-loudeq_mag_i    = [0 for i in freq]
-peq_l_mag_i     = {}
-peq_r_mag_i     = {}
+peq_r_mag_i     = [0] * len(freq)       ## <PEQ ##
+peq_l_mag_i     = [0] * len(freq)
+drcTot_l_mag_i  = [0] * len(freq)       # drcTot : drc + peq + syseq
+drcTot_r_mag_i  = [0] * len(freq)
+tone_mag_i      = [0] * len(freq)
+loudeq_mag_i    = [0] * len(freq)
 
-### Gestión de pcms para DRC:
-# (i) El diseño original en FIRtro v1.0 requiere nombres
-#     de archivo pcm para drc numerados correlativamente desde 1.
+### Carga de las curvas informativas para la web de los pcm disponibles para DRC:
+# (i) El diseño original en FIRtro v1.0 requiere los nombres
+#     de archivos pcm para drc numerados correlativamente desde 1.
 #     El mecanismo de selección de DRC reserva el índice 0 para "drc plano".
 drc_index = 0
-drc_r_mag_i[drc_index] = np.zeros(len(freq))
-drc_l_mag_i[drc_index] = np.zeros(len(freq))
-# Buscamos todos los ficheros pcm de drc que existan, 
-# incrementando el index y generando las curvas informativas de la web.
+drc_r_mag_i[drc_index] = [0] * len(freq)
+drc_l_mag_i[drc_index] = [0] * len(freq)
+# Buscamos todos los ficheros pcm de drc que existan: 
 print "(server_process) Doing FFT of DRC pcm files..."
 while True:
     # intentamos leer los pcm de drc con el siguiente índice:
@@ -1230,11 +1234,9 @@ while True:
         print "(server_process) Fin de la búsqueda de archivos DRC."
         break
 
-### Curvas de PEQ (ecasound) informativas para la web:
-peq_r_mag_i = np.zeros(len(freq))
-peq_l_mag_i = np.zeros(len(freq))
-
-last_level_change_timestamp = time.time()
+### Carga de las curvas informativas para la web de PEQ:
+#   NOTA:   Las releemos en cada do('peq_reload') para permitir
+#           cambios al vuelo de los paramétricos del archivo 'lspk/altavoz/xxx.peq'
 
 # Recuperamos la configuración SysEQ del altavoz si se hubiera desactivado
 do('syseq')
