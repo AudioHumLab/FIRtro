@@ -274,7 +274,7 @@ def main():
         print " "*14        + str(x[0]).rjust(2).ljust(8) + x[1].ljust(16) + x[2] 
     
     print "\n--- Filters Running:"
-    tmp = [["filter_name:", "coeff#:", "coeff_name:", "coeff_pcm_name:"]] + filters_running
+    tmp = [["f_filterName:", "coeff#:", "coeff_name:", "coeff_pcm_name:"]] + filters_running
     for x in tmp:
         print x[0].ljust(14) + x[1].rjust(2).ljust(8) + x[2].ljust(16) + x[3]
 
