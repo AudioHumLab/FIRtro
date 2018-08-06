@@ -9,7 +9,7 @@ if [ ! $altavoz ]; then
     exit 0
 fi
 if [ -d /home/firtro/lspk/$altavoz ]; then
-    echo "(i) Se reiniciará FIRtro con altavoz: "$altavoz" ... ..."
+    echo "(i) Se reiniciará FIRtro con altavoz '"$altavoz"' ... ..."
 else
     echo "NO existe "$altavoz
     exit 0
@@ -24,7 +24,7 @@ tmp=$(grep "\[" /home/firtro/lspk/$altavoz/presets.ini \
       | grep -v ";" | grep -v "#" | sed 's/\[//g' | sed 's/\]//g')
 preset=$(echo $tmp | cut -d" " -f1)
 if [ $preset ]; then
-    echo "(i) Configurando preset ["$preset"] en audio/status"
+    echo "(i) Configurando preset '"$preset"' en audio/status"
     sed  -i.bak -e '/preset/c\preset\ \=\ '$preset /home/firtro/audio/status
 else
     # Si no lo hubiera, borramos el preset de audio/status:
