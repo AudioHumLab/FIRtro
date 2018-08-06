@@ -18,7 +18,6 @@ fi
 # Para reemplazar una linea que cumpla una pattern con otra linea:
 # sed -e ‘/pattern_de_linea_a_reeemplazar/c\nueva_linea’   /path/to/file
 
-
 # 2. Si hay algún preset previsto en la carpeta del altavoz,
 #    lo cargamos en audio/status para que se use en al arranque:
 tmp=$(grep "\[" /home/firtro/lspk/$altavoz/presets.ini \
