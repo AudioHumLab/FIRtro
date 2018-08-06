@@ -347,19 +347,18 @@ def do (order):
     ##        y se deciden las acciones correspondientes       ##
     #############################################################
 
-    #########################################################
-    #     <MPD> control de volumen de MPD ligado a FIRtro
-    # (i) INTERRUMPIMOS EL PROCESAMIENTO si se tratase de una
-    # orden gain rebotada por mpd inmediatamente después 
-    # de haber ajustado aquí el volumen del sistema.
-    #########################################################
+    #///
+    # <MPD> control de volumen de MPD ligado a FIRtro.
+    # (i) INTERRUMPIMOS el do() si se tratase de una orden gain 'rebotada'
+    # por mpd inmediatamente después de haber ajustado el volumen del sistema.
     if mpd_volume_linked2firtro:
         if (time.time() - last_level_change_timestamp) < MPD_GAIN_FWD_TIMER:
             #print "(server_process) comando descartado: " + order + \
             #      " (reason MPD_GAIN_FWD_TIMER=" + str(MPD_GAIN_FWD_TIMER) + ")" # DEBUG
             dicci_estado = firtroData(locals(), globals(), inputs.sections())
             return dicci_estado
-
+    #\\\
+    
     order = order.rstrip('\r\n')            # Quitamos los caracteres finales
     line = order.split()                    # Separamos el comando de los argumentos
     if len(line) > 0:   command = line[0]
