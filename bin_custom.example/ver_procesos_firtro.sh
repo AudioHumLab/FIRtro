@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# cutre utilidad para ver los procesos de FIRtro en un terminal
+# Cutre utilidad para ver los procesos de FIRtro en un terminal,
+# puede ser util para ver los rearranques.
 
 clear
 
@@ -16,25 +17,28 @@ function verlosprocesos {
 
 while true; do
 
-    # Array con los nombres de procesos de audio
+    # Scripts python
+    declare -a procesos=(
+                        python
+                        )
+    verlosprocesos
+
+    # Procesos de audio
     declare -a procesos=(
                         jackd brutefir ecasound
                         )
-
     verlosprocesos
 
-    # Array con los nombres de procesos dependientes de jackd
+    # Procesos dependientes de jackd
     declare -a procesos=(
-                        zita-j2n zita-n2j
-                        alsa_in alsa_out
+                        zita-j2n zita-n2j alsa_in alsa_out jacktrip
                         )
     verlosprocesos
 
-    # Array con los nombres de procesos de players
+    # Procesos de players
     declare -a procesos=(
                         mpd mplayer shairport mopidy squeezeslave
                         )
-
     verlosprocesos
 
     sleep .5
