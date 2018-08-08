@@ -7,6 +7,13 @@
 ; - Nuevas opciones, resaltado de las subsecciones en path
 ; - Se separa una sección con todo lo relativo a la configuración de displays (lcd, etc)
 
+[speakers]
+loudspeaker = ejemplo2vias
+
+[presets]
+; -- Preset por defecto al arranque (opcional)
+default_preset = plano
+
 [misc]
 
 ; -- Retardo entre órdenes en segundos
@@ -38,14 +45,6 @@ jack_internal_monitors =
 ; - monitores "EXTERNOS" (tarjetas de sonido diferentes de la principal):
 ;jack_external_monitors = PCH:playback_1 PCH:playback_2
 jack_external_monitors = 
-
-[speakers]
-loudspeaker = ejemplo2vias
-
-[presets]
-
-; -- Preset por defecto al arranque (opcional)
-default_preset = plano
 
 [cards]
 
