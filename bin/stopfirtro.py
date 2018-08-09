@@ -8,7 +8,7 @@
     stoptfirtro.py [ core | audio | core+players | all ]   (por defecto 'all')
 
     core o audio:   Jack, Brutefir, Ecasound.
-    core+players:       + MPD y otros players
+    core+players:   + MPD y otros players
     all:            + control por Lirc y algunos clients para display
 """
 # v2.0
