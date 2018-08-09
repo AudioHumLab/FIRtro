@@ -5,10 +5,10 @@
 
     Uso:
 
-    initfirtro.py [ core | audio | +players | all ]   (por defecto 'all')
+    initfirtro.py [ core | audio | core+players | all ]   (por defecto 'all')
 
     core o audio:   Jack, Brutefir, Ecasound.
-    +players:       + MPD y otros players
+    core+players:   + MPD y otros players
     all:            + control por Lirc y algunos clients para display
 """
 #----------------------------------------------------------------------
@@ -35,7 +35,7 @@
 #
 # v2.1
 #
-# - Se reescriben los niveles de ejecución.
+# - Se reescriben los niveles de ejecución: core, core+players, all
 #
 # - Ecasound se inicia a la Fs del sistema.
 #
@@ -66,7 +66,7 @@
 # - El server se arranca inmediatemante despues del nucleo del audio (jack+brutefir)
 #   para levantar los puertos dummy en jack que serán usados por MPD.
 # - Se deja de gestionar aquí el pausado de los players integrados.
-# - Nueva opción de volumen predefinido al arranque
+#     - Nueva opción de volumen predefinido al arranque
 #
 # v2.2g
 # - Se añade spotifymonitor y mpdmonitor para informar a los servidores de display
@@ -284,7 +284,7 @@ def main(run_level):
     control = Popen(["python", control_path], stdout=None, stderr=None)
 
     # 4 # PLAYERS INTEGRADOS EN FIRtro
-    if run_level in ["+players", "all"]:
+    if run_level in ["core+players", "all"]:
 
         # MPD (v2.2e)
         if load_mpd:
@@ -454,10 +454,10 @@ if __name__ == "__main__":
     if sys.argv[1:]:
         run_level = sys.argv[1].lower()
 
-    if run_level == "core": # legacy compatible
-        run_level = "audio"
+    if run_level == "audio": # alias
+        run_level = "core"
 
-    if run_level in ["audio", "+players", "all"]:
+    if run_level in ["core", "core+players", "all"]:
         print "(initfirtro) iniciando: " + run_level
         main(run_level)
     else:
