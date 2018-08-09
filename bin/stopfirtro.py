@@ -5,14 +5,14 @@
 
     Uso:
 
-    stoptfirtro.py [ core | audio | +players | all ]   (por defecto 'all')
+    stoptfirtro.py [ core | audio | core+players | all ]   (por defecto 'all')
 
     core o audio:   Jack, Brutefir, Ecasound.
-    +players:       + MPD y otros players
+    core+players:       + MPD y otros players
     all:            + control por Lirc y algunos clients para display
 """
 # v2.0
-#   Reordenación del run_level
+#   Reordenación del run_level: core, core+players, all
 #   Reescritura del código evitando líneas multisentencia
 # v2.0b (revisión)
 # v2.0c (revisión)
@@ -64,7 +64,7 @@ def main(run_level):
         if load_spotifymonitor:
             Popen (["pkill", "-9", "-f", spotifymonitor_path], stdout=fnull, stderr=fnull)
 
-    if run_level in ["+players", "all"]:
+    if run_level in ["core+players", "all"]:
         # mpd
         if load_mpd:
             Popen ("killall mpd", shell=True)
@@ -110,10 +110,10 @@ if __name__ == "__main__":
     if sys.argv[1:]:
         run_level = sys.argv[1].lower()
 
-    if run_level == "core": # legacy compatible
-        run_level = "audio"
+    if run_level == "audio": # alias
+        run_level = "core"
 
-    if run_level in ["audio", "+players", "all"]:
+    if run_level in ["audio", "core+players", "all"]:
         print "(stopfirtro) deteniendo: " + run_level
         main(run_level)
     else:
