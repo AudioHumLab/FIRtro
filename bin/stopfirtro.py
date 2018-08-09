@@ -54,9 +54,6 @@ def main(run_level):
         # INFOFIFO_server
         if load_INFOFIFO_server:
             Popen (["pkill", "-9", "-f", INFOFIFO_server_path], stdout=fnull, stderr=fnull)
-        # spotifymonitor
-        if load_spotifymonitor:
-            Popen (["pkill", "-9", "-f", spotifymonitor_path], stdout=fnull, stderr=fnull)
         # mpdmonitor
         if load_mpdmonitor:
             Popen (["pkill", "-9", "-f", mpdmonitor_path], stdout=fnull, stderr=fnull)
