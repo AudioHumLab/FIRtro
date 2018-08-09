@@ -80,18 +80,16 @@
 # v2.2i
 # - Reordenacion del código, más comentado.
 # - Nuevos alias run_level
+# - Funcion auxiliar lee_status para leer audio/status al vuelo,
+#   en lugar de getstatus estático.
 #--------------------------------------------------------------------------------------
 
-import sys
-# para poder importar los módulos del FIRtro locales en ~/bin:
-sys.path.append('/home/firtro/bin')
-
 import os
+import sys
 from time import sleep
 import client
 import stopfirtro
 from getconfig import *
-from getstatus import *
 from subprocess import Popen
 import soundcards as sc
 import pulse_manager as pulse
@@ -100,26 +98,23 @@ import mpdconf_adjust
 
 HOME = os.path.expanduser("~")
 
-# Opcional: DEPURACION A FICHERO:
-#original_stdout = sys.stdout
-#sys.stdout = open("/home/firtro/firtro_debug.log", "w")
+# FUNC.AUX v2.2i Lee audio/status al vuelo
+def lee_status():
+    f = open("/home/firtro/audio/status", "r")
+    lineas = f.read().split("\n")
+    f.close()
+    dicci = {}
+    for linea in lineas:
+        if not [x for x in linea if x in ('#', ';', '[')]:
+            if "=" in linea:
+                linea = linea.split("=")
+                linea = [x.strip() for x in linea]
+                param = linea[0]
+                valor = linea[1]
+                dicci[param] = valor
+    return dicci
 
-# se usa para evitar algunos printados más abajo
-fnull = open(os.devnull, 'w')
-
-audio_folder = loudspeaker_folder + loudspeaker + "/" + fs + "/"
-
-# Puertos de entrada a FIRtro:
-if load_ecasound:
-    firtro_ports = ecasound_ports
-else:
-    firtro_ports = brutefir_ports
-
-# Cambiamos al directorio de brutefir config
-# (nota: esto es innecesario si se usan path completos en brutefir_config)
-os.chdir(audio_folder)
-
-# Para limitar el volumen según lo configurado opcionalmente en audio/config
+# FUNC.AUX Para limitar el volumen según lo configurado opcionalmente en audio/config
 def limit_level(level_on_startup, max_level_on_startup):
     if max_level_on_startup:
         max_level_on_startup = float(max_level_on_startup)
@@ -135,7 +130,7 @@ def limit_level(level_on_startup, max_level_on_startup):
 
     # si no se pide nivel fijo
     else:
-        if level > max_level_on_startup:
+        if lee_status()['level'] > max_level_on_startup:
             client.firtro_socket("level " + str(max_level_on_startup))
 
 def main(run_level):
@@ -373,7 +368,7 @@ def main(run_level):
         sys.exit() # INTERRUMPIMOS INITFIRTRO
 
     # 7 # RECUPERAMOS LOS AJUSTES de FIRtro
-    
+
     # Nota: Redirigimos stdout a /dev/null Para que no salga todo
     #       el chorizo  que devuelve la funcion firtro_socket
     original_stdout = sys.stdout
@@ -387,24 +382,14 @@ def main(run_level):
         client.firtro_socket("treble 0")
 
     # 7.2 # PRESET por DEFECTO
+    preset = lee_status()['preset']
     if default_preset:
         client.firtro_socket("preset " + default_preset)
     else:
         client.firtro_socket("preset " + preset)
 
-    # 7.3 # Actualizamos VARIABLES DE ESTADO (implícitas del módulo 'status').
-    #       Nota: usamos un bucle para evitar errores si audio/status estuviera incompleto.
-    t = 0
-    while True:
-        try:
-            status.readfp(statusfile) # actualizacion como tal
-            break
-        except:
-            t += 1
-            sleep (.2)
-            if t > 5:
-                print "(initfirtro.py) ERROR leyendo audio/status"
-                break
+    # 7.3 # Releemos el ESTADO audio/status
+    estado = lee_status()
 
     # 7.4 # LIMITE DE VOLUMEN opcional al arranque
     limit_level(level_on_startup, max_level_on_startup)
@@ -426,7 +411,7 @@ def main(run_level):
             print "(initfirtro) 'mpd_volume_linked2firtro' NO es compatible con Pulseaudio"
 
     # 7.6 # RESTAURA LAS ENTRADAS
-    print "(initfirtro) Recuperando INPUT: " + input_name
+    print "(initfirtro) Recuperando INPUT: " + estado['input']
     client.firtro_socket("input restore")
 
     # 7.7 # DESMUTEAMOS la tarjeta de sonido a nivel ALSA
@@ -437,18 +422,39 @@ def main(run_level):
     print "(initfirtro):"
     if tone_defeat_on_startup:
         print "             Se ha aplicado TONE DEFEAT."
-    print "             Altavoz:   " + loudspeaker + " (fs: " + fs + ", xover: " + filter_type + ")"
-    print "             DRC_fir:   " + drc_eq
+    print "             Altavoz:   " + loudspeaker + " (fs: " + estado['fs'] + ", xover: " + estado['filter_type'] + ")"
+    print "             DRC_fir:   " + estado['drc_eq']
     if load_ecasound:
-        print "             PEQ:       " + peq
+        print "             PEQ:       " + estado['peq']
     if preset:
         if default_preset:
-            print "             Preset:    " + preset + "(defeault)"
+            print "             Preset:    " + estado['preset'] + "(defeault)"
         else:
-            print "             Preset:    " + preset
-    print "             Input:     " + input_name
+            print "             Preset:    " + estado['preset']
+    print "             Input:     " + estado['input']
 
 if __name__ == "__main__":
+
+    # DEBUG para ver este proceso en un log
+    #original_stdout = sys.stdout
+    #sys.stdout = open("/home/firtro/firtro_debug.log", "w")
+
+    # Se usa para evitar que algunos procesos auxiliares Popen
+    # printen sus mensajes por esta misma terminal.
+    fnull = open(os.devnull, 'w')
+
+    fs = lee_status()['fs']
+    audio_folder = loudspeaker_folder + loudspeaker + "/" + fs + "/"
+
+    # Puertos de entrada a FIRtro:
+    if load_ecasound:
+        firtro_ports = ecasound_ports
+    else:
+        firtro_ports = brutefir_ports
+
+    # Cambiamos al directorio de ejecución de Brutefir para que carge los coeff.
+    # (nota: esto es innecesario si se usan path completos en brutefir_config)
+    os.chdir(audio_folder)
 
     run_level = "all"
     if sys.argv[1:]:
