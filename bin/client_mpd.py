@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# v1.0b
+# Sale del loop si se pierde la conexión con MPD
+
 ###
 # The mpd2 library:
 # http://pythonhosted.org/python-mpd2/topics/getting-started.html
