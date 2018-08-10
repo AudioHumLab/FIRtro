@@ -8,9 +8,12 @@
 """
 
 # v1.0b
-# Se etiquetan los 'print' para identificar la procedencia
+#   Se reescriben algunas líneas para legibilidad, se añaden comentarios.
+#   Se etiquetan los 'print' para identificar la procedencia
+#   Se añade que la funcion firtro_socket devuelve lo recibido
 # v1.0c
-# Se admite especificar el nombre del servidor FIRtro destino.
+#   Se admite especificar el nombre del servidor FIRtro destino, 
+#   para poder correr client.py fuera de FIRtro. 
 
 import socket
 import sys
@@ -44,7 +47,7 @@ def firtro_socket (data, quiet=False, server="localhost"):
                 # El server de FIRtro devuelve una cadena json con el estado
                 # incluyendo los posibles warnings después de procesar la orden.
                 recibido = json.loads(recibido)
-                if len(recibido['warnings'])>0:
+                if len(recibido['warnings']) > 0:
                     for value in recibido['warnings']:
                         print "(client.py) Warning: " + value
             s.send("close")
@@ -55,10 +58,10 @@ def firtro_socket (data, quiet=False, server="localhost"):
             print "---- close: closes the current connection"
             print "---- quit: closes the current connection and the control script"
             while True:
-                mensaje=raw_input(">>>")
+                mensaje = raw_input(">>>")
                 s.send(mensaje)
-                recibido=s.recv(4096); #print "(client.py)", recibido # DEBUG
-                if mensaje=="quit" or mensaje=="close":
+                recibido = s.recv(4096); #print "(client.py)", recibido # para DEBUG
+                if mensaje == "quit" or mensaje == "close":
                     print "Received data:", recibido
                     break
                 else:
@@ -75,6 +78,7 @@ def firtro_socket (data, quiet=False, server="localhost"):
         print "(client.py) Closing connection..."
 
     s.close()
+
     return recibido
 
 if __name__ == "__main__":
