@@ -23,6 +23,9 @@
 #   se recurre al nuevo módulo players_integrated
 # v2.1d2
 # - Logging sobre $USER/tmp
+#
+# v2.1f
+# - players_integrated.py renombrado players.py
 
 # módulos genéricos
 import os, sys, getpass
@@ -41,7 +44,7 @@ int_monitor_ports = jack_internal_monitors.split()
 # FIRtro2: gestiona sound cards adicionales resampleadas en jack
 import soundcards as sc
 # FIRtro2: gestiona los players integrados en un módulo separado
-import players_integrated as players
+import players
 
 # LOGGING para el DEBUG de excepciones
 # https://julien.danjou.info/blog/2016/python-exceptions-guide
