@@ -1,20 +1,19 @@
 #!/bin/bash
 
 # Cutre utilidad para ver los procesos de FIRtro en un terminal,
-# puede ser util para ver los rearranques.
-
-clear
+# puede ser util para ver la evolución de los rearranques.
 
 function verlosprocesos {
     for proceso in "${procesos[@]}"; do
         tmp=$(pgrep -la $proceso)
         # resaltamos en bold lel proceso
         tmp=${tmp//$proceso/\\e[1m$proceso\\e[0m}
-        echo -e "$tmp"
+        echo -e "$tmp" >> ~/tmp/firtro_procesos.txt
     done
-    echo ""
+    echo "" >> ~/tmp/firtro_procesos.txt
 }
 
+clear
 while true; do
 
     # Scripts python
@@ -41,6 +40,8 @@ while true; do
                         )
     verlosprocesos
 
+    cat ~/tmp/firtro_procesos.txt
+    rm  ~/tmp/firtro_procesos.txt
     sleep .5
     clear
 done
