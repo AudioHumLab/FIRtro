@@ -7,7 +7,7 @@
 #  - Comprueba posible initfirtro.py en curso
 
 # 00. Esperamos hasta 30 seg a que acabe un posible initfirtro.py en curso
-i=3  
+i=30
 while true; do
     if [ $(pgrep -f initfirtro.py) ]; then
         echo "(firtro_change_lspk) Esperando fin de 'initfirtro.py' en curso ..."
