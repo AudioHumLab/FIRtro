@@ -64,4 +64,4 @@ echo "(firtro_change_lspk) audio/status  ---> "$(grep preset /home/firtro/audio/
 
 # 4. Reiniciamos los módulos de audio de FIRtro
 echo "(firtro_change_lspk) REINICIANDO los módulos de audio de FIRtro:"
-initfirtro.py audio
+/home/firtro/bin/initfirtro.py audio
