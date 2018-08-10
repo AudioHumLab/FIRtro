@@ -2,8 +2,25 @@
 
 # Cutrescript para relanzar FIRtro con otro altavoz
 
-# v0.2
+# v0.3
 #  - Matamos el server para que no interfiera
+#  - Comprueba posible initfirtro.py en curso
+
+# 00. Esperamos hasta 30 seg a que acabe un posible initfirtro.py en curso
+i=30  
+while true; do
+    if [ $(pgrep -f initfirtro.py) ]; then
+        echo "(firtro_change_lspk) Esperando fin de 'initfirtro.py' en curso ..."
+        sleep 1
+    else
+        break
+    fi
+    i=$(( i-1 ))
+    if [ $i -eq 0 ]; then
+        echo "(firtro_change_lspk) WARNING initfirtro.py no ha finalizado"
+        exit 0
+    fi
+done
 
 # 0. Comprobammos que disponemos de la carpeta de configuración del altavoz
 altavoz=$1
