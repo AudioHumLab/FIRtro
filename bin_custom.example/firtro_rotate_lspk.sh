@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# v0.1
 # Cutrescript para relanzar FIRtro rotando
 # cada uno de los altavoces disponibles en ~/lspk
 # Util para ser asociado a un botón de la web de control.
