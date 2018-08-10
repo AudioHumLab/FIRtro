@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
-# from __future__ import with_statement # This isn't required in Python 2.6
 """
     Cliente para dialogar con FIRtro (server.py)
     Uso:
