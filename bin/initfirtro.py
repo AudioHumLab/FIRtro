@@ -388,7 +388,7 @@ def main(run_level):
     else:
         client.firtro_socket("preset " + preset)
 
-    # 7.3 # Releemos el ESTADO audio/status
+    # 7.3 # Actualizamos el ESTADO audio/status con los efectos del preset
     estado = lee_status()
 
     # 7.4 # LIMITE DE VOLUMEN opcional al arranque
