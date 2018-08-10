@@ -15,7 +15,7 @@
 # v1.1b
 # - revision, bugs
 # v1.1c
-# - comprobamos si el proceso mplayer está accesible
+# - Comprobamos si el proceso mplayer está accesible
 
 import sys
 from subprocess import Popen, check_output
@@ -38,20 +38,24 @@ def _update_radio_status(nuevo):
 def select_channel(channel_name):
     """ configura directamente en mplayer un nombre de emisora
     """
-    Popen('echo loadfile dvb://' + "'" + channel_name +"'"+' > ' + tdt_fifo, shell=True)
-
-def select_preset(radio):
-    """ selecciona una presintonia disponible en audio/radio
-    """
-    # obtenemos el nombre del canal correspondiente a la presintonia solicitada
-    channel_name = channels.get("channels", radio)
-    if channel_name <> "":
-        # reconfiguramoms mplayer con el canal deseado
-        select_channel(channel_name)
+    try:
+        Popen('echo loadfile dvb://' + "'" + channel_name +"'"+' > ' + tdt_fifo, shell=True)
         return True
-    else:
+    except:
         return False
-    
+
+def select_preset(memo):
+    """ selecciona un preset disponible en audio/radio
+    """
+    # obtenemos el nombre del canal correspondiente a la posicion solicitada
+    if memo.isdigit():
+        channel_name = channels.get("channels", memo)
+        if channel_name <> "":
+            # reconfiguramoms mplayer con el canal deseado
+            if select_channel(channel_name):
+                return True
+    return False
+
 if __name__ == "__main__":
 
     # verificamos que el proceso mplayer para tdt esté accesible:
@@ -90,5 +94,3 @@ if __name__ == "__main__":
         # Popen("echo get_file_name > tdt_fifo", shell=True)
     else:
         print "El canal \"" + opcion + "\" no está configurado"
-
-        
