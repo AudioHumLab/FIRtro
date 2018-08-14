@@ -10,14 +10,14 @@
 i=30
 while true; do
     if [ $(pgrep -f initfirtro.py) ]; then
-        echo "(firtro_change_lspk) Esperando fin de 'initfirtro.py' en curso ..."
+        echo "(lspk_change) Esperando fin de 'initfirtro.py' en curso ..."
         sleep 1
     else
         break
     fi
     i=$(( i-1 ))
     if [ $i -eq 0 ]; then
-        echo "(firtro_change_lspk) WARNING initfirtro.py no ha finalizado"
+        echo "(lspk_change) WARNING initfirtro.py no ha finalizado"
         exit 0
     fi
 done
@@ -29,14 +29,14 @@ if [ ! $altavoz ]; then
     exit 0
 fi
 if [ -d /home/firtro/lspk/$altavoz ]; then
-    echo "(firtro_change_lspk) Se reiniciará FIRtro con el altavoz: "$altavoz
+    echo "(lspk_change) Se reiniciará FIRtro con el altavoz: "$altavoz
 else
     echo "NO existe "$altavoz
     exit 0
 fi
 
 # 1. Matamos el server para que no interfiera:
-echo "(firtro_change_lspk) Cerrando server.py"
+echo "(lspk_change) Cerrando server.py"
 pkill -f "python /home/firtro/bin/server.py"
 # OjO hay veces que se queda algún proceso escuchando en 9999/tcp,
 # por ejemplo alsa_in ¿!?, hay que matarlo para liberar el puerto:
@@ -47,7 +47,7 @@ fuser -kv 9999/tcp
 
 # 2. Configuramos el altavoz solicitado en audio/config
 sed  -i.bak -e '/loudspeaker\ \=/c\loudspeaker\ \=\ '$altavoz /home/firtro/audio/config
-echo "(firtro_change_lspk) audio/config  ---> "$(grep ^loudspeaker /home/firtro/audio/config)
+echo "(lspk_change) audio/config  ---> "$(grep ^loudspeaker /home/firtro/audio/config)
 
 # 3. Si hay algún preset previsto en la carpeta del altavoz,
 #    lo cargamos en audio/status para que se use en el arranque:
@@ -60,8 +60,8 @@ else
     # Si no lo hubiera, borramos el preset de audio/status:
     sed  -i -e '/preset/c\preset\ \=\ ' /home/firtro/audio/status
 fi
-echo "(firtro_change_lspk) audio/status  ---> "$(grep preset /home/firtro/audio/status)
+echo "(lspk_change) audio/status  ---> "$(grep preset /home/firtro/audio/status)
 
 # 4. Reiniciamos los módulos de audio de FIRtro
-echo "(firtro_change_lspk) REINICIANDO los módulos de audio de FIRtro:"
+echo "(lspk_change) REINICIANDO los módulos de audio de FIRtro:"
 /home/firtro/bin/initfirtro.py audio
