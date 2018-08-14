@@ -24,7 +24,7 @@ for altavoz in "${altavoces[@]}"; do
     # Cambiamos de altavoz
     if [ $marca == "true" ]; then
         echo "(lspk_rotate) Cambiando a:     "$altavoz
-        /home/firtro/bin_custom/firtro_change_lspk.sh $altavoz &
+        /home/firtro/bin_custom/lspk_change.sh $altavoz &
         break
     fi
 
@@ -39,5 +39,5 @@ done
 # y se ha acabado el bucle, por tanto cambiamos al primero:
 if [ $marca == "true" ]; then
     echo "(lspk_rotate) Cambiando a:     "${altavoces[0]}
-    /home/firtro/bin_custom/firtro_change_lspk.sh ${altavoces[0]} &
+    /home/firtro/bin_custom/lspk_change.sh ${altavoces[0]} &
 fi
