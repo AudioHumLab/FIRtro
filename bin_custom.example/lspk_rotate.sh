@@ -15,7 +15,7 @@ for tmp in /home/firtro/lspk/* ; do
 done
 
 # 2. Altavoz actual:
-curr=$(grep loudspeaker /home/firtro/audio/config | cut -d"=" -f2) echo "(rotate_lspk) Altavoz actual: "$curr
+curr=$(grep loudspeaker /home/firtro/audio/config | cut -d"=" -f2) echo "(lspk_rotate) Altavoz actual: "$curr
 
 # 3. Recorremos los altavoces y reiniciamos con el siguiente al actual:
 marca="false"
@@ -23,7 +23,7 @@ for altavoz in "${altavoces[@]}"; do
 
     # Cambiamos de altavoz
     if [ $marca == "true" ]; then
-        echo "(rotate_lspk) Cambiando a:     "$altavoz
+        echo "(lspk_rotate) Cambiando a:     "$altavoz
         /home/firtro/bin_custom/firtro_change_lspk.sh $altavoz &
         break
     fi
@@ -38,6 +38,6 @@ done
 # ... si hemos llegado aquí es porque estamos usando el último, 
 # y se ha acabado el bucle, por tanto cambiamos al primero:
 if [ $marca == "true" ]; then
-    echo "(rotate_lspk) Cambiando a:     "${altavoces[0]}
+    echo "(lspk_rotate) Cambiando a:     "${altavoces[0]}
     /home/firtro/bin_custom/firtro_change_lspk.sh ${altavoces[0]} &
 fi
