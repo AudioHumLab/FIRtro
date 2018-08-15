@@ -239,7 +239,8 @@ if [ -f $fdest ]; then
     fi
 fi
 if [ "$actualizar" ]; then
-    echo "Atencion se necesitan permisos de administrador (sudo).\n"
+    echo "Atencion se necesitan permisos de administrador (sudo)"
+    echo "( ^C para cancelar la actualización del website )\n"
     sudo cp $forig $fdest
     sudo a2ensite FIRtro.conf
     sudo a2dissite 000-default.conf
