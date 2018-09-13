@@ -8,6 +8,7 @@
 #     - una carpeta de altavoz distinta de la configurada en el sistema en audio/config
 # v1.2a: los coeff de cruce se dejan de agrupar primero lp y luego mp,
 #        se printan por parejas lp/mp para mejor visibilidad de las atenuaciones de cada coeff.
+# v1.2b: se adaptan las etapas de filtrado eq y drc para podeer hacer MONO: drc recibe ambos canales de eq.
 
 ### ESTE SCRIPT ES MUY RUDIMENTARIO HABRIA QUE REESCRIBIRLO :-/
 ### INCLUYENDO EL SCANEO DE PCMs Y TAL ...
@@ -104,15 +105,19 @@ def hacer_CadenaConvolver(VIAS):
         for input in bf_ini.options("inputs"):
             if input[-1].upper() == canal:
                 print '    from_inputs:  "' + input[:-1] + input[-1].upper() + '";'
-                print '    to_filters:   "f_drc_' + canal + '";'
+                print '    to_filters:   "f_drc_L", "f_drc_R" ;'
                 print '    coeff:        "c_eq' + str(CANALES.index(canal)) +'";'
         print '};'
 
     # DRC filtering:
-    print '\n# --- DRC filtering:\n'
+    print '\n# --- DRC filtering (se reciben los dos canales para poder hacer MONO):\n'
     for canal in CANALES:
         print 'filter "f_drc_' + canal + '" {'
-        print '    from_filters: "f_eq_' + canal + '";'
+
+        if canal == "L":
+            print '    from_filters: "f_eq_L"//1, "f_eq_R"//0 ;'
+        else:
+            print '    from_filters: "f_eq_L"//0, "f_eq_R"//1 ;'
 
         # Ahora debemos llevar la señal a las VIAs y a los SUBs si existieran
         # tmp1 recoje las vias separadas por canal
