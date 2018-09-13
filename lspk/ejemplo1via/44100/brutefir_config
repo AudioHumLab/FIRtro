@@ -101,27 +101,27 @@ coeff "c_dirac-pulse" {
 # --- EQ filtering:
 
 filter "f_eq_L" {
-	from_inputs:  "in_L";
-	to_filters:   "f_drc_L";
-	coeff:        "c_eq0";
+    from_inputs:  "in_L";
+    to_filters:   "f_drc_L", "f_drc_R" ;
+    coeff:        "c_eq0";
 };
 filter "f_eq_R" {
-	from_inputs:  "in_R";
-	to_filters:   "f_drc_R";
-	coeff:        "c_eq1";
+    from_inputs:  "in_R";
+    to_filters:   "f_drc_L", "f_drc_R" ;
+    coeff:        "c_eq1";
 };
 
-# --- DRC filtering:
+# --- DRC filtering (se reciben los dos canales para poder hacer MONO)
 
 filter "f_drc_L" {
-	from_filters: "f_eq_L";
-	to_filters:   "f_fr_L";
-	coeff:        -1;
+    from_filters:  "f_eq_L"//1, "f_eq_R"//0 ;
+    to_filters:   "f_fr_L", "f_hi_L", "f_lo_L", "f_sw1", "f_sw2";
+    coeff:        -1;
 };
 filter "f_drc_R" {
-	from_filters: "f_eq_R";
-	to_filters:   "f_fr_R";
-	coeff:        -1;
+    from_filters: "f_eq_L"//0, "f_eq_R"//1 ;
+    to_filters:   "f_fr_R", "f_hi_R", "f_lo_R", "f_sw1", "f_sw2";
+    coeff:        -1;
 };
 
 # --- XOVER filtering:
