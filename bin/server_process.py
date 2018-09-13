@@ -60,6 +60,8 @@
 # - Se corrige change_inputs: se recarga el xover de audio/inputs solo si change_xovers=True
 # - Mejoras en los comentarios del código.. y reubicación de algunas de las recientes novedades..
 #
+# v2.0h
+# - Se simplifica el código para MONO. Implica novedades en brutefir_config.
 #----------------------------------------------------------------------
 
 import time
@@ -86,7 +88,6 @@ from getinputs import inputs
 import soundcards
 import wait4
 import presets                  ## <PRESETS>
-import monostereo               ## <MONO> Funcionalidad mono/stereo.
 import peq_control              ## <PEQ>  Ecasound como ecualizador paramétrico, cargado
                                 ##        en modo server tcp/ip en el arranque (initfirtro.py).
 import peq2fr                   ##        Módulo auxiliar para procesar archivos de EQs paramétricos.
@@ -269,7 +270,7 @@ def do (order):
 
     global gain, level, headroom, balance, muted, polarity, filter_type, replaygain_track
     global bass, treble, loudness_ref, loudness_track, loudness_level_info
-    global mono, monoCompens    ## <MONO> ##
+    global mono                 ## <MONO> ##
 
     global system_eq, drc_eq
     global preset               ## <PRESETS> ##
@@ -712,18 +713,15 @@ def do (order):
             else:
                 mono = "on"
         if mono == "on":
-            # hacemos el cruce de canales de entrada:
-            monostereo.setMono("on")
-            # COMPENSAMOS NIVELES por la mezcla de canales
-            monoCompens = -6.0
+            # Hacemos el cruce de canales de entrada. Aprovechamos que las
+            # etapas de filtrado 2 y 3 (drc L y R) reciben los dos canales L y R
+            # en sus filtros de entrada 0 y 1. Basta con sumar la mitad de cada uno.
+            # Si consultamos el comando lf en Brutefir veremos que están atenuados 6.0 (dBs)
+            bf_cli('cffa 2 0 m0.5; cffa 2 1 m0.5; cffa 3 1 m0.5; cffa 3 0 m0.5')
         else:
             mono = "off" # corrige si se pide una opcion incorrecta
-            # esto simplemente desconecta las entradas:
-            monostereo.setMono("off")
-            # marcamos para restaurar las entradas
-            change_input = True
-            # y COMPENSAMOS NIVELES
-            monoCompens = +0.0
+            # Aquí tomamos solo la entrada adecuada y dejamos la otra a cero.
+            bf_cli('cffa 2 0 m1; cffa 2 1 m0; cffa 3 0 m0; cffa 3 1 m1')
 
     ## v2.0a <CLOCK> se había perdido, se ha recuperado de Testing3 (OjO se ha reescrito).
     ## nota: Los cambios de CLOCK o de FS pueden ser:
@@ -782,9 +780,6 @@ def do (order):
             fs           = fs_old
             change_fs    = False
             write_status = True
-
-        if mono == "on":                            ## <MONO> ##
-            monostereo.setMono("on")                # mezcla canales de entrada (previamente se ha compensado el nivel)
 
     # v2.0a <CLOCK> omitido en v2.0 PRESTES :-|, se ha recuperado de Testing3 (OjO se ha reescrito)
     # - Se reconfigura el reloj de tarjetas de sonido profesionales (reloj interno/externo)
@@ -920,8 +915,8 @@ def do (order):
         # 5) SI hay HEADROOM suficiente aplicamos los cambios de level y/o EQ:
         if headroom >= 0:
             if change_gain:
-                gain_0 = gain + monoCompens
-                gain_1 = gain + monoCompens
+                gain_0 = gain   # diferenciamos por canal para poder ajustar balance
+                gain_1 = gain
                 if abs(balance) > balance_variation:
                     balance = copysign(balance_variation,balance)
                 if balance > 0:
@@ -1144,11 +1139,7 @@ def do (order):
 ### NIVEL:
 input_gain = 0
 gain = level + input_gain + ref_level_gain
-# <MONO> no computa en el cálculo de headroom, se sumará a la ganancia final enviada a Brutefir.
-if mono == "on":
-    monoCompens = -6.0
-else:
-    monoCompens = -0.0
+
 # <MPD> control de volumen de MPD ligado a FIRtro
 last_level_change_timestamp = time.time()
 
