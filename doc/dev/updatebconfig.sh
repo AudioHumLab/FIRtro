@@ -38,5 +38,6 @@ for f in $files; do
         -e 's/'"$d1"'/'"$d2"'/g' \
         -e 's/'"$e1"'/'"$e2"'/g' \
         $f
-
+    echo $f
 done
+echo Done.
