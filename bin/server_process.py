@@ -1188,23 +1188,22 @@ drcTot_r_mag_i  = [0] * len(freq)
 tone_mag_i      = [0] * len(freq)
 loudeq_mag_i    = [0] * len(freq)
 
-### Carga de las curvas informativas para la web de los pcm disponibles para DRC:
+### Carga de las curvas informativas para la web de los PCM disponibles para DRC:
 # (i) El diseño original en FIRtro v1.0 requiere los nombres
 #     de archivos pcm para drc numerados correlativamente desde 1.
 #     El mecanismo de selección de DRC reserva el índice 0 para "drc plano".
-
-# Curva cero todo ceros:
+# 1. Curva cero todo ceros:
 drc_r_mag_i[0] = [0] * len(freq)
 drc_l_mag_i[0] = [0] * len(freq)
-
-# Curvas de los pcm:
+# 2. Resto de curvas de los pcm:
 print "(server_process) Doing FFT of DRC pcm files..."
-# La lista de coeffs de drc, cada uno es una tripleta <coeff_num>, <coeff_name>, <pcm_file>
+# El módulo 'read_brutefir_config' (aka 'brutefir') proporciona la lista de coeffs de drc,
+# cada uno es una tripleta <coeff_num>, <coeff_name>, <pcm_file>
 brutefir.lee_config()
-drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de DRC
+drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
 for x in drc_coeffs:
     coeff_num, coeff_name, pcm_file = x
-    # read_brutefir_config (aka brutefir) proporciona solo el basename del pcm, lo completamos:
+    # Como read_brutefir_config (aka brutefir) proporciona solo el basename del pcm, lo completamos:
     pcm_file = loudspeaker_folder + loudspeaker + '/' +fs + "/" + pcm_file
     drc_num = coeff_name[5]
     drc_channel = coeff_name[-1]
