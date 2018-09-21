@@ -27,6 +27,8 @@
 #   Se distingue cada canal, se optimiza el código.
 # - Se adapta para manejar distintos subwoofers
 # - Se usa RawConfigParser + .optionxform = str para preservar nombres de vias case sensitive en presets.ini
+# v2.1
+# - Reubicación de los pcm de DRC en la carpeta original audio_folder (lspk/altavoz/FS)
 
 import brutefir_cli
 from subprocess import Popen
@@ -115,8 +117,8 @@ def configura_preset(presetID, filter_type):
                 atten, delay, pcm_name = valor.split()
                 configura_via(via, atten, delay, pcm_name, filter_type)
                 viasDelPreset.append(via)
-                avisos += [ "(presets) Se configura la via: " + via.ljust(8) \
-                            + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
+                avisos += [ "(presets) Se configura la via: \t" \
+                            + via + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
 
             # opciones del ini relativas a BALANCE:
             if opcion in ["balance"]:
@@ -160,34 +162,32 @@ def ajusta_peq(peq):
 
 def configura_drc_coeff(fName):
     """ funcion auxiliar para cargar el drc del preset seleccionado
+        devuelve una string con el índice del coeff drc que se pretende cargar,
+        que es lo que entiende server_process
     """
     global avisos
-    # El DRC dedica un pcm para cada canal
-    drc_coeffs = []
-    for channel in "L", "R":
-        filtro_pcm = channel + " " + fName + ".pcm"
-        for coeff in brutefir.coeffs:
-        # e.g.: [6, 'c_drc2_L', 'L RRreq FR_60Hz1st.pcm']
-            if filtro_pcm == coeff[2]:
-                drc_coeffs.append(coeff[1])
 
-    # aquí vamos a hablar con el FIRtro en lugar de directamente con Brutefir
-    # al objeto de respetar la gestión de DRCs integrada en el FIRtro.
-    drc_nums = []
+    drc_nums_found = []
+    # Recorremos los coeff de drc disponibles en brutefir_config
+    drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
+    for x in drc_coeffs:
+        # OjO coeff_num es la posicion que ocupa dentro de todos los coeff declarados
+        #     en brutefir_config, NO confundir con el drc_num (el índice de los drc disponibles).
+        coeff_num, coeff_name, pcm_file = x
+        drc_num = coeff_name[5]
+        drc_channel = coeff_name[-1]
+        # ejemplo pcm_file: 'drc-1-L xxxxxxxxxx.pcm"
+        bare_pcm_file = pcm_file[7:-4].strip()
+        if bare_pcm_file == fName:
+            drc_nums_found.append(drc_num)
 
-    for drc_coeff in drc_coeffs:
-        # e.g.: 'c_drc2_L' --> '2'
-        drc_nums.append(drc_coeff[5])
-
-    try:
-        if drc_nums[0] == drc_nums[1]:
-            # devolvemos el drc que hay que configurar para que se ocupe server_process.py
-            return drc_nums[0]
-            avisos += ["(presets) Se configura drc num." + drc_nums[0] + " con filtro: " + fName]
-
-    except:
-        return "0"
+    # Veamos si todos los drc_num son el mismo:
+    if drc_nums_found.count(drc_nums_found[0]) == len(drc_nums_found):
+        avisos += ["(presets) Se configura drc num:\t" + drc_nums_found[0] + "\t\t\t\t" + fName ]
+        return drc_nums_found[0]
+    else:
         avisos += ["(presets) algo no ha ido bien localizando el drc"]
+        return "0"
 
 def configura_via(via, atten, delay, pcmName, filter_type):
     """ Funcion auxiliar para cargar en Brutefir el filtro de xover
