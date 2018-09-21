@@ -28,7 +28,7 @@
 
 """
 Uso:
-    brutefir_config.py opciones
+    do_brutefir_config.py opciones
 
     opciones:
         /path/to/'brutefir.ini'file   (obligatorio)
