@@ -186,7 +186,7 @@ def configura_drc_coeff(fName):
         avisos += ["(presets) Se configura drc num:\t" + drc_nums_found[0] + "\t\t\t\t" + fName ]
         return drc_nums_found[0]
     else:
-        avisos += ["(presets) algo no ha ido bien localizando el drc"]
+        avisos += ["(presets) algo no ha ido bien localizando el drc :-/"]
         return "0"
 
 def configura_via(via, atten, delay, pcmName, filter_type):
