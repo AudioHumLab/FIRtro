@@ -57,13 +57,13 @@ coeff "c_eq1" {
 # --------------------------------
 
 coeff "c_drc1_R" {
-	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1/R_drc_pba1.pcm";
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1-R_prueba.pcm";
 	format:      "FLOAT_LE";
 	shared_mem:  false;
 	attenuation: -1.0;
 };
 coeff "c_drc1_L" {
-	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1/L_drc_pba1.pcm";
+	filename:    "/home/firtro/lspk/ejemplo1via/44100/drc-1-L_prueba.pcm";
 	format:      "FLOAT_LE";
 	shared_mem:  false;
 	attenuation: -1.0;

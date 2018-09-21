@@ -1188,41 +1188,34 @@ drcTot_r_mag_i  = [0] * len(freq)
 tone_mag_i      = [0] * len(freq)
 loudeq_mag_i    = [0] * len(freq)
 
-### Carga de las curvas informativas para la web de los pcm disponibles para DRC:
+### Carga de las curvas informativas para la web de los PCM disponibles para DRC:
 # (i) El diseño original en FIRtro v1.0 requiere los nombres
 #     de archivos pcm para drc numerados correlativamente desde 1.
 #     El mecanismo de selección de DRC reserva el índice 0 para "drc plano".
-drc_index = 0
-drc_r_mag_i[drc_index] = [0] * len(freq)
-drc_l_mag_i[drc_index] = [0] * len(freq)
-# Buscamos todos los ficheros pcm de drc que existan: 
+# 1. Curva cero todo ceros:
+drc_r_mag_i[0] = [0] * len(freq)
+drc_l_mag_i[0] = [0] * len(freq)
+# 2. Resto de curvas de los pcm:
 print "(server_process) Doing FFT of DRC pcm files..."
-while True:
-    # intentamos leer los pcm de drc con el siguiente índice:
-    i = drc_index + 1
-    tmp = loudspeaker_folder + loudspeaker + '/' +fs + "/drc-" + str(i)
-    # Canal L:
-    pcm_file = tmp + "-L.pcm"
-    if os.path.isfile(pcm_file):
-        print "(server_process) Found ", pcm_file
-        # curva informativa canal L
+# El módulo 'read_brutefir_config' (aka 'brutefir') proporciona la lista de coeffs de drc,
+# cada uno es una tripleta <coeff_num>, <coeff_name>, <pcm_file>
+brutefir.lee_config()
+drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
+for x in drc_coeffs:
+    coeff_num, coeff_name, pcm_file = x
+    # Como read_brutefir_config (aka brutefir) proporciona solo el basename del pcm, lo completamos:
+    pcm_file = loudspeaker_folder + loudspeaker + '/' +fs + "/" + pcm_file
+    drc_num = coeff_name[5]
+    drc_channel = coeff_name[-1]
+    print "(server_process) Leyendo ", pcm_file
+    if drc_channel == "L":
         drc_l_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
-        # Canal R:
-        pcm_file = tmp + "-R.pcm"
-        if os.path.isfile(pcm_file):
-            print "(server_process) Found ", pcm_file
-            # curva informativa canal R
-            drc_r_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
-            # Actualizamos el índice de DRCs disponibles:
-            drc_index = i
-        else:
-            print "(server_process) ERROR en la secuencia de archivos DRC disponibles."
-            print "(server_process) Se cancela la búsqueda de archivos DRC."
-            break
-    else:
-        print "(server_process) Encontrados " + str(drc_index) + " archivos DRC."
-        print "(server_process) Fin de la búsqueda de archivos DRC."
-        break
+    if drc_channel == "R":
+        drc_r_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
+drc_index = len(drc_coeffs) / 2 # así se pensó
+print "(server_process) Encontrados " + str(drc_index) + " archivos DRC."
+print "(server_process) Fin de la búsqueda de archivos DRC."
+
 
 ### Carga de las curvas informativas para la web de PEQ:
 #   NOTA:   Las releemos en cada do('peq_reload') para permitir

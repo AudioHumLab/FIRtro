@@ -1,18 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+###################################################################################################
+#################################   DISCLAIMER ACHTUNG   ##########################################
+###################################################################################################
+#                ESTE SCRIPT ES MUY RUDIMENTARIO HABRIA QUE REESCRIBIRLO :-/
+#                INCLUYENDO EL SCANEO DE PCMs Y TAL ...
+###################################################################################################
+###################################################################################################
+###################################################################################################
+
 # v1.0: se permite argumento "-w" para escribir la salida en el archivo brutefir_config
 # v1.1: incorpora un coeff de xover "dirac pulse" para poder cargarlo en una vía full range"
 # v1.2: se permiten nuevos argumentos:
 #     - un archivo brutefir.ini alternativo
 #     - una carpeta de altavoz distinta de la configurada en el sistema en audio/config
-# v1.2a: los coeff de cruce se dejan de agrupar primero lp y luego mp,
-#        se printan por parejas lp/mp para mejor visibilidad de las atenuaciones de cada coeff.
-# v1.2b: se adaptan las etapas de filtrado eq y drc para podeer hacer MONO: drc recibe ambos canales de eq.
-
-### ESTE SCRIPT ES MUY RUDIMENTARIO HABRIA QUE REESCRIBIRLO :-/
-### INCLUYENDO EL SCANEO DE PCMs Y TAL ...
-
+# v1.2a:
+#   - Los coeff de cruce se dejan de agrupar primero lp y luego mp,
+#     se printan por parejas lp/mp para mejor visibilidad de las atenuaciones de cada coeff.
+# v1.2b:
+#   - Se adaptan las etapas de filtrado eq y drc para podeer hacer MONO: drc recibe ambos canales de eq.
+# v1.2c:
+#   - Bug en la lectura de la carpeta de altavoz de referencia si se pasa como argumento
+#   - Bug se leia <audio_folder>/filters.ini antes del escaneo
+#   - Se renombra a do_brutefir_config.py por respeto
+#   - Se adapta al abandono de la ubicación de PCMs para DRC en subcarpetas de la de audio 
 
 """
 Uso:
@@ -253,15 +265,15 @@ def hacer_Coef_DRC():
     print   '# --------------------------------\n'
 
     for coeff in filters_ini.options("drcs"):
-            gain = filters_ini.get("drcs", coeff).split()[0]
-            file = ' '.join(filters_ini.get("drcs", coeff).split()[1:])
-            # por compatibilidad mayuscula al final
-            tmp = coeff[:-1] + coeff[-1].upper()
-            print 'coeff "' + tmp + '" {'
-            print '    filename:    "' + file + '";'
-            print '    format:      "FLOAT_LE";  shared_mem:  false;'
-            print '    attenuation: ' + gain + ';'
-            print '};'
+        gain = filters_ini.get("drcs", coeff).split()[0]
+        file = ' '.join(filters_ini.get("drcs", coeff).split()[1:])
+        # por compatibilidad mayuscula al final
+        tmp = coeff[:-1] + coeff[-1].upper()
+        print 'coeff "' + tmp + '" {'
+        print '    filename:    "' + file + '";'
+        print '    format:      "FLOAT_LE";  shared_mem:  false;'
+        print '    attenuation: ' + gain + ';'
+        print '};'
 
 def hacer_Coef_XO():
 
@@ -338,21 +350,23 @@ def hacer_cabecera():
     print 'lock_memory:       ' + lee_secc_gral("lock_memory")       + ';'
     print 'show_progress:     ' + lee_secc_gral("show_progress")     + ';'
 
+#------------------------------------------ MAIN -----------------------------------------
 if __name__ == "__main__":
 
     salidaPorConsola = True
 
-    #preparamos la estructura de variables
+    # Preparamos la estructura de variables
     bf_ini      = ConfigParser.ConfigParser()
     filters_ini = ConfigParser.ConfigParser()
     avisos      = []
 
-    # el archivo brutefir.ini es obligatorio como argumento.
+    # El archivo brutefir.ini es obligatorio como argumento.
     bf_ini_file = ""
-    # ubicación por defecto de la carpeta del altavoz
+
+    # La ubicación por defecto de la carpeta del altavoz se toma de ~/audio/config
     audio_folder = loudspeaker_folder + loudspeaker + "/" + fs
 
-    # si se pasan argumentos los atendemos
+    # Si se pasan argumentos los atendemos
     if sys.argv[1:]:
         args = sys.argv[1:]
 
@@ -368,10 +382,10 @@ if __name__ == "__main__":
             bf_ini_file = tmp[0]
 
         # si se indica una carpeta de altavoz en particular
-        # OjO debe proporcionarse como "lspk/otroAltavoz"
+        # OjO debe proporcionarse como "lspk/altavoz"
         tmp = [x for x in args if "lspk/" in x]
         if tmp:
-            loudspeaker = tmp[0].split("lspk/")[1]
+            loudspeaker = tmp[0].split("lspk/")[1].replace("/", "") # por si se pasara con el slash final
 
         # se pide ayuda
         tmp = [x for x in args if "-h" in x]
@@ -383,14 +397,14 @@ if __name__ == "__main__":
         print __doc__
         sys.exit(0)
 
-
-    audio_folder = loudspeaker_folder + loudspeaker + "/" + fs
+    # Variables de trabajo (bien por defecto o bien las que se pasen como argumento)
+    audio_folder     = loudspeaker_folder + loudspeaker + "/" + fs
     filters_ini_file = audio_folder + "/filters.ini"
 
+    # Cargamos con el contenido
     bf_ini.read(bf_ini_file)
-    filters_ini.read(filters_ini_file)
 
-    # lee y verifica brutefir.ini
+    # lee y verifica bf_ini
     fs     = float(lee_secc_gral("fs"))
     dither = lee_secc_gral("dither")
 
@@ -406,6 +420,9 @@ if __name__ == "__main__":
 
         # scanfilters genera filters.ini con los filtros encontrados en la carpeta del altavoz.
         scanfilters.main(audio_folder)
+
+        # Cargamos con el contenido
+        filters_ini.read(filters_ini_file)
 
         # Ahora generamos brutefir_config a partir de brutefir.ini y filters.ini
 
@@ -432,9 +449,6 @@ if __name__ == "__main__":
             print "\n        " + audio_folder + "/brutefir_config"
         else:
             print "\n(i) Se ha guardado " + audio_folder + "/brutefir_config\n"
-            print "\n(i) creando symlinks a las carpetas drc-x ... ...\n"
-            import drc_generate_symlinks
-            drc_generate_symlinks.main(audio_folder)
 
     else:
         avisos.append('la estructura de puertos de salida en brutefir.ini no es correcta')

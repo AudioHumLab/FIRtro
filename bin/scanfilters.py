@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
-    Módulo para uso interno desde brutefir_config.py.
+    Módulo para uso interno desde do_brutefir_config.py.
+    
     Se confecciona una lista clasificada con todos los filtros pcm
     encontrados en la carpeta del altavoz solicitada,
     y se  escribe en el archivo /home/firtro/lspk/altavoz/Fs/filters.ini
+
     Nota: la lista muestra la ganacia de los filtros pcm
           si se acompañan de un archivo ini, para comodidad
           del usuario que construye la carpeta del altavoz.
 
 """
+# v0.2
+# - Se adecúa con ocasión de la vuelta a tener los PCM de DRC en la "audio_folder" lspk/ALTAVOZ/FS/
+
 import os, sys
 import ConfigParser # usado para leer la ganancia del .INI asociado a los .PCM
 
@@ -20,51 +24,43 @@ from getstatus import fs
 
 avisos = ""
 
-def buscaDRCs(path): # filtros de DRC
+def buscaDRCs(carpeta): # filtros de DRC
 
     f1.write("\n[drcs]\n")
 
-    drcLista = []
+    # Lista de los pcm relativos a DRC
+    # La ordenamos por la pos 7: 'drc-1-Lxxxxxxxxxxx"
+    #                                    ^---(pos7)
+    drcPCMs = sorted([x for x in os.listdir(carpeta) if x[:4]=="drc-" and x[-4:]==".pcm"],
+                      key=lambda x: x[7:])
 
-    # recorremos los directorios drc-X OjO no procesar los links .pcm
-    # que están para compatibilidad con el metodo inicial de gestión de DRCs.
-    drcFolders = [ x for x in os.listdir(path) if 'drc-' in x and not x.endswith(".pcm")]
-
-    for drcFolder in drcFolders:
-        # filtramos los .PCM ya que opcionalemnte puede haber .INI con metadatos (la gananacia)
-        filters = [x for x in os.listdir(path + "/" + drcFolder) if x.endswith(".pcm")]
-        for filter in filters:
-            # y hacemos una lista con cada filtro incluyendo la carpeta drc-X
-            drcLista.append(audio_folder + "/" + drcFolder + "/" + filter)
-
-    # Ya tenemos la lista de archivos pcm para DRC
+    drcPCMs = [carpeta+"/"+x for x in drcPCMs]
 
     filterVersions = []
 
-    for drcFile in drcLista:
+    for drcPCM in drcPCMs:
 
-        gain = lee_INI_of_PCM(drcFile, 'gain')
+        gain = lee_INI_of_PCM(drcPCM, 'gain')
 
-        indice = drcFile.split("drc-")[1][0]
-        canal = drcFile.split("/")[-1][0].upper()
+        basename = drcPCM.split("/")[-1]
+        indice = basename[4]
+        canal = basename[6].upper()
         coeff_name = "c_drc" + indice + "_" + canal
+ 
+        f1.write(coeff_name + " = " + gain.rjust(6) + "  " + drcPCM + "\n")
 
-        f1.write(coeff_name + " = " + gain.rjust(6) + "  " + drcFile + "\n")
-
-        filterFile = drcFile.split("/")[-1]
+        filterFile = drcPCM.split("/")[-1]
         filterVersion = filterFile[1:].strip().replace(".pcm", "")
         if filterVersion not in filterVersions:
             filterVersions.append(filterVersion)
 
-#    writeVersions(filterVersions, "drc") OBSOLETO
-
-def buscaXOs(path): # filtros de CORTE DE VIAS y/o FULL RANGE
+def buscaXOs(carpeta): # filtros de CORTE DE VIAS y/o FULL RANGE
 
     # eludimos los filtros pcm de subwoofer
-    xoFiles = [ x for x in os.listdir(path) if ("p-sw" not in x) and x.endswith(".pcm") ]
+    xoFiles = [ x for x in os.listdir(carpeta) if ("p-sw" not in x) and x.endswith(".pcm") ]
 
     # le añadimos el path absoluto
-    xoFiles = [ audio_folder + "/" + x for x in xoFiles ]
+    xoFiles = [ carpeta + "/" + x for x in xoFiles ]
 
     for phase in ('lp', 'mp'):
 
@@ -89,14 +85,12 @@ def buscaXOs(path): # filtros de CORTE DE VIAS y/o FULL RANGE
             f1.write("c_" + phase + "-" + xo.split("-")[1][:2]
                      + str(i) + " = " + gain.rjust(6) + "  " + xo + "\n")
 
-#    writeVersions(filterVersions, "xo") OBSOLETO
-
-def buscaSWs(path): # filtros de SUBWOOFERS
+def buscaSWs(carpeta): # filtros de SUBWOOFERS
 
     # filtros sw:
-    swFiles = [ x for x in os.listdir(path) if "p-sw" in x and x.endswith(".pcm") ]
+    swFiles = [ x for x in os.listdir(carpeta) if "p-sw" in x and x.endswith(".pcm") ]
     # le añadimos el path absoluto
-    swFiles = [ audio_folder + "/" + x for x in swFiles ]
+    swFiles = [ carpeta + "/" + x for x in swFiles ]
 
     for phase in ('lp', 'mp'):
 
@@ -121,8 +115,6 @@ def buscaSWs(path): # filtros de SUBWOOFERS
             f1.write("c_" + phase + "-" + sw.split("-")[1][:2]
                      + str(i) + " = " + gain.rjust(6) + "  " + sw + "\n")
 
-#    writeVersions(filterVersions, "sw") OBSOLETO
-
 def lee_INI_of_PCM(pcmFile, option):
     ''' cada .pcm tiene asociado un .INI a modo de metadatos,
         en principio tiene la ganancia del filtro
@@ -144,17 +136,16 @@ def lee_INI_of_PCM(pcmFile, option):
 
 def main(carpeta):
 
-    global f1, f2, avisos, audio_folder
-    audio_folder = carpeta
+    global f1, avisos
 
-    f1 = open(audio_folder + "/filters.ini", "w")
+    f1 = open(carpeta + "/filters.ini", "w")
     f1.write("; (i) NO editar.\n")
     f1.write("; Este archivo es el resultado de escanear los archivos .PCM de filtrado\n")
     f1.write("; y sus archvos .INI asociados que contienen la ganacia de cada filtro .PCM\n")
 
-    buscaDRCs(audio_folder)
-    buscaXOs(audio_folder)
-    buscaSWs(audio_folder)
+    buscaDRCs(carpeta)
+    buscaXOs(carpeta)
+    buscaSWs(carpeta)
 
     f1.close()
 
