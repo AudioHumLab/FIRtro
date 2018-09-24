@@ -5,7 +5,7 @@
     
     Se confecciona una lista clasificada con todos los filtros pcm
     encontrados en la carpeta del altavoz solicitada,
-    y se  escribe en el archivo /home/firtro/lspk/altavoz/Fs/filters.ini
+    y se  escribe en el archivo /home/firtro/lspk/altavoz/Fs/filters.scan
 
     Nota: la lista muestra la ganacia de los filtros pcm
           si se acompañan de un archivo ini, para comodidad
@@ -14,6 +14,7 @@
 """
 # v0.2
 # - Se adecúa con ocasión de la vuelta a tener los PCM de DRC en la "audio_folder" lspk/ALTAVOZ/FS/
+# - Se renombre filters.ini --> filters.scan que refleja mejor la naturaleza de este archivo.
 
 import os, sys
 import ConfigParser # usado para leer la ganancia del .INI asociado a los .PCM
@@ -56,39 +57,41 @@ def buscaDRCs(carpeta): # filtros de DRC
 
 def buscaXOs(carpeta): # filtros de CORTE DE VIAS y/o FULL RANGE
 
-    # eludimos los filtros pcm de subwoofer
-    xoFiles = [ x for x in os.listdir(carpeta) if ("p-sw" not in x) and x.endswith(".pcm") ]
-
-    # le añadimos el path absoluto
+    # Eludimos los .pcm que no estén 'bien nombrados'
+    prefis = ['lp-', 'mp-']
+    vias   = ['-fr', '-lo', '-mi', '-hi']
+    xoFiles = [ x for x in os.listdir(carpeta) if x[:3] in prefis and x[2:5] in vias and x.endswith(".pcm")]
+    # Le añadimos el path absoluto
     xoFiles = [ carpeta + "/" + x for x in xoFiles ]
 
     for phase in ('lp', 'mp'):
 
-        f1.write("\n[" + phase + "_xo]\n")
+        f1.write("\n[" + phase + "_xo]\n") # separador de sección del ini
 
-        # set of files of refered phase
-        xoPhase = [ x for x in xoFiles if x.split("/")[-1].startswith(phase + '-')]
-        xoPhase.sort()
+        # Colección de PCMs de la phase que toque lp|mp
+        xoFilesPhase = [ x for x in xoFiles if x.split("/")[-1].startswith(phase + '-')]
+        xoFilesPhase.sort()
 
-        filterVersions = []
+        i = 0
+        last_via = ''
+        for xoFile in xoFilesPhase:
 
-        for xo in xoPhase:
-
-            gain = lee_INI_of_PCM(xo, 'gain')
-
-            # quitamos el prefijo para extraer la version identificativa del filtro.
-            filterVersion = xo[5:].split("/")[-1]
-            if filterVersion not in filterVersions:
-                filterVersions.append(filterVersion)
-            i = filterVersions.index(filterVersion) + 1
-
-            f1.write("c_" + phase + "-" + xo.split("-")[1][:2]
-                     + str(i) + " = " + gain.rjust(6) + "  " + xo + "\n")
+            gain = lee_INI_of_PCM(xoFile, 'gain')
+            via = xoFile.split("/")[-1][3:5]
+            if last_via <> via:
+                i = 0
+            last_via = via
+            
+            f1.write("c_" + phase + "-" + xoFile.split("-")[1][:2]
+                     + "_" + str(i) + " = " + gain.rjust(6) + "  " + xoFile + "\n")
+            i +=1
 
 def buscaSWs(carpeta): # filtros de SUBWOOFERS
 
-    # filtros sw:
-    swFiles = [ x for x in os.listdir(carpeta) if "p-sw" in x and x.endswith(".pcm") ]
+    # Eludimos los .pcm que no estén 'bien nombrados'
+    prefis = ['lp-', 'mp-']
+    vias   = ['-sw']
+    swFiles = [ x for x in os.listdir(carpeta) if x[:3] in prefis and x[2:5] in vias and x.endswith(".pcm")]
     # le añadimos el path absoluto
     swFiles = [ carpeta + "/" + x for x in swFiles ]
 
@@ -97,23 +100,17 @@ def buscaSWs(carpeta): # filtros de SUBWOOFERS
         f1.write("\n[" + phase + "_sw]\n")
 
         # set of files of refered phase
-        swPhase = [ x for x in swFiles if x.split("/")[-1].startswith(phase + '-')]
-        swPhase.sort()
+        swFilesPhase = [ x for x in swFiles if x.split("/")[-1].startswith(phase + '-')]
+        swFilesPhase.sort()
 
-        filterVersions = []
+        i = 0
+        for swFile in swFilesPhase:
 
-        for sw in swPhase:
+            gain = lee_INI_of_PCM(swFile, 'gain')
 
-            gain = lee_INI_of_PCM(sw, 'gain')
-
-            # quitamos el prefijo para extraer la version identificativa del filtro.
-            filterVersion = sw[5:].split("/")[-1]
-            if filterVersion not in filterVersions:
-                filterVersions.append(filterVersion)
-            i = filterVersions.index(filterVersion) + 1
-
-            f1.write("c_" + phase + "-" + sw.split("-")[1][:2]
-                     + str(i) + " = " + gain.rjust(6) + "  " + sw + "\n")
+            f1.write("c_" + phase + "-" + swFile.split("-")[1][:2]
+                     + "_" + str(i) + " = " + gain.rjust(6) + "  " + swFile + "\n")
+            i += 1
 
 def lee_INI_of_PCM(pcmFile, option):
     ''' cada .pcm tiene asociado un .INI a modo de metadatos,
@@ -138,7 +135,7 @@ def main(carpeta):
 
     global f1, avisos
 
-    f1 = open(carpeta + "/filters.ini", "w")
+    f1 = open(carpeta + "/filters.scan", "w")
     f1.write("; (i) NO editar.\n")
     f1.write("; Este archivo es el resultado de escanear los archivos .PCM de filtrado\n")
     f1.write("; y sus archvos .INI asociados que contienen la ganacia de cada filtro .PCM\n")
