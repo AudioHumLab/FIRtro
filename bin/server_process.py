@@ -1213,7 +1213,7 @@ for x in drc_coeffs:
     if drc_channel == "R":
         drc_r_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
 drc_index = len(drc_coeffs) / 2 # así se pensó
-print "(server_process) Encontrados " + str(drc_index) + " archivos DRC."
+print "(server_process) Encontrados " + str(drc_index) + " juegos de .pcm para DRC."
 print "(server_process) Fin de la búsqueda de archivos DRC."
 
 
