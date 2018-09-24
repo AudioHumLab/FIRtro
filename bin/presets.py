@@ -166,6 +166,10 @@ def configura_drc_coeff(fName):
         que es lo que entiende server_process
     """
     global avisos
+    
+    if fName == 'off':
+        avisos += ["(presets) Se configura drc num:\t0\t\t\t\t-1 (off)" ]
+        return "0"
 
     drc_nums_found = []
     # Recorremos los coeff de drc disponibles en brutefir_config
@@ -182,7 +186,7 @@ def configura_drc_coeff(fName):
             drc_nums_found.append(drc_num)
 
     # Veamos si todos los drc_num son el mismo:
-    if drc_nums_found.count(drc_nums_found[0]) == len(drc_nums_found):
+    if drc_nums_found and drc_nums_found.count(drc_nums_found[0]) == len(drc_nums_found):
         avisos += ["(presets) Se configura drc num:\t" + drc_nums_found[0] + "\t\t\t\t" + fName ]
         return drc_nums_found[0]
     else:
