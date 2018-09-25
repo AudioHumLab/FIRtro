@@ -62,6 +62,8 @@
 #
 # v2.0h
 # - Se simplifica el código para MONO. Implica novedades en brutefir_config.
+# - Nueva lista 'drc_descrip_i' en el diccionario json para la web, 
+#   que contiene los descriptivos de los pcm de DRC. 
 #----------------------------------------------------------------------
 
 import time
@@ -242,7 +244,7 @@ def firtroData(locales, globales, entradas):
         'fs', 'drc_eq', 'filter_type', 'clock', 'loudness_track', 'loudness_ref', 'loudness_level_info',
         'radio', 'input_name', 'input_gain', 'system_eq', 'room_gain', 'house_corner', 'house_atten',
         'ref_level_gain', 'loudspeaker', 'inputs', 'warnings', 'order','freq_i','tone_mag_i','loudeq_mag_i',
-        'drcTot_r_mag_i','drcTot_l_mag_i','drc_index','balance','balance_variation',
+        'drcTot_r_mag_i','drcTot_l_mag_i','drc_index', 'drc_descrip_i', 'balance','balance_variation',
         'preset', 'lista_de_presets', 'mono', 'peq', 'peqdefeat']    ## <PRESETS> <MONO> <PEQ> ##
     # Y obtenemos un nuevo diccionario filtrado, con solo las opciones que nos interesan
     fdata = { key: data[key] for key in keys}
@@ -1187,6 +1189,7 @@ drcTot_l_mag_i  = [0] * len(freq)       # drcTot : drc + peq + syseq
 drcTot_r_mag_i  = [0] * len(freq)
 tone_mag_i      = [0] * len(freq)
 loudeq_mag_i    = [0] * len(freq)
+drc_descrip_i   = []
 
 ### Carga de las curvas informativas para la web de los PCM disponibles para DRC:
 # (i) El diseño original en FIRtro v1.0 requiere los nombres
@@ -1203,11 +1206,15 @@ brutefir.lee_config()
 drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
 for x in drc_coeffs:
     coeff_num, coeff_name, pcm_file = x
+    #                      ^-------------- ej: /44100/drc-3-L RRreq CD mueble.pcm
+    print "(server_process) Leyendo curva: ", pcm_file
+    drc_descrip = pcm_file[7:].replace('.pcm','').strip()
+    if not drc_descrip in drc_descrip_i:
+        drc_descrip_i.append( (coeff_num, drc_descrip) )
     # Como read_brutefir_config (aka brutefir) proporciona solo el basename del pcm, lo completamos:
     pcm_file = loudspeaker_folder + loudspeaker + '/' +fs + "/" + pcm_file
     drc_num = coeff_name[5]
     drc_channel = coeff_name[-1]
-    print "(server_process) Leyendo ", pcm_file
     if drc_channel == "L":
         drc_l_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
     if drc_channel == "R":
@@ -1215,7 +1222,6 @@ for x in drc_coeffs:
 drc_index = len(drc_coeffs) / 2 # así se pensó
 print "(server_process) Encontrados " + str(drc_index) + " juegos de .pcm para DRC."
 print "(server_process) Fin de la búsqueda de archivos DRC."
-
 
 ### Carga de las curvas informativas para la web de PEQ:
 #   NOTA:   Las releemos en cada do('peq_reload') para permitir
