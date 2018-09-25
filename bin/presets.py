@@ -121,8 +121,8 @@ def configura_preset(presetID, filter_type):
                     avisos += [ "(presets) Se configura la via: \t" \
                                 + via + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
                 else:
-                    avisos += [ "(presets) ERROR en la via:     \t" + via + "\t\t(revisar pcm en presets.ini)" ]
-                    
+                    avisos += [ "(presets) ERROR en la via:     \t" \
+                                + via + "\t\t(revisar pcm en presets.ini)" ]
 
             # opciones del ini relativas a BALANCE:
             if opcion in ["balance"]:
