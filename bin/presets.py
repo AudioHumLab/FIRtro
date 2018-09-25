@@ -29,6 +29,7 @@
 # - Se usa RawConfigParser + .optionxform = str para preservar nombres de vias case sensitive en presets.ini
 # v2.1
 # - Reubicación de los pcm de DRC en la carpeta original audio_folder (lspk/altavoz/FS)
+# - Se comprueba que cada vía a configurar se corresponda con uno de los coeff disponibles en Brutefir.
 
 import brutefir_cli
 from subprocess import Popen
@@ -115,10 +116,13 @@ def configura_preset(presetID, filter_type):
             if [x for x in etiquetasDeVias if x in opcion]:
                 via = opcion # solo para legibilidad
                 atten, delay, pcm_name = valor.split()
-                configura_via(via, atten, delay, pcm_name, filter_type)
-                viasDelPreset.append(via)
-                avisos += [ "(presets) Se configura la via: \t" \
-                            + via + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
+                if configura_via(via, atten, delay, pcm_name, filter_type):
+                    viasDelPreset.append(via)
+                    avisos += [ "(presets) Se configura la via: \t" \
+                                + via + "\t" + filter_type + "\t" + atten + "\t" + delay + "\t" + pcm_name ]
+                else:
+                    avisos += [ "(presets) ERROR en la via:     \t" + via + "\t\t(revisar pcm en presets.ini)" ]
+                    
 
             # opciones del ini relativas a BALANCE:
             if opcion in ["balance"]:
@@ -206,13 +210,15 @@ def configura_via(via, atten, delay, pcmName, filter_type):
     else:
         pcmName = filter_type + "-" + pcmName + ".pcm"
 
-    # Recorremos los coeff disponibles, saltamos los dos primeros que son de la etapa de EQ.
+    # Recorremos los coeff disponibles en Brutfir,
+    # saltamos los dos primeros que son de la etapa de EQ.
+    matched = False
     for bfirCoeff in brutefir.coeffs[2:]:
 
         coeffNum, coeffName, coeffPcm = bfirCoeff
-
-        # Vemos si es el pcm solicitado
+        
         if pcmName == coeffPcm:
+            matched = True
             
             bfilter = "f_" + via
 
@@ -227,6 +233,11 @@ def configura_via(via, atten, delay, pcmName, filter_type):
             # 3) ajusta el delay:   cod <output> <delay>
             tmp = 'cod "' + via + '" ' + samples + '; quit;'
             brutefir_cli.bfcli(tmp)
+
+    if matched:
+        return True
+    else:
+        return False
 
 def conecta_tarjeta(vias):
 
