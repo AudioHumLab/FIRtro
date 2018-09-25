@@ -1189,7 +1189,7 @@ drcTot_l_mag_i  = [0] * len(freq)       # drcTot : drc + peq + syseq
 drcTot_r_mag_i  = [0] * len(freq)
 tone_mag_i      = [0] * len(freq)
 loudeq_mag_i    = [0] * len(freq)
-drc_descrip_i   = []
+drc_descrip_i   = []                    # lista con la descripción incluida en el nombre de los PCM de DRC
 
 ### Carga de las curvas informativas para la web de los PCM disponibles para DRC:
 # (i) El diseño original en FIRtro v1.0 requiere los nombres
