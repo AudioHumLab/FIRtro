@@ -53,7 +53,7 @@ brutefir.filters_running = []
 
 # Para que funcione la cosa actualizamos las listas:
 bferror = False
-try:   
+try:
     brutefir.lee_config()
 except:
     bferror = True
@@ -93,27 +93,32 @@ def configura_preset(presetID, filter_type):
         - el ajuste de balance
     """
     global avisos
-    
+
     if presets.has_section(presetID):
         avisos += [ "(presets) Ha seleccionado preset: " + presetID ]
         avisos += [ "\n                                        ftype:\taten:\tdelay:\tpcm:" ]
         viasDelPreset = []
         etiquetasDeVias = ["fr", "lo", "mi", "hi", "sw"]
 
+        # valores por si falla la lectura de presets.ini
+        drc_num = drc_status
+        balance = "0"
+        peq = None
+
         # [presetID]
         # opcion1 = valor1
         # opcion2 = valor2
-        # ...     = ...... 
+        # ...     = ......
         # etc
         for opcion in presets.options(presetID):
             valor = presets.get(presetID, opcion)
 
             # opciones del ini relativas a DRC:
-            if opcion in ["drc"]:
+            if opcion == 'drc':
                 drc_num = configura_drc_coeff(valor)
 
             # opciones del ini relativas a VÍAS:
-            if [x for x in etiquetasDeVias if x in opcion]:
+            elif [x for x in etiquetasDeVias if x in opcion]:
                 via = opcion # solo para legibilidad
                 atten, delay, pcm_name = valor.split()
                 if configura_via(via, atten, delay, pcm_name, filter_type):
@@ -125,22 +130,26 @@ def configura_preset(presetID, filter_type):
                                 + via + "\t\t(revisar pcm en presets.ini)" ]
 
             # opciones del ini relativas a BALANCE:
-            if opcion in ["balance"]:
+            elif opcion == 'balance':
                 balance = ajusta_balance(valor)
 
             # opciones del ini relativas a PEQ:
-            if opcion in ["peq"]:
+            elif opcion == 'peq':
                 peq = ajusta_peq(valor)
 
+            else:
+                avisos += ["(presets) opcion '" + opcion + "' NO válida en presets.ini"]
+
         avisos += ["(presets) Enjoy!\n"]
+
+        ###############################################################
         # Conectamos a la tarjeta solo las vias definidas en el preset:
+        ###############################################################
         conecta_tarjeta(viasDelPreset)
 
     else:
         presetID = "ERROR PRESET NO VALIDO"
-        drc_num = drc_status
-        balance = "0"
-        peq = None
+        # drc_num, balance, peq se quedan los definidos arriba
 
     for aviso in avisos:
         print aviso
@@ -170,22 +179,22 @@ def configura_drc_coeff(fName):
         que es lo que entiende server_process
     """
     global avisos
-    
+
     if fName == 'off':
         avisos += ["(presets) Se configura drc num:\t0\t\t\t\t-1 (off)" ]
         return "0"
 
     drc_nums_found = []
-    # Recorremos los coeff de drc disponibles en brutefir_config
+    # Recorremos los coeff de drc disponibles en brutefir_config buscando fName
     drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
     for x in drc_coeffs:
         # OjO coeff_num es la posicion que ocupa dentro de todos los coeff declarados
-        #     en brutefir_config, NO confundir con el drc_num (el índice de los drc disponibles).
+        #     en brutefir_config, NO confundir con el drc_num (el índice de entre los drc disponibles).
         coeff_num, coeff_name, pcm_file = x
         drc_num = coeff_name[5]
         drc_channel = coeff_name[-1]
         # ejemplo pcm_file: 'drc-1-L xxxxxxxxxx.pcm"
-        bare_pcm_file = pcm_file[7:-4].strip()
+        bare_pcm_file = pcm_file[7:-4].strip("_").strip()
         if bare_pcm_file == fName:
             drc_nums_found.append(drc_num)
 
@@ -216,10 +225,10 @@ def configura_via(via, atten, delay, pcmName, filter_type):
     for bfirCoeff in brutefir.coeffs[2:]:
 
         coeffNum, coeffName, coeffPcm = bfirCoeff
-        
+
         if pcmName == coeffPcm:
             matched = True
-            
+
             bfilter = "f_" + via
 
             # 1) carga el coeff:    cfc <filter> <coeff>
@@ -243,7 +252,7 @@ def conecta_tarjeta(vias):
 
     jack.attach("tmp")
 
-    # Disponemos de la funcion brutefir.outputsMap que contiene 
+    # Disponemos de la funcion brutefir.outputsMap que contiene
     # el mapeo de vias tal como esta definido en brutefir_config, por ejemplo:
     #   system:playback_3/hi_L
     #   system:playback_4/hi_R
@@ -254,7 +263,7 @@ def conecta_tarjeta(vias):
 
     to_disconnect=[]
     to_connect = []
-    
+
     # Ahora debemos evaluar si es una salida a activar:
     for bfOutMap in brutefir.outputsMap:
         conectar = False
@@ -269,7 +278,7 @@ def conecta_tarjeta(vias):
             to_connect.append( (jackOrig, jackDest) )
         else:
             to_disconnect.append( (jackOrig, jackDest) )
-    
+
     for pair in to_disconnect:
         jack.disconnect(pair[0], pair[1])
     for pair in to_connect:
