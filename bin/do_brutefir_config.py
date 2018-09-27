@@ -517,7 +517,7 @@ if __name__ == "__main__":
         avisos.append('\n(i) Se ha validado la configuracion de vías.')
 
         # scanfilters genera filters.scan con los filtros encontrados en la carpeta del altavoz.
-        scanfilters.main(audio_folder)
+        avisos += ['\n'] + scanfilters.main(audio_folder)
         filters_ini_file = audio_folder + "/filters.scan"
         filters_ini.read(filters_ini_file)
 
