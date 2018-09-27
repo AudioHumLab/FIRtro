@@ -60,7 +60,7 @@ $plot_options = {
     },
     series:[
         {
-            lineWidth:2, 
+            lineWidth:2,
             showMarker: false
         }
     ],
@@ -263,10 +263,10 @@ function update_controls () {
 
     // Página activa del documento
     switch ($.mobile.activePage.attr('id')) {
-        
+
         case 'info_page':
-        
-            // El estado del AUDIO se muestra usando variables info_xxx que son 
+
+            // El estado del AUDIO se muestra usando variables info_xxx que son
             // función de los valores del estado de FIRtro contenidos en $php_data
 
             if ($php_data['muted'] == false)    $("#info_vol").text("Vol: " + $php_data["level"]);
@@ -275,7 +275,7 @@ function update_controls () {
             $("#info_hro").text("Hr: " + $php_data["headroom"]);
 
             $("#info_bal").text("Bal: " + $php_data["balance"]);
-                        
+
             $("#info_bas").text("Bass: " + $php_data["bass"])
             $("#info_tre").text("Treb: " + $php_data["treble"])
 
@@ -287,7 +287,7 @@ function update_controls () {
 
             if ( ($php_data['peq'] != "") && ($php_data['peqdefeat'] != true) ) $("#info_peq").text("PEQ");
             else                                                                $("#info_peq").text(" - ");
-            
+
             $("#info_pre").text("Preset: " + $php_data["preset"])
             if ($php_data['loudness_track']==true)  $("#info_lou").text("LOUD");
             else                                    $("#info_lou").text(" -- ");
@@ -297,7 +297,7 @@ function update_controls () {
             $("#info_inp").text($php_data["input_name"].toUpperCase())
             $("#info_fs").text($php_data["fs"])
             $("#info_xov").text("xo: " + $php_data["filter_type"])
-            
+
             // El estado de los PLAYER se muestra usando variables info_xxx que se corresponden
             // con los valores de los player también contenidos en $php_data
             $iname = $php_data['input_name'];
@@ -323,11 +323,11 @@ function update_controls () {
             $("#info_album").text($album)
             $("#info_title").text($title)
             $("#info_sta").text(":: " + $state + " ::");
-            
+
             break;
-        
+
         case 'level_page':
-        
+
             if ($("#vol_slider").attr("value") != $php_data['level']) {
                 $("#vol_slider").attr("value", $php_data['level']).slider("refresh");
             }
@@ -343,36 +343,36 @@ function update_controls () {
                 $("#level_display1").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             }
             else {
-                //$("#level_display1").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)"); 
+                //$("#level_display1").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
                 $("#level_display1").text("VOL " + $php_data["level"] + " dB"
                                           + " / Hr " + $php_data["headroom"] + " dB"
                                           + " / Bal " + $php_data["balance"]
-                                          ); 
+                                          );
             }
-            
+
             $("#level_display21").text("FS: " + $php_data["fs"] + " Hz");
-            
+
             if ($php_data['loudness_track']==true)  $("#level_display22").text("Loudness: ON");
             else                                    $("#level_display22").text("Loudness: OFF");
-            
+
             $("#level_display31").text("DRC: " + $php_data["drc_eq"]);
-            
+
             if ($php_data["system_eq"] == false)    $system_eq = "OFF";
             else                                    $system_eq = "ON";
-            
+
             $("#level_display32").text("SysEQ: " +          $system_eq);
             $("#level_display41").text("Bass: " +           $php_data["bass"]);
             $("#level_display42").text("Treble: " +         $php_data["treble"]);
             $("#level_display51").text("Input: " +          $php_data["input_name"]);
             $("#level_display52").text("Filter type: " +    $php_data["filter_type"]);
-            
+
             // MONO
             if ($php_data['mono'] == "on")      $("#level_display53").text("- MONO -");
             else                                $("#level_display53").text("- stereo -");
-            
+
             // PRESETS
-            $("#level_display54").text("Preset: " + $php_data["preset"]);            
-            
+            $("#level_display54").text("Preset: " + $php_data["preset"]);
+
             // PEQ
             if ($php_data['peq'] != "off") {
                 $("#level_display55").text("PEQ: ON");
@@ -383,7 +383,7 @@ function update_controls () {
             else {
                 $("#level_display55").text("(no peq)");
             }
-            
+
             // Array de warnings
             if ($php_data['warnings'] != "") {
                 $php_data['warnings'].forEach(function(item) {
@@ -392,14 +392,14 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#level_display6").append("<br/>"+item);
-                });    
+                });
             }
             else $("#level_display6").text("");
 
             break;
 
         case 'drc_page':
-            
+
             $("#drc_display").empty();
             if ($php_data['muted'] == true) $("#drc_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else $("#drc_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
@@ -413,10 +413,10 @@ function update_controls () {
                 $("#drc_display").append("<br/>SysEQ: OFF");
                 $("#syseq_switch").attr("value", "off").slider("refresh");
             }
-            
+
             // Incluimos informacion del PEQ en el display de la seccion DRC:
             // y un switch de control de PEQ.
-            // $("#drc_display").append(" --- DRC: " + $php_data["drc_eq"] + "/" + ($php_data["drc_index"]).toString());
+            // $("#drc_display").append(" --- DRC: " + $php_data["drc_eq"] + "/" + ($php_data["drc_items"]).toString());
             drcinfo = ""
             if ($php_data['peq'] != "off") {
                 drcinfo = " - PEQ: ON";
@@ -430,9 +430,9 @@ function update_controls () {
                 drcinfo = " - (no peq)";
                 $("#peq_switch").attr("value", "off").slider("refresh");
             }
-            $("#drc_display").append(" - DRC: " + $php_data["drc_eq"] + "/" 
-                                     + ($php_data["drc_index"]).toString() + drcinfo);
-            
+            $("#drc_display").append(" - DRC: " + $php_data["drc_eq"] + "/"
+                                     + ($php_data["drc_items"]).toString() + drcinfo);
+
             // Array de warnings
             //if ($php_data['warnings'] != "") $("#drc_display").append("<br/>Warning: "+$php_data['warnings']);
             if ($php_data['warnings'] != "") {
@@ -442,7 +442,7 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#drc_display").append("<br/>"+item);
-                });    
+                });
             }
             // Actualizacion del grafico de tonos
             // Ojo con una cosa. La unica forma que he encontrado de cambiar la serie de datos y actualizar el grafico es haciendo esto:
@@ -454,13 +454,13 @@ function update_controls () {
             // Precisamente por esto, si queremos actualizar solo si es necesario, debemos crear una variable temporal ($plot_data_new) paa ver si los datos han cambiado, ya que si se hace
             // JSON.stringify($tone_plot.data) !== JSON.stringify([$plot_data_new])
             // Da siempre False, aunque los datos no se visualicen actualizados
-            
+
             // Datos para el grafico.
             $.each($php_data['freq_i'], function(index, value) {
                 $plot_data_new[index]=[value, $php_data['drcTot_r_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
-            
+
             // Vemos si han cambiado
             if (JSON.stringify($plot_data_new) !== JSON.stringify($syseq_r_plot_data)) {
                 $syseq_r_plot_data=$plot_data_new.slice();
@@ -468,13 +468,13 @@ function update_controls () {
                 $syseq_r_plot.replot([$syseq_r_plot_data]); // En el replot hay que pasarle la variable tamben, sino no funciona
                 //console.log ("Grafico de EQ sistema actualizado");
             }
-            
+
             // Datos para el grafico. Los guardamos en una variable nueva
             $.each($php_data['freq_i'], function(index, value) {
                 $plot_data_new[index]=[value, $php_data['drcTot_l_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
-            
+
             // Vemos si han cambiado
             if (JSON.stringify($plot_data_new) !== JSON.stringify($syseq_l_plot_data)) {
                 $syseq_l_plot_data=$plot_data_new.slice();
@@ -482,22 +482,22 @@ function update_controls () {
                 $syseq_l_plot.replot([$syseq_l_plot_data]); // En el replot hay que pasarle la variable tamben, sino no funciona
                 //console.log ("Grafico de EQ sistema actualizado");
             }
-            
+
             break;
-            
+
         case 'tone_page':
-        
+
             $("#tone_display").empty();
-            if ($php_data['muted'] == true) 
+            if ($php_data['muted'] == true)
                 $("#tone_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else
                 $("#tone_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
-            
+
             $("#tone_display").append("<br/>Bass: " + $php_data["bass"] + " --- Treble: " + $php_data["treble"]);
-            
+
             // traslado del balance aqui:
             $("#tone_display").append("<br/>Balance: " + $php_data["balance"]);
-            
+
             //if ($php_data['warnings'] != "") $("#tone_display").append("<br/>Warning: "+$php_data['warnings']);
             // Array de warnings
             if ($php_data['warnings'] != "") {
@@ -507,15 +507,15 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#tone_display").append("<br/>"+item);
-                });    
+                });
             }
-            
+
             // Datos para el grafico. Los guardamos en una variable nueva
             $.each($php_data['freq_i'], function(index, value) {
                 $plot_data_new[index]=[value, $php_data['tone_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
-            
+
             // Vemos si han cambiado
             if (JSON.stringify($plot_data_new) !== JSON.stringify($tone_plot_data)) {
                 $tone_plot_data=$plot_data_new.slice();
@@ -534,20 +534,20 @@ function update_controls () {
             if ($("#bal_slider").attr("value") != $php_data['balance']) {
                 $("#bal_slider").attr("value", $php_data['balance']).slider("refresh");
             }
-            
-                       
+
+
             break;
 
         case 'loudness_page':
-        
+
             if ($("#loudness_slider").attr("value") != $php_data['loudness_ref']) $("#loudness_slider").attr("value",$php_data['loudness_ref']).slider("refresh");
             $("#loudness_display").empty();
             if ($php_data['muted'] == true) $("#loudness_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else $("#loudness_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
-            
-            if ($php_data['loudness_track']==true) {            
+
+            if ($php_data['loudness_track']==true) {
                 $("#loudness_display").append("<br/>Loudness " + $php_data["loudness_level_info"]);
-                $("#loudness_switch").attr("value", "on").slider("refresh");                
+                $("#loudness_switch").attr("value", "on").slider("refresh");
             }
             else  {
                 $("#loudness_display").append("<br/>Loudness OFF");
@@ -562,14 +562,14 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#loudness_display").append("<br/>"+item);
-                });    
+                });
             }
             // Datos para el grafico. Los guardamos en una variable nueva
             $.each($php_data['freq_i'], function(index, value) {
                 $plot_data_new[index]=[value, $php_data['loudeq_mag_i'][index]];
                 //console.log (tone_data[index]);
             });
-            
+
             // Vemos si han cambiado
             if (JSON.stringify($plot_data_new) !== JSON.stringify($loudeq_plot_data)) {
                 $loudeq_plot_data=$plot_data_new.slice();
@@ -580,7 +580,7 @@ function update_controls () {
             break;
 
         case 'inputs_page':
-        
+
             $("#input_display").empty();
             if ($php_data['muted'] == true) $("#input_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else $("#input_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
@@ -593,7 +593,7 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#input_display").append("<br/>"+item);
-                });    
+                });
             }
             break;
 
@@ -613,12 +613,12 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#preset_display").append("<br/>"+item);
-                });    
+                });
             }
             break;
 
         case 'media_page':
-        
+
             $("#media_display").empty();
             if ($php_data['muted'] == true) $("#media_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else $("#media_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
@@ -631,7 +631,7 @@ function update_controls () {
                     $first_item=false;
                 }
                 else $("#media_display").append("<br/>"+item);
-                });    
+                });
             }
             break;
 
@@ -659,21 +659,21 @@ function update_plot(){
 ////////*** MANEJO DE EVENTOS ***////////
 /////////////////////////////////////////
 
-// Según la doc de JQuery se debe usar el método "$(document).on('pageinit', function(){" 
+// Según la doc de JQuery se debe usar el método "$(document).on('pageinit', function(){"
 // en vez de "$(document).on('ready', function(event){"
 // para asegurarse de que la página esta siempre lista
 // http://jquerymobile.com/test/docs/api/events.html
-// Pero OjO, porque este evento se produce por cada inicialización de la página, 
+// Pero OjO, porque este evento se produce por cada inicialización de la página,
 // cuando pinchamos por primera vez, así que hay que filtrar por página
 // para evitar asignar la misma función mas de una vez al mismo control.
 
-// "$(document).on('ready', function(event){" se ejecuta SOLO la primera vez que se carga el documento, 
-// con la página de inicio. Aqui se define la función por defecto para todos los botones, 
+// "$(document).on('ready', function(event){" se ejecuta SOLO la primera vez que se carga el documento,
+// con la página de inicio. Aqui se define la función por defecto para todos los botones,
 // y como no se usa ningún ID ni nombre, funciona para todas las páginas y simplificamos código.
 
-// Atención, como usamos posteriormete el evento 'pageinit' para código especifíco de cada página, 
+// Atención, como usamos posteriormete el evento 'pageinit' para código especifíco de cada página,
 // debe tenerse en cuenta que primero se produce el envento 'pageinit' (una vez por página)
-// y luego 'ready' (solo la primera vez que se abre el documento, sea la página que sea). 
+// y luego 'ready' (solo la primera vez que se abre el documento, sea la página que sea).
 // Esto puede influir en donde se deben declarar ciertas variables
 
 $(document).on('ready', function(event){
@@ -682,10 +682,10 @@ $(document).on('ready', function(event){
 
     // Deshabilitamos el zoom en los botones
     $('input[type="submit"]').nodoubletapzoom();
-    
+
     // http://zsprawl.com/iOS/2012/05/completely-disabling-zoom-in-jquery-mobile-1-1-0/
     //$.extend($.mobile.zoom, {locked:true, enabled:false});
-    
+
     // Capturamos todos los botones del formulario tipo submit.
     // Se envía su nombre al código PHP, donde se interpretará la acción correspondiente.
     $('input[type="submit"]').click(function(event) {
@@ -703,7 +703,7 @@ $(document).on('ready', function(event){
             //if ($button_value == "auto") $button_value=$("#inputs_page input[name='input_select']:checked").attr("value");
             // Asi que lo cogemos del array recibido del servidor
             if ($button_value == "auto") $button_value=$php_data['input_name'];
-        }        
+        }
         // 2- Si el boton es el de salvar configuracion
         if ($button_name == "save_config") {
             $button_value=$config_changes;
@@ -717,11 +717,11 @@ $(document).on('ready', function(event){
             $.mobile.navigate( "#level_page" ); // Volvemos a la pagina de inicio
             return; // No solicitamos nada al server
         }
-        
+
         send_command (event.currentTarget.name, $button_value);
         event.preventDefault();
     });
-            
+
     // Esto se usa para hacer el resize de los gráficos. Algunos exploradores generan eventos continuos mientras se estan redimensionando
     // creando una carga de de trabajo innecesaria. Otros sin embargo solo generan un evento cuando acaban de redimensionarse.
     // Para solucionar todos los casos, pongo un timer de espera ($resize_timeout) antes de hacer el resize del gráfico
@@ -732,10 +732,10 @@ $(document).on('ready', function(event){
             update_plot();
         }, $resize_timeout);
     });
-    
+
     // Establecemos el tema especificado en el config
     if ($config['global_theme'] != "" && $config['global_theme'] != "default") changeGlobalTheme($config['global_theme']);
-    
+
     // Arrancamos el auto update
     if ($config['auto_update'] == true) auto_update();
 });
@@ -744,7 +744,7 @@ $(document).on('ready', function(event){
 // Se ejecuta la primera vez que se carga cada página.
 // OjO con el orden de los eventos, ver notas en función anterior.
 $(document).on('pageinit', function(){
-    //changeGlobalTheme($config['global_theme']);    
+    //changeGlobalTheme($config['global_theme']);
 });
 
 // Inicializaciones por página. Se ejecutan la primera vez que se carga la página:
@@ -804,7 +804,7 @@ $(document).on('pageinit', '#level_page', function(){
     // $() is the jQuery constructor function.
     // this is a reference to the DOM element of invocation.
     // so basically, in $(this), you are just passing the this in $() as a parameter so that you could call jQuery methods and functions.
-    
+
     // Slider de volumen. Se envía el nombre y el valor al código PHP cada vez que cambie
     $('#vol_slider').on('slidestop', function(event) {
         //var $slider_name=event.currentTarget.name;
@@ -812,7 +812,7 @@ $(document).on('pageinit', '#level_page', function(){
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
     });
-    
+
 });
 
 $(document).on('pageinit', '#drc_page', function(){
@@ -822,20 +822,55 @@ $(document).on('pageinit', '#drc_page', function(){
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
     });
-    
+
     //Switch de PEQ. Se envía el nombre y el valor al código PHP            *** PEQ ***
     $('#peq_switch').on('slidestop', function(event) {
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
     });
-    
+
     // Creamos el objeto, con datos vacios. Posteriormente en la funcion update_controls() nos ocuparemos de actualizarlos.
     $syseq_r_plot=$.jqplot('syseq_r_chartdiv', [['']], $plot_options_drc);
     $syseq_l_plot=$.jqplot('syseq_l_chartdiv', [['']], $plot_options_drc);
+
+    // Nueva botonera radius dinámica con los DRC disponibles y sus nombres
+    if ($php_data) {
+        // Un primer botón es para drc-0 (sin drc)
+            $('#drc_select_cg').append('<input type="radio" name="drc_select" id="drc_select_0" '
+                                        + 'value="0" />'
+                                        + '<label for="drc_select_0">'
+                                        + 'drc - 0'
+                                        + '</label>');
+
+        // Recorremos la lista de drcs 'drc_sets_info' para completar los botones de selección, dinámicamente.
+        // La key json de $php_data: drc_sets_info[0] contiene el número de drc-X
+        //                                        [1] contiene el descriptivo
+        $php_data['drc_sets_info'].forEach(function(item) {
+            $('#drc_select_cg').append('<input type="radio" name="drc_select" id="drc_select_' + item[0] + '" '
+                                        + 'value="' + item[0] + '" />'
+                                        + '<label for="drc_select_' + item[0] + '">'
+                                        + 'drc - ' + item [0] + " : " + item[1]
+                                        + '</label>');
+        });
+
+        // Marcamos el radio del drc activo, key 'drc_eq', como seleccionado. Se escapan los espacios
+        $("#drc_select_" + $php_data['drc_eq'].replace(/( )/g, "\\\ ")).attr('checked', true);
+
+        // creación de un divisor de botones de entrada radio
+        $("#drc_radiodiv").trigger("create");
+
+        // Capturamos los eventos de cambio para enviar las ordenes correspondientes
+        $("#drc_page input[name='drc_select']").on('change', function(event, ui) {
+                //send_command (event.currentTarget.name, event.currentTarget.value);
+                // Nota: este comando es preprocesado por 'functions.php' y allí traducido a control de FIRtro,
+                send_command ('drc', event.currentTarget.value);
+                //event.preventDefault();
+        });
+    }
 });
 
 $(document).on('pageinit', '#tone_page', function(){
-        
+
     // Creamos el objeto, con datos vacios. Posteriormente en la funcion update_controls() nos ocuparemos de actualizarlos.
     $tone_plot=$.jqplot('tone_chartdiv', [['']], $plot_options);
 
@@ -855,14 +890,14 @@ $(document).on('pageinit', '#loudness_page', function(){
         send_command (event.currentTarget.name, event.currentTarget.value);
         event.preventDefault();
     });
-    
+
     // Creamos el objeto, con datos vacios. Posteriormente en la funcion update_controls() nos ocuparemos de actualizarlos.
     $loudeq_plot=$.jqplot('loudeq_chartdiv', [['']], $plot_options);
 });
 
 $(document).on('pageinit', '#inputs_page', function(){
     if ($php_data) {
-        
+
         // Recorremos el array de entradas para añadir el código correspondiente al selector
         // OjO se usa el nombre de la entrada como id del selector para que luego sea mas sencillo de seleccionar
         // Por tanto NO puede haber dos entradas con el mismo nombre, lo cual es de esperar.
@@ -877,7 +912,7 @@ $(document).on('pageinit', '#inputs_page', function(){
         // Tenemos que invocar la acción de crear al div que contiene todo el selector
         // Sino no se muestra con el estilo predefinido
         $("#input_radiodiv").trigger("create");
-        
+
         // Capturamos los eventos de cambio para enviar las ordenes correspondientes
         $("#inputs_page input[name='input_select']").on('change', function(event, ui) {
                 send_command (event.currentTarget.name, event.currentTarget.value);
@@ -889,18 +924,18 @@ $(document).on('pageinit', '#inputs_page', function(){
 
 $(document).on('pageinit', '#presets_page', function(){
     if ($php_data) {
-        
+
         $php_data['lista_de_presets'].forEach(function(item) {
             $('#preset_select_cg').append('<input type="radio" name="preset_select" id="preset_select_' + item + '" value="' + item + '" />'+
                                           '<label for="preset_select_' + item + '">' + item + '</label>');
         });
-        
+
         // Marcamos el radio del preset activo como seleccionado. Se escapan los espacios
         $("#preset_select_" + $php_data['preset'].replace(/( )/g, "\\\ ")).attr('checked', true);
 
         // creación de un divisor de botones de entrada radio
         $("#preset_radiodiv").trigger("create");
-        
+
         // Capturamos los eventos de cambio para enviar las ordenes correspondientes
         $("#presets_page input[name='preset_select']").on('change', function(event, ui) {
                 send_command (event.currentTarget.name, event.currentTarget.value);
@@ -966,7 +1001,7 @@ $(document).on('pageinit', '#config_page', function(){
             // Y se selecciona
             $("#global_theme").val($config_ws['themes']['global_theme']).selectmenu('refresh', true);
         }
-        else {      
+        else {
             $.each ($config_ws[section], function(option) {
                 option_value=$config_ws[section][option]
                 console.log("\t"+option+": "+option_value)
@@ -978,7 +1013,7 @@ $(document).on('pageinit', '#config_page', function(){
             });
         }
     });
-    
+
     // Manejo de temas
     $('#global_theme').on("change", function(event){
         var theme=event.currentTarget.value;
@@ -988,13 +1023,13 @@ $(document).on('pageinit', '#config_page', function(){
         }
         else setTimeout(function() {changeGlobalTheme(event.currentTarget.value);}, 100);
     });
-    
+
     // Control de cambios de opciones. Los almacenamos en un objeto temporal
     $('#config_page [name="config_option"]').on("change", function(event){
         $config_changes[event.currentTarget.id] = event.currentTarget.value
         console.log("New value => " + event.currentTarget.id+": "+event.currentTarget.value)
     });
-    
+
     // Como esta seccion se crea dinamicamente, hay que forzar que se aplique el tema por defecto una vez creados los elementos.
     if ($config_ws['themes']['global_theme'] != "default") changeGlobalTheme($config_ws['themes']['global_theme']);
 
