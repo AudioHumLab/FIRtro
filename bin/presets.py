@@ -173,34 +173,34 @@ def ajusta_peq(peq):
     # o sea que esta función no hace nada :-)
     return peq
 
-def configura_drc_coeff(fName):
+def configura_drc_coeff(nombreDRC):
     """ funcion auxiliar para cargar el drc del preset seleccionado
         devuelve una string con el índice del coeff drc que se pretende cargar,
         que es lo que entiende server_process
     """
     global avisos
 
-    if fName == 'off':
+    if nombreDRC == 'off':
         avisos += ["(presets) Se configura drc num:\t0\t\t\t\t-1 (off)" ]
         return "0"
 
     drc_nums_found = []
-    # Recorremos los coeff de drc disponibles en brutefir_config buscando fName
+    # Recorremos las tripletas de coeffs de drc disponibles en brutefir_config buscando 'nombreDRC'
     drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
     for x in drc_coeffs:
         # OjO coeff_num es la posicion que ocupa dentro de todos los coeff declarados
         #     en brutefir_config, NO confundir con el drc_num (el índice de entre los drc disponibles).
-        coeff_num, coeff_name, pcm_file = x
+        coeff_num, coeff_name, pcm_file = x # tripleta
         drc_num = coeff_name[5]
         drc_channel = coeff_name[-1]
         # ejemplo pcm_file: 'drc-1-L xxxxxxxxxx.pcm"
         bare_pcm_file = pcm_file[7:-4].strip("_").strip()
-        if bare_pcm_file == fName:
+        if bare_pcm_file == nombreDRC:
             drc_nums_found.append(drc_num)
 
     # Veamos si todos los drc_num son el mismo:
     if drc_nums_found and drc_nums_found.count(drc_nums_found[0]) == len(drc_nums_found):
-        avisos += ["(presets) Se configura drc num:\t" + drc_nums_found[0] + "\t\t\t\t" + fName ]
+        avisos += ["(presets) Se configura drc num:\t" + drc_nums_found[0] + "\t\t\t\t" + nombreDRC ]
         return drc_nums_found[0]
     else:
         avisos += ["(presets) algo no ha ido bien localizando el drc :-/"]
