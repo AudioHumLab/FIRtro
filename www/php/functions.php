@@ -50,46 +50,46 @@
     }
 
     // Funcion para escribir el fichero de configuracion. Las funciones standard de PHP no lo incluyen
-    function write_ini_file($assoc_arr, $path, $has_sections=FALSE) { 
-        $content = ""; 
-        if ($has_sections) { 
-            foreach ($assoc_arr as $key=>$elem) { 
-                $content .= "[".$key."]\n"; 
-                foreach ($elem as $key2=>$elem2) { 
-                    if(is_array($elem2)) 
-                    { 
-                        for($i=0;$i<count($elem2);$i++) 
-                        { 
-                            $content .= $key2."[] = \"".$elem2[$i]."\"\n"; 
-                        } 
-                    } 
-                    else if($elem2=="") $content .= $key2." = \n"; 
-                    else $content .= $key2." = \"".$elem2."\"\n"; 
-                } 
-            } 
-        } 
-        else { 
-            foreach ($assoc_arr as $key=>$elem) { 
-                if(is_array($elem)) 
-                { 
-                    for($i=0;$i<count($elem);$i++) 
-                    { 
-                        $content .= $key2."[] = \"".$elem[$i]."\"\n"; 
-                    } 
-                } 
-                else if($elem=="") $content .= $key2." = \n"; 
-                else $content .= $key2." = \"".$elem."\"\n"; 
-            } 
-        } 
+    function write_ini_file($assoc_arr, $path, $has_sections=FALSE) {
+        $content = "";
+        if ($has_sections) {
+            foreach ($assoc_arr as $key=>$elem) {
+                $content .= "[".$key."]\n";
+                foreach ($elem as $key2=>$elem2) {
+                    if(is_array($elem2))
+                    {
+                        for($i=0;$i<count($elem2);$i++)
+                        {
+                            $content .= $key2."[] = \"".$elem2[$i]."\"\n";
+                        }
+                    }
+                    else if($elem2=="") $content .= $key2." = \n";
+                    else $content .= $key2." = \"".$elem2."\"\n";
+                }
+            }
+        }
+        else {
+            foreach ($assoc_arr as $key=>$elem) {
+                if(is_array($elem))
+                {
+                    for($i=0;$i<count($elem);$i++)
+                    {
+                        $content .= $key2."[] = \"".$elem[$i]."\"\n";
+                    }
+                }
+                else if($elem=="") $content .= $key2." = \n";
+                else $content .= $key2." = \"".$elem."\"\n";
+            }
+        }
 
-        if (!$handle = fopen($path, 'w')) { 
-            return false; 
-        } 
-        if (!fwrite($handle, $content)) { 
-            return false; 
-        } 
-        fclose($handle); 
-        return true; 
+        if (!$handle = fopen($path, 'w')) {
+            return false;
+        }
+        if (!fwrite($handle, $content)) {
+            return false;
+        }
+        fclose($handle);
+        return true;
     }
 
     function get_current_input() {
@@ -258,8 +258,7 @@
         if ($value == "on") $json=firtro_socket ("peq_reload");
         else $json=firtro_socket ("peq_defeat");
         }
-    elseif(substr($command,0,3) == 'drc') {
-        $value=substr($command, -1);
+    elseif($command == 'drc') {
         $json=firtro_socket ("drc $value");
         }
     elseif($command == 'bass_up') {
