@@ -1,4 +1,7 @@
 <?php
+    // v1.1
+    //  se adapta y simplifica elseif($command= 'drc') para la nueva botonera de DRCs
+
     $config_file = "../config/config.ini";
     $config;
     $config_ws;
@@ -30,56 +33,56 @@
         socket_close($socket);
         return $out;
     }
-    
+
     function fifo_write($fifoPath, $data) {
-        $fifo_w = fopen($fifoPath, 'w'); 
+        $fifo_w = fopen($fifoPath, 'w');
         fwrite ($fifo_w, $data . "\n");
         #fclose ($fifo_w);
         fflush ($fifo_w);
         sleep(1);
     }
-    
-    // Funcion para escribir el fichero de configuracion. Las funciones standard de PHP no lo incluyen
-    function write_ini_file($assoc_arr, $path, $has_sections=FALSE) { 
-        $content = ""; 
-        if ($has_sections) { 
-            foreach ($assoc_arr as $key=>$elem) { 
-                $content .= "[".$key."]\n"; 
-                foreach ($elem as $key2=>$elem2) { 
-                    if(is_array($elem2)) 
-                    { 
-                        for($i=0;$i<count($elem2);$i++) 
-                        { 
-                            $content .= $key2."[] = \"".$elem2[$i]."\"\n"; 
-                        } 
-                    } 
-                    else if($elem2=="") $content .= $key2." = \n"; 
-                    else $content .= $key2." = \"".$elem2."\"\n"; 
-                } 
-            } 
-        } 
-        else { 
-            foreach ($assoc_arr as $key=>$elem) { 
-                if(is_array($elem)) 
-                { 
-                    for($i=0;$i<count($elem);$i++) 
-                    { 
-                        $content .= $key2."[] = \"".$elem[$i]."\"\n"; 
-                    } 
-                } 
-                else if($elem=="") $content .= $key2." = \n"; 
-                else $content .= $key2." = \"".$elem."\"\n"; 
-            } 
-        } 
 
-        if (!$handle = fopen($path, 'w')) { 
-            return false; 
-        } 
-        if (!fwrite($handle, $content)) { 
-            return false; 
-        } 
-        fclose($handle); 
-        return true; 
+    // Funcion para escribir el fichero de configuracion. Las funciones standard de PHP no lo incluyen
+    function write_ini_file($assoc_arr, $path, $has_sections=FALSE) {
+        $content = "";
+        if ($has_sections) {
+            foreach ($assoc_arr as $key=>$elem) {
+                $content .= "[".$key."]\n";
+                foreach ($elem as $key2=>$elem2) {
+                    if(is_array($elem2))
+                    {
+                        for($i=0;$i<count($elem2);$i++)
+                        {
+                            $content .= $key2."[] = \"".$elem2[$i]."\"\n";
+                        }
+                    }
+                    else if($elem2=="") $content .= $key2." = \n";
+                    else $content .= $key2." = \"".$elem2."\"\n";
+                }
+            }
+        }
+        else {
+            foreach ($assoc_arr as $key=>$elem) {
+                if(is_array($elem))
+                {
+                    for($i=0;$i<count($elem);$i++)
+                    {
+                        $content .= $key2."[] = \"".$elem[$i]."\"\n";
+                    }
+                }
+                else if($elem=="") $content .= $key2." = \n";
+                else $content .= $key2." = \"".$elem."\"\n";
+            }
+        }
+
+        if (!$handle = fopen($path, 'w')) {
+            return false;
+        }
+        if (!fwrite($handle, $content)) {
+            return false;
+        }
+        fclose($handle);
+        return true;
     }
 
     if($command == 'level_up') {
@@ -133,8 +136,7 @@
         if ($value == "on") $json=firtro_socket ("peq_reload");
         else $json=firtro_socket ("peq_defeat");
         }
-    elseif(substr($command,0,3) == 'drc') {
-        $value=substr($command, -1);
+    elseif($command == 'drc') {
         $json=firtro_socket ("drc $value");
         }
     elseif($command == 'bass_up') {
@@ -148,7 +150,7 @@
         }
     elseif($command == 'treble_down') {
         $json=firtro_socket ("treble_add -1");
-        }        
+        }
     elseif($command == 'eq_flat') {
         $json=firtro_socket ("flat");
         }
@@ -353,7 +355,7 @@
     shell_exec("sleep 1 && eject");
     $json=firtro_socket ("status");
     }
-        
+
     elseif(substr($command,0,7) == 'custom_') {
         $config=parse_ini_file($config_file);
         #$tmp1 = 'val_custom_'.substr($command,7);
