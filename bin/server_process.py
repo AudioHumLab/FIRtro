@@ -49,7 +49,7 @@
 # - Se admite 'radio_channel next|prev' para rotar sobre los presets del archivo audio/radio,
 #   y 'radio_channel recall' para recuperar el último preset escuchado (radio_prev).
 # - 'exec' acepta argumentos con el ejecutable.
-# 
+#
 # v2.0f
 # - mpd client slider LOG_volume
 #
@@ -62,8 +62,8 @@
 #
 # v2.0h
 # - Se simplifica el código para MONO. Implica novedades en brutefir_config.
-# - Nueva lista 'drc_descrip_i' en el diccionario json para la web, 
-#   que contiene los descriptivos de los pcm de DRC. 
+# - Nueva lista 'drc_sets_info' en el diccionario json para la web, que contiene
+#   tuplas (indiceDRC, descriptivo.pcm) de todos los drc encontrados.
 #----------------------------------------------------------------------
 
 import time
@@ -134,7 +134,7 @@ def bf_cli (orden):
     except socket.error, (value, msg):
         s.close()
         error = "Brutefir: " +"[Errno " + str(value) +"] " + msg
-        if error not in warnings: 
+        if error not in warnings:
             warnings.append (error)
 
 ################################################################
@@ -217,7 +217,7 @@ def peq2mag_i (peqFile, channel):
 
     # Ahora queda trasladar la respuesta (calculada con Fs) a los 63
     # valores de frecuencia 'freq' de la etapa EQ y manejados en las gráficas de la web.
-    
+
     # Y usamos el algoritmo de Alberto (ver función pcm_ftt) para completar los 63 valores:
     for i in range(len(freq)):
         for j in range(len(hdB)):
@@ -238,13 +238,13 @@ def firtroData(locales, globales, entradas):
     data.update(globales)
     # 3. y la lista de entradas
     data.update({'inputs':entradas})
-    
+
     # Variables que nos interesan del dicionario general 'data':
     keys = ['treble', 'bass', 'replaygain_track', 'level', 'maxlevel_i', 'headroom', 'muted', 'polarity',
         'fs', 'drc_eq', 'filter_type', 'clock', 'loudness_track', 'loudness_ref', 'loudness_level_info',
         'radio', 'input_name', 'input_gain', 'system_eq', 'room_gain', 'house_corner', 'house_atten',
         'ref_level_gain', 'loudspeaker', 'inputs', 'warnings', 'order','freq_i','tone_mag_i','loudeq_mag_i',
-        'drcTot_r_mag_i','drcTot_l_mag_i','drc_index', 'drc_descrip_i', 'balance','balance_variation',
+        'drcTot_r_mag_i','drcTot_l_mag_i','drc_items', 'drc_sets_info', 'balance','balance_variation',
         'preset', 'lista_de_presets', 'mono', 'peq', 'peqdefeat']    ## <PRESETS> <MONO> <PEQ> ##
     # Y obtenemos un nuevo diccionario filtrado, con solo las opciones que nos interesan
     fdata = { key: data[key] for key in keys}
@@ -261,7 +261,7 @@ def firtroData(locales, globales, entradas):
 def do (order):
 
     ####  (i) Acceso a VARIABLES GLOBALES (incluyendo las importadas):
-    
+
     global warnings             # Avisos runtime
 
     global ref_level_gain       # Ganancia del altavoz ref al SPL nominal (/lspk/altavoz/speaker)
@@ -286,7 +286,7 @@ def do (order):
     global tone_mag_i, loudeq_mag_i, syseq_mag_i, drc_l_mag_i, drc_r_mag_i
     global drcTot_l_mag_i
     global drcTot_r_mag_i       # Las curvas 'drcTot' incluyen DRC_fir + sysEQ + PEQ
-    global drc_index
+    global drc_items
     global peq_l_mag_i          ## <PEQ> ##
     global peq_r_mag_i
 
@@ -299,7 +299,7 @@ def do (order):
     global control_clear        # Sin uso
 
     #### Inicialización de las acciones a tomar en este procesamiento do(order)
-    
+
     write_status = True         # Normalmente se refrescará el archivo de estado audio/status
     warnings = []               # Borramos los warnings
     change_gain = False
@@ -320,7 +320,7 @@ def do (order):
     change_radio = False
 
     #### Memorizamos ajustes para poder restaurarlos si no se pudieran aplicar (e.g. por falta de headroom)
-    
+
     bass_old                = bass
     treble_old              = treble
     loudness_ref_old        = loudness_ref
@@ -344,7 +344,7 @@ def do (order):
     mono_old = mono                         ## <MONO> ##
     radio_old = radio
     radio_prev_old = radio_prev
-    
+
     #############################################################
     ##        Leemos la orden solicitada 'do(order)'           ##
     ##        y se deciden las acciones correspondientes       ##
@@ -361,7 +361,7 @@ def do (order):
             dicci_estado = firtroData(locals(), globals(), inputs.sections())
             return dicci_estado
     #\\\
-    
+
     order = order.rstrip('\r\n')            # Quitamos los caracteres finales
     line = order.split()                    # Separamos el comando de los argumentos
     if len(line) > 0:   command = line[0]
@@ -369,7 +369,7 @@ def do (order):
     if len(line) > 1: arg1 = line[1]
     if len(line) > 2: arg2 = line[2]
     if len(line) > 3: arg3 = line[3]
-    
+
     if control_output > 0:                  # Printa por consola
         print "(server_process) Command:", order
 
@@ -476,7 +476,7 @@ def do (order):
 
         elif command == "drc":
             if len(line) > 1:
-                if (int(arg1) <= drc_index):
+                if (int(arg1) <= drc_items):
                     drc_eq = arg1
                     change_drc = True
             else:
@@ -641,7 +641,7 @@ def do (order):
 
     ## <PRESETS> ##
     if change_preset:
-                
+
         # (i)   Muteamos temporalmente Brutefir para evitar oir las nuevas vias sin la la nueva EQ de sala,
         #       por ejemplo en el caso de un nuevo subwooer muy dependiente de compensación del
         #       room gain escucharemos un grave muy inflado hasta que no se aplica la EQ.
@@ -650,7 +650,7 @@ def do (order):
         #       Este sleep es experimental 350 ms sirve para que lo dicho arriba se cumpla.
         #       La cosa es que el muteo tarda demasiado en ejecutarse :-/
         time.sleep(.350)
-        
+
         # (i) OjO: los preset incluyen un DRC y BALANCE asociados, entonces
         # a la vez que configuramos las vias para el preset, obtenemos el drc y el balance que le corresponde:
         preset, drc_eq, balance, peq = presets.configura_preset(preset, filter_type)
@@ -975,7 +975,7 @@ def do (order):
     ############################################
     ####        Resto de acciones:          ####
     ############################################
-    
+
     if do_mute:
         bf_cli("cfia 0 0 m0 ; cfia 1 1 m0")
         # 2º Entrada de brutefir (para analogica con filtros mp)
@@ -1034,15 +1034,10 @@ def do (order):
     # Curvas info para la web - EQ global aplicada (drc + syseq):
     if (change_gain or change_eq or change_drc or change_peq):
         # L:
-        if int(drc_eq) < len(drc_l_mag_i):
-            drcTot_l_mag_i = [round(float(data),2) for data in (drc_l_mag_i[int(drc_eq)] + syseq_mag_i + peq_l_mag_i).tolist()]
-        else:
-            drcTot_l_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
+        drcTot_l_mag_i = [round(float(data),2) for data in (drc_l_mag_i[drc_eq] + syseq_mag_i + peq_l_mag_i).tolist()]
         # R:
-        if int(drc_eq) < len(drc_r_mag_i):
-            drcTot_r_mag_i = [round(float(data),2) for data in (drc_r_mag_i[int(drc_eq)] + syseq_mag_i + peq_r_mag_i).tolist()]
-        else:
-            drcTot_r_mag_i = [round(float(data),2) for data in (syseq_mag_i + peq_l_mag_i).tolist()]
+        drcTot_r_mag_i = [round(float(data),2) for data in (drc_r_mag_i[drc_eq] + syseq_mag_i + peq_r_mag_i).tolist()]
+
 
     if exec_cmd:
         result = Popen(exec_path + exec_arg, shell=True)
@@ -1127,7 +1122,7 @@ def do (order):
         for warning in warnings:
             print "\t" + warning
 
-    # A efectos de control, devolvemos un diccionario 
+    # A efectos de control, devolvemos un diccionario
     # conteniendo el estado del FIRtro
     dicci_estado = firtroData(locals(), globals(), inputs.sections())
     return dicci_estado
@@ -1181,23 +1176,23 @@ freq_i = [ int(i) for i in freq] # No podemos hacer freq_i = freq porque resulta
 
 ### Inicialización de curvas informativas (xxx_i) para las gráficas DRC de la página web.
 syseq_mag_i     = [0] * len(freq)
-drc_l_mag_i     = {}                    # diccionarios de curvas
+drc_l_mag_i     = {}                # diccionarios de curvas de los pcm DRC
 drc_r_mag_i     = {}
-peq_r_mag_i     = [0] * len(freq)       ## <PEQ ##
+peq_r_mag_i     = [0] * len(freq)   ## <PEQ ## curva del PEQ
 peq_l_mag_i     = [0] * len(freq)
-drcTot_l_mag_i  = [0] * len(freq)       # drcTot : drc + peq + syseq
+drcTot_l_mag_i  = [0] * len(freq)   # drcTot : drc[N] + peq + syseq
 drcTot_r_mag_i  = [0] * len(freq)
 tone_mag_i      = [0] * len(freq)
 loudeq_mag_i    = [0] * len(freq)
-drc_descrip_i   = []                    # lista con la descripción incluida en el nombre de los PCM de DRC
+drc_sets_info   = []                # lista de tuplas (indiceDRC, descriptivoDRC) info para la web
 
 ### Carga de las curvas informativas para la web de los PCM disponibles para DRC:
 # (i) El diseño original en FIRtro v1.0 requiere los nombres
 #     de archivos pcm para drc numerados correlativamente desde 1.
 #     El mecanismo de selección de DRC reserva el índice 0 para "drc plano".
 # 1. Curva cero todo ceros:
-drc_r_mag_i[0] = [0] * len(freq)
-drc_l_mag_i[0] = [0] * len(freq)
+drc_r_mag_i["0"] = [0] * len(freq)
+drc_l_mag_i["0"] = [0] * len(freq)
 # 2. Resto de curvas de los pcm:
 print "(server_process) Doing FFT of DRC pcm files..."
 # El módulo 'read_brutefir_config' (aka 'brutefir') proporciona la lista de coeffs de drc,
@@ -1206,21 +1201,29 @@ brutefir.lee_config()
 drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
 for x in drc_coeffs:
     coeff_num, coeff_name, pcm_file = x
-    #                      ^-------------- ej: /44100/drc-3-L RRreq CD mueble.pcm
+    #                      ^-------------- ej: /44100/drc-3-L_RRreq CD mueble.pcm
     print "(server_process) Leyendo curva: ", pcm_file
-    drc_descrip = pcm_file[7:].replace('.pcm','').strip()
-    if not drc_descrip in drc_descrip_i:
-        drc_descrip_i.append( (coeff_num, drc_descrip) )
+
+    # Nueva key json informativa para la web de control con los juejos de drc
+    drc_descrip = pcm_file[7:].replace('.pcm','').strip("_")    # le quitamos el leading '_' obligatorio en el nombrado de pcm para DRC.
+    coeff_index = coeff_name.split('_')[1].replace('drc','')
+    if not coeff_index in [ x[0] for x in drc_sets_info ]:
+        drc_sets_info.append( (coeff_index, drc_descrip) )
+
     # Como read_brutefir_config (aka brutefir) proporciona solo el basename del pcm, lo completamos:
     pcm_file = loudspeaker_folder + loudspeaker + '/' +fs + "/" + pcm_file
     drc_num = coeff_name[5]
     drc_channel = coeff_name[-1]
+
     if drc_channel == "L":
-        drc_l_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
+        drc_l_mag_i[drc_num] = pcm_fft (freq, int(fs), pcm_file)
     if drc_channel == "R":
-        drc_r_mag_i[i] = pcm_fft (freq, int(fs), pcm_file)
-drc_index = len(drc_coeffs) / 2 # así se pensó
-print "(server_process) Encontrados " + str(drc_index) + " juegos de .pcm para DRC."
+        drc_r_mag_i[drc_num] = pcm_fft (freq, int(fs), pcm_file)
+
+drc_sets_info.sort()                # Ordenamos por su índice
+drc_items = len(drc_sets_info)      # número total de coeffs DRCs
+
+print "(server_process) Encontrados " + str(drc_items) + " juegos de .pcm para DRC."
 print "(server_process) Fin de la búsqueda de archivos DRC."
 
 ### Carga de las curvas informativas para la web de PEQ:
