@@ -710,6 +710,41 @@ $(document).on('pageinit', '#drc_page', function(){
     // Creamos el objeto, con datos vacios. Posteriormente en la funcion update_controls() nos ocuparemos de actualizarlos.
     $syseq_r_plot=$.jqplot('syseq_r_chartdiv', [['']], $plot_options_drc);
     $syseq_l_plot=$.jqplot('syseq_l_chartdiv', [['']], $plot_options_drc);
+
+    // Nueva botonera radius dinámica con los DRC disponibles y sus nombres
+    if ($php_data) {
+        // Un primer botón es para drc-0 (sin drc)
+            $('#drc_select_cg').append('<input type="radio" name="drc_select" id="drc_select_0" '
+                                        + 'value="0" />'
+                                        + '<label for="drc_select_0">'
+                                        + 'drc - 0'
+                                        + '</label>');
+
+        // Recorremos la lista de drcs 'drc_sets_info' para completar los botones de selección, dinámicamente.
+        // La key json de $php_data: drc_sets_info[0] contiene el número de drc-X
+        //                                        [1] contiene el descriptivo
+        $php_data['drc_sets_info'].forEach(function(item) {
+            $('#drc_select_cg').append('<input type="radio" name="drc_select" id="drc_select_' + item[0] + '" '
+                                        + 'value="' + item[0] + '" />'
+                                        + '<label for="drc_select_' + item[0] + '">'
+                                        + 'drc - ' + item [0] + " : " + item[1]
+                                        + '</label>');
+        });
+
+        // Marcamos el radio del drc activo, key 'drc_eq', como seleccionado. Se escapan los espacios
+        $("#drc_select_" + $php_data['drc_eq'].replace(/( )/g, "\\\ ")).attr('checked', true);
+
+        // creación de un divisor de botones de entrada radio
+        $("#drc_radiodiv").trigger("create");
+
+        // Capturamos los eventos de cambio para enviar las ordenes correspondientes
+        $("#drc_page input[name='drc_select']").on('change', function(event, ui) {
+                //send_command (event.currentTarget.name, event.currentTarget.value);
+                // Nota: este comando es preprocesado por 'functions.php' y allí traducido a control de FIRtro,
+                send_command ('drc', event.currentTarget.value);
+                //event.preventDefault();
+        });
+    }
 });
 
 $(document).on('pageinit', '#tone_page', function(){
