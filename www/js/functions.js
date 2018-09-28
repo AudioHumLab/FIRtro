@@ -400,11 +400,12 @@ function update_controls () {
 
         case 'drc_page':
 
+            // Display linea 1: volumen
             $("#drc_display").empty();
             if ($php_data['muted'] == true) $("#drc_display").text("Volume: " + $php_data["level"] + " dB (MUTED)");
             else $("#drc_display").text("Volume: " + $php_data["level"] + " dB (HR: " + $php_data["headroom"] + " dB)");
 
-            // Switch de control de SystemEQ
+            // Display linea 2: SysEQ ligado a su switch
             if ($php_data['system_eq'] == true) {
                 $("#drc_display").append("<br/>SysEQ: ON");
                 $("#syseq_switch").attr("value", "on").slider("refresh");
@@ -414,24 +415,25 @@ function update_controls () {
                 $("#syseq_switch").attr("value", "off").slider("refresh");
             }
 
-            // Incluimos informacion del PEQ en el display de la seccion DRC:
-            // y un switch de control de PEQ.
-            // $("#drc_display").append(" --- DRC: " + $php_data["drc_eq"] + "/" + ($php_data["drc_items"]).toString());
-            drcinfo = ""
+            // Display linea 2: +DRC
+            drcinfo = " - DRC: " + $php_data["drc_eq"] + "/" + ($php_data["drc_items"]).toString()
+            $("#drc_display").append(drcinfo)
+
+            // Display linea 2: +PEQ ligado a su switch
+            peqinfo = ""
             if ($php_data['peq'] != "off") {
-                drcinfo = " - PEQ: ON";
+                peqinfo = " - PEQ: ON";
                 $("#peq_switch").attr("value", "on").slider("refresh");
                 if ($php_data['peqdefeat']) {
-                    drcinfo = " - PEQ: DEFEAT";
+                    peqinfo = " - PEQ: DEFEAT";
                     $("#peq_switch").attr("value", "off").slider("refresh");
                 }
             }
             else {
-                drcinfo = " - (no peq)";
+                peqinfo = " - (no peq)";
                 $("#peq_switch").attr("value", "off").slider("refresh");
             }
-            $("#drc_display").append(" - DRC: " + $php_data["drc_eq"] + "/"
-                                     + ($php_data["drc_items"]).toString() + drcinfo);
+            $("#drc_display").append(peqinfo)
 
             // Array de warnings
             //if ($php_data['warnings'] != "") $("#drc_display").append("<br/>Warning: "+$php_data['warnings']);
