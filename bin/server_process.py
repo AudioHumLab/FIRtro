@@ -64,6 +64,10 @@
 # - Se simplifica el código para MONO. Implica novedades en brutefir_config.
 # - Nueva lista 'drc_sets_info' en el diccionario json para la web, que contiene
 #   tuplas (indiceDRC, descriptivo.pcm) de todos los drc encontrados.
+#
+# v2.0i
+# - try/except si se minorasen los filtros drc pudiera ser que audio/status indicase un índice no disponible,
+#   entonces fallará 'KeyError' el cálculo de las curvas para la web drcTot_l_mag_i drcTot_r_mag_i
 #----------------------------------------------------------------------
 
 import time
@@ -1033,11 +1037,15 @@ def do (order):
 
     # Curvas info para la web - EQ global aplicada (drc + syseq):
     if (change_gain or change_eq or change_drc or change_peq):
-        # L:
-        drcTot_l_mag_i = [round(float(data),2) for data in (drc_l_mag_i[drc_eq] + syseq_mag_i + peq_l_mag_i).tolist()]
-        # R:
-        drcTot_r_mag_i = [round(float(data),2) for data in (drc_r_mag_i[drc_eq] + syseq_mag_i + peq_r_mag_i).tolist()]
-
+        try:    # v2.0i
+            # L:
+            drcTot_l_mag_i = [ round(float(data),2) for data in
+                               (drc_l_mag_i[drc_eq] + syseq_mag_i + peq_l_mag_i).tolist() ]
+            # R:
+            drcTot_r_mag_i = [ round(float(data),2) for data in
+                               (drc_r_mag_i[drc_eq] + syseq_mag_i + peq_r_mag_i).tolist() ]
+        except:
+            print "\n(server_process) ERROR calculando curvas para drc-" + drc_eq + "\n"
 
     if exec_cmd:
         result = Popen(exec_path + exec_arg, shell=True)
