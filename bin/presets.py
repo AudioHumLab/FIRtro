@@ -30,6 +30,8 @@
 # v2.1
 # - Reubicación de los pcm de DRC en la carpeta original audio_folder (lspk/altavoz/FS)
 # - Se comprueba que cada vía a configurar se corresponda con uno de los coeff disponibles en Brutefir.
+# v2.1a
+# - Se adapta al la versión revisada de read_brutefir_process que ahora devuelve diccionarios
 
 import brutefir_cli
 from subprocess import Popen
@@ -54,11 +56,11 @@ brutefir.filters_running = []
 # Para que funcione la cosa actualizamos las listas:
 bferror = False
 try:
-    brutefir.lee_config()
+    brutefir.read_config()
 except:
     bferror = True
 try:
-    brutefir.lee_running_config()
+    brutefir.read_running()
 except:
     bferror = True
 if bferror:
@@ -185,12 +187,13 @@ def configura_drc_coeff(nombreDRC):
         return "0"
 
     drc_nums_found = []
-    # Recorremos las tripletas de coeffs de drc disponibles en brutefir_config buscando 'nombreDRC'
-    drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
-    for x in drc_coeffs:
+    # Recorremos los coeffs disponibles en brutefir_config buscando 'nombreDRC',
+    # filtramos los coeff de drc
+    drc_coeffs = [c for c in brutefir.coeffs if c['name'][:5]=="c_drc"]
+    for c in drc_coeffs:
         # OjO coeff_num es la posicion que ocupa dentro de todos los coeff declarados
         #     en brutefir_config, NO confundir con el drc_num (el índice de entre los drc disponibles).
-        coeff_num, coeff_name, pcm_file = x # tripleta
+        coeff_num, coeff_name, pcm_file = c['index'], c['name'], c['pcm']
         drc_num = coeff_name[5]
         drc_channel = coeff_name[-1]
         # ejemplo pcm_file: 'drc-1-L xxxxxxxxxx.pcm"
@@ -222,9 +225,9 @@ def configura_via(via, atten, delay, pcmName, filter_type):
     # Recorremos los coeff disponibles en Brutfir,
     # saltamos los dos primeros que son de la etapa de EQ.
     matched = False
-    for bfirCoeff in brutefir.coeffs[2:]:
+    for c in brutefir.coeffs[2:]:
 
-        coeffNum, coeffName, coeffPcm = bfirCoeff
+        coeffNum, coeffName, coeffPcm = c['index'], c['name'], c['pcm']
 
         if pcmName == coeffPcm:
             matched = True
