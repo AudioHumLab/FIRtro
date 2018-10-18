@@ -68,6 +68,9 @@
 # v2.0i
 # - try/except si se minorasen los filtros drc pudiera ser que audio/status indicase un índice no disponible,
 #   entonces fallará 'KeyError' el cálculo de las curvas para la web drcTot_l_mag_i drcTot_r_mag_i
+#
+# v2.0j
+# -  Se adapta al la versión revisada de read_brutefir_process que ahora devuelve diccionarios
 #----------------------------------------------------------------------
 
 import time
@@ -1006,22 +1009,21 @@ def do (order):
         etiquetasDeVias = ["fr", "lo", "mi", "hi", "sw"]
         haLeidoBfir = True
         try:
-            brutefir.lee_config()
+            brutefir.read_config()
         except:
             haLeidoBfir = False
             print "(server_process) ERROR usando read_brutefir_process.py"
         try:
-            brutefir.lee_running_config()
+            brutefir.read_running()
         except:
             haLeidoBfir = False
             print "(server_process) ERROR usando read_brutefir_process.py"
         if haLeidoBfir:
-            for filter_running in brutefir.filters_running:
-                # ejemplo: ['f_lo_L', '12', 'c_lp-lo4', 'lp-lo.pcm']
-                bfilter, coeffNum, coeffName, pcmName = filter_running
-                if [x for x in etiquetasDeVias if x in bfilter]:        # aquí verificamos que sea una etapa de filtro de vias
-                    newCoeffName = "c_" + filter_type + "-" + coeffName[5:]
-                    tmp = 'cfc "' + bfilter + '" "' + newCoeffName + '"; quit;'
+            for frun in brutefir.filters_running: # frun es un diccionario
+                # verificamos que sea una etapa de filtro de vias
+                if [ x for x in etiquetasDeVias if x in frun['fname'] ]:
+                    newCoeffName = "c_" + filter_type + "-" + frun['cname'][5:]
+                    tmp = 'cfc "' + frun['fname'] + '" "' + newCoeffName + '"; quit;'
                     bf_cli(tmp)
 
     if change_drc:
@@ -1204,11 +1206,11 @@ drc_l_mag_i["0"] = [0] * len(freq)
 # 2. Resto de curvas de los pcm:
 print "(server_process) Doing FFT of DRC pcm files..."
 # El módulo 'read_brutefir_config' (aka 'brutefir') proporciona la lista de coeffs de drc,
-# cada uno es una tripleta <coeff_num>, <coeff_name>, <pcm_file>
-brutefir.lee_config()
-drc_coeffs = [x for x in brutefir.coeffs if x[1][:5]=="c_drc"] # filtramos los coeff de drc
-for x in drc_coeffs:
-    coeff_num, coeff_name, pcm_file = x
+# cada coeff es un diccionario {'index', 'name', 'pcm', 'atten' }
+brutefir.read_config()
+drc_coeffs = [c for c in brutefir.coeffs if c['name'][:5]=="c_drc"] # filtramos los coeff de drc
+for c in drc_coeffs:
+    coeff_num, coeff_name, pcm_file = c['index'], c['name'], c['pcm']
     #                      ^-------------- ej: /44100/drc-3-L_RRreq CD mueble.pcm
     print "(server_process) Leyendo curva: ", pcm_file
 
