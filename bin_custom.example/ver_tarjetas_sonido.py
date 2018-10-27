@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
     Script para visualizar el estado de las tarjetas alsa.
     Admite una string como filtro de tarjeta a listar.
