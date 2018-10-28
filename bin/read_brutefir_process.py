@@ -173,13 +173,20 @@ def read_running():
     # Cruzamos los filters con los coeff
     #####################################
     # Tenemos los nombres de los filtros con el número de coeficiente cargado en cada filtro,
-    # ahora añadiremos el nombre del coeficiente y el pcm
+    # ahora añadiremos el nombre , el pcm y la atenn del coeficiente.
     for frun in filters_running:
         for coeff in coeffs:
             if frun['cset'] == coeff['index']:
                 frun['cname']  = coeff['name']
-                frun['pcm']    = coeff['pcm']
+                frun['cpcm']   = coeff['pcm']
                 frun['catten'] = coeff['atten']
+        # Completamos campos para posibles filtros con coeff: -1;
+        # que no habrán sido detectados en el cruce de arriba 'for coeff in coeffs'
+        if frun['cset'] == '-1':
+            frun['cset']    = ''
+            frun['cname']   = '-1'
+            frun['cpcm']    = '-1'
+            frun['catten']  = '0.0'
 
 
 def main():
@@ -214,9 +221,11 @@ def main():
         fa = '{:+6.2f}'.format( float(f['atten']) )
         ca = '{:+6.2f}'.format( float(f['catten']) )
         print f['index'].rjust(4) +" "+ f['fname'].ljust(11) + fa + f['pol'].rjust(4) + \
-              f['cset'].rjust(7) +"   "+ f['cname'].ljust(16) + ca.ljust(11) + f['pcm']
+              f['cset'].rjust(7) +"   "+ f['cname'].ljust(16) + ca.ljust(11) + f['cpcm']
 
-    print "\n--- Jack:"
+    ################################
+    print "\n--- Jack:\n"
+    ################################
     for x in jc.jackConexiones("brutefir", "*"):
         print x[0].ljust(30) + x[1].ljust(8) + x[2]
 
