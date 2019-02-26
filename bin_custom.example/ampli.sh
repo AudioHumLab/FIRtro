@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# (i) se necesita el binario 'usbrelay' en el mismo directorio que este script
+# (i)   Se necesita el binario 'usbrelay' en el path.
+#       Recientemente Debian dispone del paquete 'usbrelay'
+#       En caso contrario hay que compilarlo usando la libreria hidraw:
+#           https://github.com/darrylb123/usbrelay
 
-# Basado en el binario 'usbrelay', compilado con la libreria hidraw, ver detalles en:
-# https://github.com/darrylb123/usbrelay
 # El binario 'usbrelay':
 #   - Sin argumentos muestra el estado de los reles.
 #   - Con argumentos BITFT_n=x modifica los reles.
