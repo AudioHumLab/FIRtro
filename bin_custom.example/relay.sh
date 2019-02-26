@@ -24,7 +24,7 @@ if [[ $1 ]]; then
     if [[ $1 == "on" || $1 == "1" ]]; then
         tmp="BITFT_1=1"
     fi
-    cmd="$HOME/bin_custom/usbrelay "$tmp
+    cmd="usbrelay "$tmp
     # opc.1 para ejecución en local:
     $cmd
     # opc.2 para ejecución en máquina remota:
@@ -32,7 +32,7 @@ if [[ $1 ]]; then
 fi
 
 # Consultamos el estado del relé:
-cmd="$HOME/bin_custom/usbrelay"
+cmd="usbrelay"
 # opc.1 para ejecución en local:
 eval $($cmd)
 # opc.2 para ejecución en máquina remota:
