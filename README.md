@@ -1,4 +1,4 @@
-# (!) NOTICE: this a LEGACY PROJECT
+# NOTICE: this a LEGACY PROJECT
 
 Anyway some pages from the **Wiki** can be useful
 
