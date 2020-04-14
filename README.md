@@ -1,3 +1,16 @@
+# (!) NOTICE: this a LEGACY PROJECT
+
+Anyway some pages from the **Wiki** can be useful
+
+Please refer to the current implementations at:
+
+## rripio/pre.di.c 
+**https://github.com/rripio/pre.di.c**
+
+## AudioHumLab/pe.sudio.sys
+**https://github.com/AudioHumLab/pe.audio.sys**
+
+
 # FIRtro (es)
 FIRtro es un paquete de software de tipo 'black box' para filtrar y ecualizar altavoces activos, también para ecualización de sala (DRC). Dispone de funciones de preamplificador como control de volumen calibrable con Loudness ISO 226:2003, y selección de fuentes analógicas y digitales (locales o remotas).
 
